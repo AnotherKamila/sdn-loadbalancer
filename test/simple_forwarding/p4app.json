@@ -43,5 +43,11 @@
                 "cli_input": "s1-commands.txt"
             }
         }
-    }
+    },
+    "exec_scripts": [
+        {
+            "cmd": "touch readyfile",
+            "reboot_run": "false"
+        }
+    ]
 }
