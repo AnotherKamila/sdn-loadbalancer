@@ -1,2 +1,6 @@
 *.p4i
 p4src/*.json
+topology.db
+log/
+pcap/
+readyfile
