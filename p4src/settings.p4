@@ -7,7 +7,7 @@
 #include <core.p4>
 #include <v1model.p4>
 
-// TODO things like table sizes, register widths, and such, go here
+#define ARP_TABLE_SIZE 128
 
 
 #endif

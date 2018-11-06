@@ -14,7 +14,26 @@
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
-    apply {}
+
+    action set_egress(bit<9> port) {
+        standard_metadata.egress_spec = port;
+    }
+
+    table port_for_mac {
+        key = {
+            hdr.ethernet.dst_addr: exact;
+        }
+        actions = {
+            set_egress;
+            NoAction;
+        }
+        size = ARP_TABLE_SIZE;
+        default_action = NoAction();
+    }
+
+    apply {
+        port_for_mac.apply();
+    }
 }
 
 /*************************************************************************
