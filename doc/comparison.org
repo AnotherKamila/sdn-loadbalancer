@@ -1,0 +1,10 @@
+* random thoughts
+* the table
+
+| aspect            | software                        | our solution             |
+|-------------------+---------------------------------+--------------------------|
+| features          | rich api                        | limited in extendability |
+| distributed cache | via config management, rest api |                          |
+| processing        | purely CPU                      | ASIC (x%), CPU (y%)      |
+|                   |                                 |                          |
+|                   |                                 |                          |
