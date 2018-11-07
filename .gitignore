@@ -4,3 +4,6 @@ topology.db
 log/
 pcap/
 readyfile
+
+*.py[co]
+.cache/

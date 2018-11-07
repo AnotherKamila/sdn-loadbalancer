@@ -29,7 +29,9 @@ Then it is plain `pytest` that runs shell commands inside the hosts using `mx` a
 
 See the existing stuff for examples.
 
-Make sure to copy the `exec_scripts` section of `p4app.json` from the existing stuff when creating a new config. Why? Read on...
+Make sure to copy the `exec_scripts` section of `p4app.json` from the existing stuff when creating a new config. (Wondering why? Read on...)
+
+If you need fixtures, you can implement them in the file or in a `conftest.py` file. See https://docs.pytest.org/en/latest/fixture.html .
 
 ## Horrible hack
 
@@ -38,3 +40,15 @@ I wanted to make pytest run p4run, so that running the tests really is one comma
 I use the `exec_scripts` config option in `p4app.json` to create a file. Then I wait for that file to appear within the test, and only proceed once it's there.
 
 The scripts are called when mininet is ready, so the file does not appear too early. This is the only reliable way I found to detect that it's ready. Everything is terrible. But it works. Just don't forget to put the thing into `p4app.json`.
+
+The horribleness is implemented in `./conftest.py`. Abandon all hope, ye who enter here.
+
+# Trick for debugging (not only for tests!)
+
+Best thing ever:
+
+```python
+# put this in there instead of that printf
+from ptpython.repl import embed
+embed(globals(), locals())  # has access to all the variables
+```

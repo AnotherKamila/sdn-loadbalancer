@@ -7,6 +7,7 @@ name = "pypi"
 
 [packages]
 pytest = "*"
+ptpython = "*"
 
 [requires]
 python_version = "3.5"
