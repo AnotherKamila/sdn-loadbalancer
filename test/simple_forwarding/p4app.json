@@ -47,7 +47,7 @@
     "exec_scripts": [
         {
             "cmd": "touch readyfile",
-            "reboot_run": "false"
+            "reboot_run": "true"
         }
     ]
 }
