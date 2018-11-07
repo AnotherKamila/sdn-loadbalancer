@@ -1,0 +1,14 @@
+* random thoughts
+* the table
+| aspect            | software                        | our solution                       |
+|-------------------+---------------------------------+------------------------------------|
+| features          | rich api                        | limited in extendability           |
+| distributed cache | via config management, rest api |                                    |
+| processing        | purely CPU                      | ASIC (x%), CPU (y%)                |
+| speed?            |                                 |                                    |
+| config source     | usually push based              | pull based, on unknown destination |
+|                   |                                 |                                    |
+* Architecture
+** software
+** our solution
+*** pulls missing info from controller
