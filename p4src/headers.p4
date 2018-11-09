@@ -11,6 +11,10 @@ typedef bit<48> mac_addr_t;
 typedef bit<9>  egressSpec_t;
 typedef bit<32> ip4Addr_t;
 
+const bit<16> TYPE_IPV4 = 0x0800;
+const bit<16> TYPE_IPV6 = 0x86DD;
+const bit<8>  TYPE_TCP  = 6;
+
 
 header ethernet_t {
     mac_addr_t dst_addr;
@@ -29,16 +33,16 @@ header ipv4_t {
     bit<8>    ttl;
     bit<8>    protocol;
     bit<16>   hdrChecksum;
-    ip4Addr_t srcAddr;
-    ip4Addr_t dstAddr;
+    ip4Addr_t src_addr;
+    ip4Addr_t dst_addr;
 }
 
 header tcp_t{
     bit<16> srcPort;
     bit<16> dstPort;
-    bit<32> seqNo;
+    bit<32> seqNo;!
     bit<32> ackNo;
-    bit<4>  dataOffset;
+    bit<4>  data_offset;
     bit<4>  res;
     bit<1>  cwr;
     bit<1>  ece;
@@ -61,8 +65,8 @@ header ipv6_t {
     bit<16>   payload_length;
     bit<8>    next_header;
     bit<8>    hop_limit;
-    bit<128>  srcAddr;
-    bit<128>  dstAddr;
+    bit<128>  src_addr;
+    bit<128>  dst_addr;
 }
 
 struct metadata {
