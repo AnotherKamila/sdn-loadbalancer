@@ -53,6 +53,18 @@ header tcp_t{
     bit<16> urgentPtr;
 }
 
+/* https://en.wikipedia.org/wiki/IPv6_packet */
+header ipv6_t {
+    bit<4>    version;
+    bit<8>    traffic_class;
+    bit<20>   flow_label;
+    bit<16>   payload_length;
+    bit<8>    next_header;
+    bit<8>    hop_limit;
+    bit<128>  srcAddr;
+    bit<128>  dstAddr;
+}
+
 struct metadata {
 }
 
