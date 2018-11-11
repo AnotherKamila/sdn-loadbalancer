@@ -40,7 +40,7 @@ header ipv4_t {
 header tcp_t{
     bit<16> srcPort;
     bit<16> dstPort;
-    bit<32> seqNo;!
+    bit<32> seqNo;
     bit<32> ackNo;
     bit<4>  data_offset;
     bit<4>  res;
