@@ -1,0 +1,17 @@
+* Decisions
+** We don't care about mac addresses, because we are a router (2018-11-09)
+*** This implies we learn IP to Port mappings (don't care about mac addresses!)
+** master branch is always stable
+*** to be always able to merge w/o headache
+** In simple 1:1 NAT64 we DON'T do any IPv4 / IPv6 calculations
+* Who did what
+|                                  |        |
+| Had many fun discsusions         | all    |
+| Header and Parser Bootstrap      | Nico   |
+| Write the documentation          | Nico   |
+| IPv6 address ingress learning    | Nico   |
+| Write the test framework         | Kamila |
+| IPv6 address egress learning     | Kamila |
+| IPv4 address ingress learning    | Sarah  |
+| Simple stateless 1:1 NAT64 table | Sarah  |
+|                                  |        |

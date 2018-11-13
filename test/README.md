@@ -19,6 +19,16 @@ If you want to run all the tests, run `pytest` in the `test/` directory; if you 
 
 Note: Do not run `p4run` manually -- the tests will do it for you if you ask for an argument called `p4run` (see existing).
 
+
+## Hint Nico
+
+```
+pyvenv venv
+. ./venv/bin/activate
+pip install pytest
+pytest
+```
+
 # How do the tests work?
 
 Each subdirectory contains a `p4app.json` and some test cases.
