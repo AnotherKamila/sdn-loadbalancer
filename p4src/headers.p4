@@ -14,6 +14,7 @@ typedef bit<32> ip4Addr_t;
 const bit<16> TYPE_IPV4 = 0x0800;
 const bit<16> TYPE_IPV6 = 0x86DD;
 const bit<8>  TYPE_TCP  = 6;
+const bit<16> TYPE_BROADCAST = 0x1234;
 
 
 header ethernet_t {
@@ -69,11 +70,20 @@ header ipv6_t {
     bit<128>  dst_addr;
 }
 
+struct learn_t {
+   bit<48>	mac_src_addr;
+   bit<16>	ingress_port;
+}
+
 struct metadata {
+    learn_t	learn;
 }
 
 struct headers {
     ethernet_t   ethernet;
+    ipv4_t	 ipv4;
+    ipv6_t	 ipv6;
+    tcp_t	 tcp;
 }
 
 
