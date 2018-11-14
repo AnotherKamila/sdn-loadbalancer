@@ -4,10 +4,6 @@ from p4utils.utils.topology import Topology
 from p4utils.utils.sswitch_API import SimpleSwitchAPI
 from scapy.all import Ether, sniff, Packet, BitField
 
-class CpuHeader(Packet):
-    name = 'CpuPacket'
-    fields_desc = [BitField('macAddr',0,48), BitField('ingress_port', 0, 16)]
-
 class L2Controller(object):
 
     def __init__(self, sw_name):
@@ -109,20 +105,6 @@ class L2Controller(object):
         while True:
             msg = sub.recv()
             self.recv_msg_digest(msg)
-
-    def recv_msg_cpu(self, pkt):
-
-        packet = Ether(str(pkt))
-
-        if packet.type == 0x1234:
-            cpu_header = CpuHeader(packet.payload)
-            self.learn([(cpu_header.macAddr, cpu_header.ingress_port)])
-
-    def run_cpu_port_loop(self):
-
-        cpu_port_intf = str(self.topo.get_cpu_port_intf(self.sw_name).replace("eth0", "eth1"))
-        sniff(iface=cpu_port_intf, prn=self.recv_msg_cpu)
-
 
 if __name__ == "__main__":
     import sys

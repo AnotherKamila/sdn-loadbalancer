@@ -37,12 +37,11 @@ control MyIngress(inout headers hdr,
          key = {hdr.ethernet.src_addr: exact;}
 
          actions = {
-		NoAction;
 		mac_learn;
+		NoAction;
          }
          default_action = mac_learn;
-//TODO should we set some table size or don't set this value at all?
-         //size = DEFAULT_TABLE_SIZE;
+         size = ARP_TABLE_SIZE;
      }
 
     table dmac {
@@ -53,6 +52,7 @@ control MyIngress(inout headers hdr,
 		NoAction;
          }
          default_action = NoAction;
+         size = ARP_TABLE_SIZE;
      }
 
 
@@ -61,10 +61,15 @@ control MyIngress(inout headers hdr,
 
          actions = {
 		set_mcast_grp;
+		NoAction;
          }
+         default_action = NoAction;
+         size = ARP_TABLE_SIZE;
      }
 
     apply {
+	// Real switches drop when no match -- this opens up a DOS attack. We don't care, so we just broadcast.
+	//TODO create ARP requests
 	smac.apply();
 	if(dmac.apply().hit){
 		//
