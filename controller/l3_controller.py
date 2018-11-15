@@ -64,9 +64,15 @@ class Controller(object):
         * ipv4_routing
         * ipv6_routing [LATER]
         """
+        # * IPv4 direct
         for iface, net in enumerate(self.topo.get_direct_host_networks_from_switch(self.sw_name)):
             self.controller.table_add('ipv4_routing', 'ipv4_direct', [net], [str(iface)])
-        # TODO gateways :D
+
+        # * TODO IPv6 direct
+
+        # * Gateways are not here, because we don't need them in our project.
+        #   In reality, they would be added either statically or via a
+        #   control-plane routing protocol such as BGP.
 
     def init_lazy_tables(self):
         """
@@ -75,11 +81,16 @@ class Controller(object):
         * ipv4_arp
         * ipv6_ndp [LATER]
         """
+        # * ARP to hosts
         for h in self.topo.get_hosts_connected_to(self.sw_name):
             iface = '0'  # TODO determine iface somehow
             ip    = self.topo.get_host_ip(h)
             mac   = self.topo.get_host_mac(h)
             self.controller.table_add("ipv4_arp", "set_dst_mac", [ip, iface], [mac])
+
+        # * TODO NDP to hosts
+
+        # * ARP+NDP to switches is not implemented because we don't need it in our project.
 
     def learn(self, learning_data):
         for mac_addr, ingress_port in  learning_data:

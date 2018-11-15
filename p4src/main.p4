@@ -28,7 +28,7 @@ control MyIngress(inout headers hdr,
 
     action ipv4_direct(interface_t iface) {
         meta.out_interface = iface;
-        meta.ipv4_next_hop      = hdr.ipv4.dst_addr;  // send directly to the destination
+        meta.ipv4_next_hop = hdr.ipv4.dst_addr;  // send directly to the destination
     }
 
     table ipv4_routing {
