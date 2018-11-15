@@ -7,9 +7,13 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48> mac_addr_t;
-typedef bit<9>  egressSpec_t;
-typedef bit<32> ip4Addr_t;
+typedef bit<48>  mac_addr_t;
+typedef bit<9>   port_t;
+typedef bit<32>  ipv4_addr_t;
+typedef bit<128> ipv6_addr_t;
+
+// the following types are used only internally
+typedef bit<8> interface_t;  // let's use 1 byte
 
 const bit<16> TYPE_IPV4 = 0x0800;
 const bit<16> TYPE_IPV6 = 0x86DD;
@@ -23,18 +27,30 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
-    ip4Addr_t src_addr;
-    ip4Addr_t dst_addr;
+    bit<4>      version;
+    bit<4>      ihl;
+    bit<8>      diffserv;
+    bit<16>     totalLen;
+    bit<16>     identification;
+    bit<3>      flags;
+    bit<13>     fragOffset;
+    bit<8>      ttl;
+    bit<8>      protocol;
+    bit<16>     hdrChecksum;
+    ipv4_addr_t src_addr;
+    ipv4_addr_t dst_addr;
+}
+
+/* https://en.wikipedia.org/wiki/IPv6_packet */
+header ipv6_t {
+    bit<4>      version;
+    bit<8>      traffic_class;
+    bit<20>     flow_label;
+    bit<16>     payload_length;
+    bit<8>      next_header;
+    bit<8>      hop_limit;
+    ipv6_addr_t src_addr;
+    ipv6_addr_t dst_addr;
 }
 
 header tcp_t{
@@ -57,18 +73,6 @@ header tcp_t{
     bit<16> urgentPtr;
 }
 
-/* https://en.wikipedia.org/wiki/IPv6_packet */
-header ipv6_t {
-    bit<4>    version;
-    bit<8>    traffic_class;
-    bit<20>   flow_label;
-    bit<16>   payload_length;
-    bit<8>    next_header;
-    bit<8>    hop_limit;
-    bit<128>  src_addr;
-    bit<128>  dst_addr;
-}
-
 struct learn_t {
    bit<48>	mac_src_addr;
    bit<16>	ingress_port;
@@ -76,6 +80,11 @@ struct learn_t {
 
 struct metadata {
     learn_t	learn;
+
+    interface_t out_interface; // in SDN, an interface is a software-only concept
+
+    ipv4_addr_t ipv4_next_hop; // at most one will be present,
+    ipv4_addr_t ipv6_next_hop; // depending on what we're sending out
 }
 
 struct headers {

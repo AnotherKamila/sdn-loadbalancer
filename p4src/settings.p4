@@ -7,7 +7,8 @@
 #include <core.p4>
 #include <v1model.p4>
 
-#define ARP_TABLE_SIZE 128
+#define ARP_TABLE_SIZE      256
+#define ROUTING_TABLE_SIZE 1024
 
 
 #endif
