@@ -15,24 +15,67 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
-    action set_egress(bit<9> port) {
+
+    action drop() {
+        mark_to_drop();
+    }
+
+    action forward(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
 
-    table port_for_mac {
-        key = {
-            hdr.ethernet.dst_addr: exact;
-        }
-        actions = {
-            set_egress;
-            NoAction;
-        }
-        size = ARP_TABLE_SIZE;
-        default_action = NoAction();
+    action set_mcast_grp(bit<16> group){
+	standard_metadata.mcast_grp = group;
     }
 
+    action mac_learn (){
+	meta.learn.mac_src_addr = hdr.ethernet.src_addr;
+	meta.learn.ingress_port = (bit<16>) standard_metadata.ingress_port;
+		
+    }
+    table smac {
+         key = {hdr.ethernet.src_addr: exact;}
+
+         actions = {
+		mac_learn;
+		NoAction;
+         }
+         default_action = mac_learn;
+         size = ARP_TABLE_SIZE;
+     }
+
+    table dmac {
+         key = {hdr.ethernet.dst_addr: exact;}
+
+         actions = {
+                forward;
+		NoAction;
+         }
+         default_action = NoAction;
+         size = ARP_TABLE_SIZE;
+     }
+
+
+    table broadcast {
+         key = {standard_metadata.ingress_port: exact;}
+
+         actions = {
+		set_mcast_grp;
+		NoAction;
+         }
+         default_action = NoAction;
+         size = ARP_TABLE_SIZE;
+     }
+
     apply {
-        port_for_mac.apply();
+	// Real switches drop when no match -- this opens up a DOS attack. We don't care, so we just broadcast.
+	//TODO create ARP requests
+	smac.apply();
+	if(dmac.apply().hit){
+		//
+	} else {
+		broadcast.apply();
+	}
     }
 }
 

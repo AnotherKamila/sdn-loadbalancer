@@ -21,7 +21,7 @@ parser MyParser(packet_in packet,
     state start {
 
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType){
+        transition select(hdr.ethernet.ethertype){
             TYPE_IPV4: ipv4;
             TYPE_IPV6: ipv6;
             default: accept;
@@ -40,7 +40,7 @@ parser MyParser(packet_in packet,
     state ipv6 {
         packet.extract(hdr.ipv6);
 
-        transition select(hdr.ipv6.protocol){
+        transition select(hdr.ipv6.next_header){
             TYPE_TCP: tcp;
             default: accept;
         }

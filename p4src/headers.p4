@@ -69,11 +69,20 @@ header ipv6_t {
     bit<128>  dst_addr;
 }
 
+struct learn_t {
+   bit<48>	mac_src_addr;
+   bit<16>	ingress_port;
+}
+
 struct metadata {
+    learn_t	learn;
 }
 
 struct headers {
     ethernet_t   ethernet;
+    ipv4_t	 ipv4;
+    ipv6_t	 ipv6;
+    tcp_t	 tcp;
 }
 
 
