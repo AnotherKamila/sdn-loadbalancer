@@ -21,6 +21,37 @@ control MyIngress(inout headers hdr,
 
     /************************* L3 / ROUTING ******************************/
 
+    ///////// v6
+
+    action ipv6_through_gateway(ipv6_addr_t gateway, interface_t iface) {
+        meta.out_interface = iface;
+        meta.ipv6_next_hop = gateway;  // send through the gateway
+    }
+
+    action ipv6_direct(interface_t iface) {
+        meta.out_interface = iface;
+        meta.ipv6_next_hop = hdr.ipv6.dst_addr;  // send directly to the destination
+    }
+
+    table ipv6_routing {
+        key = {
+            hdr.ipv6.dst_addr: lpm;  // match prefixes
+        }
+        actions = {
+            ipv6_through_gateway;    // ipv6_through_gateway(gateway, iface)
+            ipv6_direct;             // ipv6_direct(iface)
+            drop;
+        }
+        // If there is no route, drop it -- in reality, we might want to
+        // send an ICMP "No route to host" packet.
+        // Note that this is the default route, so control plane might
+        // want to set a default gateway here instead of dropping.
+        default_action = drop();
+        size = ROUTING_TABLE_SIZE;
+    }
+
+    ///////// v4
+    
     action ipv4_through_gateway(ipv4_addr_t gateway, interface_t iface) {
         meta.out_interface = iface;
         meta.ipv4_next_hop = gateway;  // send through the gateway
@@ -52,6 +83,19 @@ control MyIngress(inout headers hdr,
 
     action set_dst_mac(mac_addr_t dst_addr) {
         hdr.ethernet.dst_addr = dst_addr;
+    }
+
+    table ipv6_ndp {
+        key = {
+            meta.ipv6_next_hop: exact;  // next_hop is the host we found in the routing step
+            // meta.out_interface: exact;  // actually next_hop is unique, so leaving this out
+        }
+        actions = {
+            set_dst_mac;                    // set_dst_mac(mac)
+            drop;
+        }
+        default_action = drop();
+        size = ARP_TABLE_SIZE;
     }
 
     table ipv4_arp {
@@ -116,8 +160,14 @@ control MyIngress(inout headers hdr,
     }
 
     apply {
-        ipv4_routing.apply();
-        ipv4_arp.apply();
+        if (hdr.ipv6.isValid()) {
+            ipv6_routing.apply();
+            ipv6_ndp.apply();
+        }
+        if (hdr.ipv4.isValid()) {
+            ipv4_routing.apply();
+            ipv4_arp.apply();
+        }
         smac.apply();
         if (!dmac.apply().hit){
             // Real switches drop when no match -- this opens up a DOS attack.

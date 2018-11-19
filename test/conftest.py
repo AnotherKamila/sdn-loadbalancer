@@ -26,14 +26,9 @@ class P4Obj:
     def host_IPs(self):
         """Returns a dict of hosts and IPs.
 
-        IPs per host are a list, because a host can have multiple IPs.
-        Therefore, the structure is: { h: [ip] }
+        Returns the first IP of a host if there are multiple.
         """
-        def get_all_IPs(h):
-            for s in self.topo.get_switches():
-                yield self.iponly(self.topo[h][s]['ip'])
-
-        return { h: list(get_all_IPs(h)) for h in self.topo.get_hosts() }
+        return { h: self.topo.get_host_ip(h) for h in self.topo.get_hosts() }
 
     def iponly(self, ip):
         """Utility function to strip netmask from IP: iponly('10.0.0.1/24') => '10.0.0.1'"""

@@ -4,6 +4,17 @@ from p4utils.utils.topology import Topology
 from p4utils.utils.sswitch_API import SimpleSwitchAPI
 from scapy.all import Ether, sniff, Packet, BitField
 
+# TODO remove once p4utils supports v6
+# careful with this: *must* match the actual topology from p4app.json hack
+IPV6_OVERRIDES = {
+    'h1': 'fd00::1',
+    'h2': 'fd00::2',
+    'h3': 'fd00::3',
+}
+IPV6_DIRECT_NETWORKS = [
+    'fd00::/64',
+]
+
 class Controller(object):
 
     def __init__(self, sw_name):
@@ -62,13 +73,15 @@ class Controller(object):
         """Initialises the routing tables:
 
         * ipv4_routing
-        * ipv6_routing [LATER]
+        * ipv6_routing
         """
         # * IPv4 direct
         for iface, net in enumerate(self.topo.get_direct_host_networks_from_switch(self.sw_name)):
             self.controller.table_add('ipv4_routing', 'ipv4_direct', [net], [str(iface)])
 
-        # * TODO IPv6 direct
+        # * IPv6 direct
+        for iface, net in enumerate(IPV6_DIRECT_NETWORKS):
+            self.controller.table_add('ipv6_routing', 'ipv6_direct', [net], [str(iface)])
 
         # * Gateways are not here, because we don't need them in our project.
         #   In reality, they would be added either statically or via a
@@ -79,15 +92,19 @@ class Controller(object):
         Initialises the content of tables that we aren't learning:
 
         * ipv4_arp
-        * ipv6_ndp [LATER]
+        * ipv6_ndp
         """
-        # * ARP to hosts
+        # * ARP + NDP to hosts
         for h in self.topo.get_hosts_connected_to(self.sw_name):
-            ip    = self.topo.get_host_ip(h)
-            mac   = self.topo.get_host_mac(h)
-            self.controller.table_add("ipv4_arp", "set_dst_mac", [ip], [mac])
-
-        # * TODO NDP to hosts
+            table = None
+            if h in IPV6_OVERRIDES:
+                table = "ipv6_ndp"
+                ip = IPV6_OVERRIDES[h]
+            else:
+                table = "ipv4_arp"
+                ip = self.topo.get_host_ip(h)
+            mac = self.topo.get_host_mac(h)
+            self.controller.table_add(table, "set_dst_mac", [ip], [mac])
 
         # * ARP+NDP to switches is not implemented because we don't need it in our project.
 
