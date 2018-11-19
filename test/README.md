@@ -5,11 +5,7 @@ We use Python 3 and pytest to run the tests.
 Therefore, to run the tests:
 
 1. make sure you have python 3 and pip 3: `sudo apt-get install python3 python3-pip`
-2. install pytest: either of:
-    * globally: `sudo pip3 install pytest`
-    * or with pipenv:
-      1. `sudo pip3 install pipenv`
-      2. `pipenv install`
+2. install pytest: `sudo pip2 install pytest`
 3. run the tests: `pytest`
     * if you installed with pipenv, you need either to run `pytest` inside a `pipenv shell`, or use `pipenv run pytest` instead
 
