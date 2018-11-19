@@ -122,7 +122,7 @@ def controller(request):
 
     "Our controller" means something called "controller.py" in the test directory;
     you might want to symlink something from /controller, such as:
-    cd simple_forwarding; ln -s ../../controller/l2_controller.py ./controller.py
+    cd basic; ln -s ../../controller/l2_controller.py ./controller.py
     """
     testdir = request.fspath.dirname  # work in the test directory
     exe     = os.path.join(testdir, './controller.py')

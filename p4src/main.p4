@@ -15,10 +15,58 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
-
     action drop() {
         mark_to_drop();
     }
+
+    /************************* L3 / ROUTING ******************************/
+
+    action ipv4_through_gateway(ipv4_addr_t gateway, interface_t iface) {
+        meta.out_interface = iface;
+        meta.ipv4_next_hop = gateway;  // send through the gateway
+    }
+
+    action ipv4_direct(interface_t iface) {
+        meta.out_interface = iface;
+        meta.ipv4_next_hop = hdr.ipv4.dst_addr;  // send directly to the destination
+    }
+
+    table ipv4_routing {
+        key = {
+            hdr.ipv4.dst_addr: lpm;  // match prefixes
+        }
+        actions = {
+            ipv4_through_gateway;    // ipv4_through_gateway(gateway, iface)
+            ipv4_direct;             // ipv4_direct(iface)
+            drop;
+        }
+        default_action = drop();     // If there is no route, drop it -- in reality, we might want to
+        // send an ICMP "No route to host" packet.
+        // Note that this is the default route, so control plane might
+        // want to set a default gateway here instead of dropping.
+        size = ROUTING_TABLE_SIZE;
+    }
+    
+    /************************* L2.5 / ARP+NDP GLUE ************************/
+
+    action set_dst_mac(mac_addr_t dst_addr) {
+        hdr.ethernet.dst_addr = dst_addr;
+    }
+
+    table ipv4_arp {
+        key = {
+            meta.ipv4_next_hop: exact;  // next_hop is the host we found in the routing step
+            meta.out_interface: exact;  // actually next_hop should be unique
+        }
+        actions = {
+            set_dst_mac;                    // set_dst_mac(mac)
+            drop;
+        }
+        default_action = drop();
+        size = ARP_TABLE_SIZE;
+    }
+
+    /************************* L2 / SWITCHING ****************************/
 
     action forward(bit<9> port) {
         standard_metadata.egress_spec = port;
@@ -28,11 +76,11 @@ control MyIngress(inout headers hdr,
 	standard_metadata.mcast_grp = group;
     }
 
-    action mac_learn (){
+    action mac_learn(){
 	meta.learn.mac_src_addr = hdr.ethernet.src_addr;
 	meta.learn.ingress_port = (bit<16>) standard_metadata.ingress_port;
-		
     }
+
     table smac {
          key = {hdr.ethernet.src_addr: exact;}
 
@@ -42,40 +90,39 @@ control MyIngress(inout headers hdr,
          }
          default_action = mac_learn;
          size = ARP_TABLE_SIZE;
-     }
+    }
 
     table dmac {
-         key = {hdr.ethernet.dst_addr: exact;}
+        key = {hdr.ethernet.dst_addr: exact;}
 
-         actions = {
+        actions = {
                 forward;
 		NoAction;
-         }
-         default_action = NoAction;
-         size = ARP_TABLE_SIZE;
-     }
-
+        }
+        default_action = NoAction;
+        size = ARP_TABLE_SIZE;
+    }
 
     table broadcast {
-         key = {standard_metadata.ingress_port: exact;}
+        key = {standard_metadata.ingress_port: exact;}
 
-         actions = {
+        actions = {
 		set_mcast_grp;
 		NoAction;
-         }
-         default_action = NoAction;
-         size = ARP_TABLE_SIZE;
-     }
+        }
+        default_action = NoAction;
+        size = ARP_TABLE_SIZE;
+    }
 
     apply {
-	// Real switches drop when no match -- this opens up a DOS attack. We don't care, so we just broadcast.
-	//TODO create ARP requests
-	smac.apply();
-	if(dmac.apply().hit){
-		//
-	} else {
-		broadcast.apply();
-	}
+        ipv4_routing.apply();
+        ipv4_arp.apply();
+        smac.apply();
+        if (!dmac.apply().hit){
+            // Real switches drop when no match -- this opens up a DOS attack.
+            // We don't care, so we just broadcast.
+            broadcast.apply();
+        }
     }
 }
 

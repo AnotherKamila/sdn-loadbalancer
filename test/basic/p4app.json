@@ -25,17 +25,14 @@
   },
   "topology": {
     "assignment_strategy": "l2",
-    "auto_arp_tables": false,
     "links": [["h1", "s1"], ["h2", "s1"], ["h3", "s1"], ["h4","s1"]],
     "hosts": {
-        "h1": {
+      "h1": {
       },
       "h2": {
-      }
-      ,
+      },
       "h3": {
-      }
-      ,
+      },
       "h4": {
       }
     },
