@@ -40,10 +40,11 @@ control MyIngress(inout headers hdr,
             ipv4_direct;             // ipv4_direct(iface)
             drop;
         }
-        default_action = drop();     // If there is no route, drop it -- in reality, we might want to
+        // If there is no route, drop it -- in reality, we might want to
         // send an ICMP "No route to host" packet.
         // Note that this is the default route, so control plane might
         // want to set a default gateway here instead of dropping.
+        default_action = drop();
         size = ROUTING_TABLE_SIZE;
     }
     
