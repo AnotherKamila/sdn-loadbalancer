@@ -83,14 +83,14 @@ class Controller(object):
         """
         # * ARP to hosts
         for h in self.topo.get_hosts_connected_to(self.sw_name):
-            iface = '0'  # TODO determine iface somehow
             ip    = self.topo.get_host_ip(h)
             mac   = self.topo.get_host_mac(h)
-            self.controller.table_add("ipv4_arp", "set_dst_mac", [ip, iface], [mac])
+            self.controller.table_add("ipv4_arp", "set_dst_mac", [ip], [mac])
 
         # * TODO NDP to hosts
 
         # * ARP+NDP to switches is not implemented because we don't need it in our project.
+
 
     def learn(self, learning_data):
         for mac_addr, ingress_port in  learning_data:

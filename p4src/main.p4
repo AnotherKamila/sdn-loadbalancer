@@ -56,7 +56,7 @@ control MyIngress(inout headers hdr,
     table ipv4_arp {
         key = {
             meta.ipv4_next_hop: exact;  // next_hop is the host we found in the routing step
-            meta.out_interface: exact;  // actually next_hop should be unique
+            // meta.out_interface: exact;  // actually next_hop is unique, so leaving this out
         }
         actions = {
             set_dst_mac;                    // set_dst_mac(mac)
