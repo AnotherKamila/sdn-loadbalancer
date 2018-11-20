@@ -47,7 +47,7 @@
   },
   "exec_scripts": [
     {
-      "cmd": "for i in 1 2 3 ; do sysctl net.ipv6.conf.h$i-eth0.disable_ipv6=0 ; ip addr flush dev h$i-eth0 ; ip addr add fd00::$i/64 dev h$i-eth0",
+      "cmd": "for i in 1 2 3 ; do mx h$i \"sysctl net.ipv6.conf.{lo,h$i-eth0}.disable_ipv6=0 ; ip addr flush dev h$i-eth0 ; ip addr add fd00::$i/64 dev h$i-eth0\" ; done ",
       "reboot_run": true
     },
     {

@@ -84,7 +84,7 @@ struct metadata {
     interface_t out_interface; // in SDN, an interface is a software-only concept
 
     ipv4_addr_t ipv4_next_hop; // at most one will be present,
-    ipv4_addr_t ipv6_next_hop; // depending on what we're sending out
+    ipv6_addr_t ipv6_next_hop; // depending on what we're sending out
 }
 
 struct headers {
