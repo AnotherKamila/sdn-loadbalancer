@@ -1,0 +1,3 @@
+#!/bin/sh
+
+python -m controller.l3_v6hack $1

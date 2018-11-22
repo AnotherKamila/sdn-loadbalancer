@@ -1,5 +1,6 @@
 # Next steps
 
+- [X] controller code cleanup: inheritance to the rescue!
 - [ ] flat loadbalancer (ECMP)
 - [ ] simple weighted loadbalancer (big bucket table)
 - [ ] tests for ^^ + exploring the behavior (oscillations and stuff)
