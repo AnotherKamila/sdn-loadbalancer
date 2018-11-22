@@ -115,22 +115,27 @@ def p4run(request):
 def controller(request):
     """Runs our controller for each switch in the topology.
 
-    "Our controller" means something called "controller.py" in the test directory;
-    you might want to symlink something from /controller, such as:
-    cd basic; ln -s ../../controller/l2_controller.py ./controller.py
+    "Our controller" means an executable called "./controller" in the test directory;
+    you might want it to call something from controller/, such as:
+
+        #!/bin/sh
+        python -m controller.l3_controller $1
+
     """
     testdir = request.fspath.dirname  # work in the test directory
-    exe     = os.path.join(testdir, './controller.py')
-    
+    exe     = os.path.join(testdir, './controller')
+
     if not os.path.exists(exe):
-        raise ValueError('controller.py not exist in {}'.format(testdir))
+        raise ValueError('./controller does not exist in {}'.format(testdir))
+    if not os.access(exe, os.X_OK):
+        raise ValueError('./controller is not executable: in {}'.format(testdir))
 
     p4 = P4Obj(testdir)
 
     def start_ctrls():
         for s in p4.topo.get_p4switches():
             yield subprocess.Popen(
-                ['python', './controller.py', s],
+                ['./controller', s],
                 cwd=testdir,
             )
     ctrls = list(start_ctrls())
@@ -138,5 +143,5 @@ def controller(request):
     for c in ctrls:
         retcode = c.poll()
         if retcode != None:
-            raise Exception("controller.py exited with error status: {}".format(retcode))
+            raise Exception("controller exited with error status: {}".format(retcode))
     return ctrls
