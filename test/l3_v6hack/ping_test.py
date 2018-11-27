@@ -1,4 +1,5 @@
 import subprocess
+from myutils import ping_all
 
 # TODO remove once p4utils supports v6
 # careful with this: *must* match the actual topology from p4app.json hack
@@ -23,16 +24,3 @@ def test_ping_ipv4(p4run, controller):
 def test_ping_ipv6(p4run, controller):
     hosts = IPV6_OVERRIDES
     ping_all(hosts, ping6=True)
-
-def ping_ip_from_host(h, ip, ping6=False):
-    ping = 'ping6' if ping6 else 'ping'
-    cmd = ['mx', h, ping] + PINGOPTS + [ip]
-    print('****** ', cmd)
-    return subprocess.call(cmd)
-
-def ping_all(hosts, ping6=False):
-    for h1 in sorted(hosts):
-        for h2 in sorted(hosts):
-            ip = hosts[h2]
-            retcode = ping_ip_from_host(h1, ip, ping6)
-            assert retcode == 0
