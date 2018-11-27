@@ -1,4 +1,4 @@
-from myutils import ping_all, netcat_all
+from myutils.testhelpers import ping_all, netcat_all
 
 def test_ping_ipv4(p4run, controller):
     ping_all(p4run.host_IPs())

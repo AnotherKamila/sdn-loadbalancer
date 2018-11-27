@@ -69,7 +69,7 @@ def p4run(request):
     p4conf = None
     with open(p4app) as p4json:
         try:
-            p4conf = json.loads(p4json.read())
+            p4conf = json.load(p4json)
         except json.decoder.JSONDecodeError as e:
             raise ValueError("{}: invalid JSON".format(p4app))
 

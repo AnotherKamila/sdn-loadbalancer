@@ -1,4 +1,4 @@
-from myutils import ping_all, netcat_all
+from myutils.testhelpers import ping_all, netcat_all
 
 # Arguments in pytest are magic:
 # * if you declare an argument called p4run, it will take care of p4run for you

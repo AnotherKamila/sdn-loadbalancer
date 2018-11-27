@@ -1,5 +1,5 @@
 import subprocess
-from myutils import ping_all
+from myutils.testhelpers import ping_all
 
 # TODO remove once p4utils supports v6
 # careful with this: *must* match the actual topology from p4app.json hack
