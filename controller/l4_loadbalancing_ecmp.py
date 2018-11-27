@@ -1,3 +1,6 @@
+from pprint import pprint
+
+
 def hostport(s):
     return s.split(':')
 
@@ -18,6 +21,7 @@ class ECMPMixin(object):
 
         """
         # TODO UDP
+        pprint(pools)
         for pool_, (vip, dips) in enumerate(pools.items()):
             pool = str(pool_)
             size = str(len(dips))
