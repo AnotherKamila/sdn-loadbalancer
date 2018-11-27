@@ -9,6 +9,8 @@
 
 #define ARP_TABLE_SIZE      256
 #define ROUTING_TABLE_SIZE 1024
+#define VIP_TABLE_SIZE      256
+#define DIP_TABLE_SIZE     1024
 
 
 #endif

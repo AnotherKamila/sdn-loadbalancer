@@ -30,7 +30,8 @@ parser MyParser(packet_in packet,
 
     state ipv4 {
         packet.extract(hdr.ipv4);
-
+        meta.l4_payload_length = hdr.ipv4.total_len - (((bit<16>)hdr.ipv4.ihl) << 2);
+ 
         transition select(hdr.ipv4.protocol){
             TYPE_TCP: tcp;
             default: accept;
@@ -39,6 +40,7 @@ parser MyParser(packet_in packet,
 
     state ipv6 {
         packet.extract(hdr.ipv6);
+        // TODO meta.l4_payload_length
 
         transition select(hdr.ipv6.next_header){
             TYPE_TCP: tcp;
