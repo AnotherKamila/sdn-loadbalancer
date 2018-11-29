@@ -9,6 +9,9 @@ ptpython = "*"
 [packages]
 fabric = "*"
 ptpython = "*"
+twisted = "*"
+pytest = "*"
+prometheus-client = "*"
 
 [requires]
 python_version = "2.7"

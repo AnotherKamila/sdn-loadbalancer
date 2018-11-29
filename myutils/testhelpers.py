@@ -1,9 +1,11 @@
+from __future__ import print_function
+
 import subprocess
 import time
 
-def run_on_host(host, cmd, background=False):
-    realcmd = ['mx', host] + cmd
-    print(' ****** ', realcmd, ' ****** ')
+def run_cmd(cmd, background=False):
+    realcmd = [str(a) for a in cmd]
+    print(' ****** ', ' '.join(realcmd), ' ****** ')
     if not background:
         return subprocess.call(realcmd)
     else:
@@ -12,6 +14,9 @@ def run_on_host(host, cmd, background=False):
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
         )
+
+def run_on_host(host, cmd, background=False):
+    return run_cmd(['mx', host] + cmd, background)
 
 def test_all_host_pairs(hosts, testfn):
     for client in sorted(hosts):
@@ -34,20 +39,24 @@ def ping_all(hosts, ping6=False):
     test_all_host_pairs(hosts, lambda h, _, ip: ping_ip_from_host(h, ip, ping6))
 
 
-def netcat_from_to(client, server, serverip, port=4742):
+def netcat_server(host, port=4742, options=None):
+    if options == None: options = []
+    server = run_on_host(host, ['nc'] + options + ['-l', str(port)], background=True)
+    time.sleep(1)  # give it time to bind
+    return server
+
+def netcat_client(host, server_ip, port=4742):
+    return run_on_host(host, ['nc', server_ip, str(port)], background=True)
+
+def netcat_from_to(client_host, server_host, server_ip, port=4742):
     # Skip if on localhost, because for some reason this sometimes
     # breaks and I don't want to deal with this.
-    if client == server: return
+    if client_host == server_host: return
 
-    servercmd = ['nc', '-l', str(port)]
-    clientcmd = ['nc', serverip, str(port)]
-    server = run_on_host(server, servercmd, background=True)
-    time.sleep(1)  # give it time to bind
-    client = run_on_host(client, clientcmd, background=True)
+    server = netcat_server(server_host, port)
+    client = netcat_client(client_host, server_ip, port)
 
     out, _ = client.communicate('hello')
-    print('*** OUT ', out)
-    print('*** RET ', client.returncode)
     assert out == ''
     assert client.returncode == 0
 

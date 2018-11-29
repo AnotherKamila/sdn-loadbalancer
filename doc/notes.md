@@ -17,3 +17,7 @@ TODO ask on meeting:
 * I should either track whether the connection is NATted (so a set membership/bloom filter)
    OR drop direct connections to backends.
 * should I drop unnecessary code? (IPv6; L2 learning)
+
+notes:
+
+switch goes x_x / starts dropping packets at about 10kpps
