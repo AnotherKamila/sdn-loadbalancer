@@ -3,7 +3,9 @@ from __future__ import print_function
 import subprocess
 import time
 
-def run_cmd(cmd, background=False):
+
+def run_cmd(cmd, host=None, background=False):
+    if host: cmd = ['mx', host] + cmd
     realcmd = [str(a) for a in cmd]
     print(' ****** ', ' '.join(realcmd), ' ****** ')
     if not background:
@@ -15,8 +17,6 @@ def run_cmd(cmd, background=False):
             stdout=subprocess.PIPE,
         )
 
-def run_on_host(host, cmd, background=False):
-    return run_cmd(['mx', host] + cmd, background)
 
 def test_all_host_pairs(hosts, testfn):
     for client in sorted(hosts):
@@ -29,7 +29,7 @@ PINGOPTS = ['-l3', '-c3', '-q']
 
 def ping_ip_from_host(h, ip, ping6=False):
     ping = 'ping6' if ping6 else 'ping'
-    assert run_on_host(h, [ping] + PINGOPTS + [ip]) == 0
+    assert run_cmd([ping] + PINGOPTS + [ip], h) == 0
 
 def ping_all(hosts, ping6=False):
     """Pings all pairs of hosts in a Mininet emulator.
@@ -41,12 +41,12 @@ def ping_all(hosts, ping6=False):
 
 def netcat_server(host, port=4742, options=None):
     if options == None: options = []
-    server = run_on_host(host, ['nc'] + options + ['-l', str(port)], background=True)
-    time.sleep(1)  # give it time to bind
+    server = run_cmd(['nc'] + options + ['-l', str(port)], host, background=True)
+    time.sleep(0.5)  # give it time to bind
     return server
 
 def netcat_client(host, server_ip, port=4742):
-    return run_on_host(host, ['nc', server_ip, str(port)], background=True)
+    return run_cmd(['nc', server_ip, str(port)], host, background=True)
 
 def netcat_from_to(client_host, server_host, server_ip, port=4742):
     # Skip if on localhost, because for some reason this sometimes
