@@ -13,4 +13,4 @@ class LoadBalancer(ECMPMixin, Router):
 if __name__ == "__main__":
     import sys
     sw_name = sys.argv[1]
-    controller = LoadBalancer(sw_name).run_digest_loop()
+    controller = LoadBalancer(sw_name).run_event_loop()

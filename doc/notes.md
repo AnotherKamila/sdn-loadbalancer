@@ -2,12 +2,17 @@
 
 - [X] controller code cleanup: inheritance to the rescue!
 - [X] flat loadbalancer (ECMP)
+- [ ] convert existing stuff into a twisted-friendly class
+- [ ] make a lines protocol + a "main" for tests
+- [ ] use that controller from thingy that decides weight based on something
 - [ ] simple weighted loadbalancer (big bucket table)
-- [ ] tests for ^^ + exploring the behavior (oscillations and stuff)
+- [ ] tests for ^^
 - [ ] don't drop connections
-- [ ] use more CPU and less memory
-- [ ] how to update weights in ^^ ?
-- [ ] don't drop connections (again)
+- [ ] exploring the behavior (oscillations and stuff)
+- [ ] tree thing
+
+Not really:
+
 - [ ] IPv6 + rewriting XD
 
 -------------------------------------------

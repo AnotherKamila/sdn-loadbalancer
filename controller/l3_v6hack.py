@@ -66,5 +66,5 @@ class Controller(L2Switch):
 if __name__ == "__main__":
     import sys
     sw_name = sys.argv[1]
-    controller = Controller(sw_name).run_digest_loop()
+    controller = Controller(sw_name).run_event_loop()
 

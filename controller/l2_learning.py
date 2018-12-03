@@ -66,7 +66,17 @@ class L2Switch(BaseController):
         #Acknowledge digest
         self.controller.client.bm_learning_ack_buffer(ctx_id, list_id, buffer_id)
 
+    def recv_msg_cpu(self, pkt):
+
+        packet = Ether(str(pkt))
+
+        if packet.type == 0x1234:
+            cpu_header = CpuHeader(packet.payload)
+            self.learn([(cpu_header.macAddr, cpu_header.ingress_port)])
+
+
+
 if __name__ == "__main__":
     import sys
     sw_name = sys.argv[1]
-    controller = L2Switch(sw_name).run_digest_loop()
+    controller = L2Switch(sw_name).run_event_loop()

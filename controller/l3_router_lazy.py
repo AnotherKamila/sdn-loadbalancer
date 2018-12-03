@@ -12,4 +12,4 @@ class Router(IPv4RoutingMixin, ArpLazyMixin, L2Switch):
 if __name__ == "__main__":
     import sys
     sw_name = sys.argv[1]
-    controller = Router(sw_name).run_digest_loop()
+    controller = Router(sw_name).run_event_loop()
