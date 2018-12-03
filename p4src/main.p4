@@ -247,20 +247,20 @@ control MyIngress(inout headers hdr,
     }
 
     action set_mcast_grp(bit<16> group){
-	standard_metadata.mcast_grp = group;
+        standard_metadata.mcast_grp = group;
     }
 
     action mac_learn(){
-	meta.learn.mac_src_addr = hdr.ethernet.src_addr;
-	meta.learn.ingress_port = (bit<16>) standard_metadata.ingress_port;
+        meta.learn.mac_src_addr = hdr.ethernet.src_addr;
+        meta.learn.ingress_port = (bit<16>) standard_metadata.ingress_port;
     }
 
     table smac {
          key = {hdr.ethernet.src_addr: exact;}
 
          actions = {
-		mac_learn;
-		NoAction;
+            mac_learn;
+            NoAction;
          }
          default_action = mac_learn;
          size = ARP_TABLE_SIZE;
