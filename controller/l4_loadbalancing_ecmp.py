@@ -1,16 +1,19 @@
 from pprint import pprint
+from twisted.internet import defer
+from controller.base_controller_twisted import BaseController
 
 
 def hostport(s):
     return s.split(':')
 
 
-class ECMPMixin(object):
+class EqualCostLoadBalancer(BaseController):
     """Fills the ECMP loadbalancing tables (IPv4 only):
 
     * ipv4_vips
     * ipv4_dips
     """
+    @defer.inlineCallbacks
     def init_pools(self, pools):
         """pools: something like:
 
@@ -26,13 +29,13 @@ class ECMPMixin(object):
             pool = str(pool_)
             size = str(len(dips))
             vhost, vport = hostport(vip)
-            self.controller.table_add("ipv4_vips", "set_dip_pool", [vhost, vport], [pool, size])
+            yield self.controller.table_add("ipv4_vips", "set_dip_pool", [vhost, vport], [pool, size])
 
             for h, dip in enumerate(dips):
                 dhost, dport = hostport(dip)
                 dip = self.topo.get_host_ip(dhost)
-                self.controller.table_add("ipv4_dips", "ipv4_tcp_rewrite_dst", [pool, str(h)], [dip, dport])
+                yield self.controller.table_add("ipv4_dips", "ipv4_tcp_rewrite_dst", [pool, str(h)], [dip, dport])
 
                 # inverse tables:
-                self.controller.table_add("ipv4_dips_inverse", "set_dip_pool_idonly", [dip, dport], [pool])
-            self.controller.table_add("ipv4_vips_inverse", "ipv4_tcp_rewrite_src", [pool], [vhost, vport])
+                yield self.controller.table_add("ipv4_dips_inverse", "set_dip_pool_idonly", [dip, dport], [pool])
+            yield self.controller.table_add("ipv4_vips_inverse", "ipv4_tcp_rewrite_src", [pool], [vhost, vport])

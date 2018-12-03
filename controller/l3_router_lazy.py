@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 
+from controller.base_controller_twisted import BaseController, main
 from controller.l2_lazy           import L2SwitchLazy
-from controller.arp_lazy          import ArpLazyMixin
-from controller.ipv4_routing_topo import IPv4RoutingMixin
+from controller.arp_lazy          import ArpLazy
+from controller.ipv4_routing_topo import IPv4Routing
 
-
-class Router(IPv4RoutingMixin, ArpLazyMixin, L2SwitchLazy):
+class Router(IPv4Routing, ArpLazy, L2SwitchLazy, BaseController):
     pass  # :D
 
 
 if __name__ == "__main__":
-    import sys
-    sw_name = sys.argv[1]
-    controller = Router(sw_name).run_event_loop()
+   main(Router)

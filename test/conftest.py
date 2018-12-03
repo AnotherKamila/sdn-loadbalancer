@@ -142,6 +142,6 @@ def controller(request):
     time.sleep(3)  # wait for the controller to fill out the initial tables
     for c in ctrls:
         retcode = c.poll()
-        if retcode != None:
+        if retcode not in [None, 0]:
             raise Exception("controller exited with error status: {}".format(retcode))
     return ctrls

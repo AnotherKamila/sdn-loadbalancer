@@ -2,7 +2,7 @@
 
 - [X] controller code cleanup: inheritance to the rescue!
 - [X] flat loadbalancer (ECMP)
-- [ ] convert existing stuff into a twisted-friendly class
+- [X] convert existing stuff into a twisted-friendly class
 - [ ] make a lines protocol + a "main" for tests
 - [ ] use that controller from thingy that decides weight based on something
 - [ ] simple weighted loadbalancer (big bucket table)
