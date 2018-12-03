@@ -2,6 +2,8 @@ import pytest_twisted as pt
 import os
 from twisted.internet import defer
 
+from controller.l4_loadbalancer import LoadBalancer
+
 # FIXME rewrite these to do the right thing
 import time
 from myutils.testhelpers import run_cmd
@@ -33,48 +35,64 @@ def run_python_m(module, host, background=True):
     return run_cmd(['pipenv', 'run', 'python', '-m', module], host, background)
 
 @pt.inlineCallbacks
-# def test_equal_balancing_inprocess(p4run):
-def test_equal_balancing_inprocess(p4run):
+def test_equal_balancing_inprocess(p4run, pools):
     NUM_CONNS = 1000
     TOLERANCE = 0.9
 
     mypool = '10.0.1.1:8000'
     pool_ip, pool_port = hostport(mypool)
 
-    # I would like to do the following:
-
-    # ctrl = yield LoadBalancer.get_initialised('s1')
-    ctrl_process = run_python_m('controller.l4_loadbalancer_flat', host='h1')
-    time.sleep(0.5)
-
-
-    from twisted.spread import pb
-    from twisted.internet import reactor
-
-    ctrl_client_factory = pb.PBClientFactory()
-    reactor.connectUNIX('/tmp/p4crap-controller.socket', ctrl_client_factory)
-    ctrl = yield ctrl_client_factory.getRootObject()
-
-    pool1 = yield ctrl.callRemote("add_pool", mypool)
-    # FIXME
-    assert pool1 == 47
-
-    setups = []
     servers = []
-    for s in ["h1:8001", "h2:8002", "h3:8003"]:
-        setups.append(ctrl.callRemote("add_dip", pool1, s))
-        h, p = hostport(s)
-        servers.append(run_server(p, host=h))  # TODO setups.append and things
+    for s in pools[mypool]:
+        host, port = hostport(s)
+        servers.append(run_server(host=host, port=port, wait_to_bind=False))
+    time.sleep(0.5)  # give them time to bind
 
-    # FIXME
-    results = yield defer.DeferredList(setups)  # wait for setup things to complete
-    assert len(results) == 3
-    for r in results:
-        assert r == (True, 42)
+    lb = yield LoadBalancer.get_initialised('s1')
 
-    # TODO :D
-    # assert run_client(NUM_CONNS, pool_ip, pool_port, host='h4') == 0
+    for vip, dips in pools.items():
+        handle = yield lb.add_pool(vip)
+        for dip in dips:
+            yield lb.add_dip(handle, dip)
 
-    # TODO :D
-    # for s in servers:
-    #     assert get_conns_and_die(s) >= TOLERANCE*NUM_CONNS/len(pools[mypool])
+    assert run_client(NUM_CONNS, pool_ip, pool_port, host='h4') == 0
+
+    for s in servers:
+        assert get_conns_and_die(s) >= TOLERANCE*NUM_CONNS/len(pools[mypool])
+
+
+    # # ctrl = yield LoadBalancer.get_initialised('s1')
+    # ctrl_process = run_python_m('controller.l4_loadbalancer_flat', host='h1')
+    # time.sleep(0.5)
+
+
+    # from twisted.spread import pb
+    # from twisted.internet import reactor
+
+    # ctrl_client_factory = pb.PBClientFactory()
+    # reactor.connectUNIX('/tmp/p4crap-controller.socket', ctrl_client_factory)
+    # ctrl = yield ctrl_client_factory.getRootObject()
+
+    # pool1 = yield ctrl.callRemote("add_pool", mypool)
+    # # FIXME
+    # assert pool1 == 47
+
+    # setups = []
+    # servers = []
+    # for s in ["h1:8001", "h2:8002", "h3:8003"]:
+    #     setups.append(ctrl.callRemote("add_dip", pool1, s))
+    #     h, p = hostport(s)
+    #     servers.append(run_server(p, host=h))  # TODO setups.append and things
+
+    # # FIXME
+    # results = yield defer.DeferredList(setups)  # wait for setup things to complete
+    # assert len(results) == 3
+    # for r in results:
+    #     assert r == (True, 42)
+
+    # # TODO :D
+    # # assert run_client(NUM_CONNS, pool_ip, pool_port, host='h4') == 0
+
+    # # TODO :D
+    # # for s in servers:
+    # #     assert get_conns_and_die(s) >= TOLERANCE*NUM_CONNS/len(pools[mypool])
