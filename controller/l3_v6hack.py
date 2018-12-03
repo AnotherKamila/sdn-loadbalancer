@@ -2,7 +2,7 @@
 
 import nnpy
 import struct
-from controller.l2_learning import L2Switch
+from controller.l2_lazy import L2SwitchLazy
 
 # In theory, this should be using IPv4RoutingMixin, but it doesn't because this is all a hack and that would be complicated.
 
@@ -17,7 +17,7 @@ IPV6_DIRECT_NETWORKS = [
     'fd00::/64',
 ]
 
-class Controller(L2Switch):
+class Controller(L2SwitchLazy):
     def init(self):
         super(Controller, self).init()
         self.init_lazy_tables()

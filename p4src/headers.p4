@@ -77,15 +77,8 @@ struct headers {
     tcp_t	     tcp;
 }
 
-struct learn_t {
-   bit<48>	mac_src_addr;
-   bit<16>	ingress_port;
-}
-
 struct metadata {
     bit<16> l4_payload_length;
-
-    learn_t	learn;
 
     interface_t out_interface; // in SDN, an interface is a software-only concept (TODO really?)
 

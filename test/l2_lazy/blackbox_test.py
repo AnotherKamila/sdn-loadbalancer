@@ -1,7 +1,4 @@
 from myutils.testhelpers import ping_all, netcat_all
-import pytest
-
-pytest.skip("I removed L2 learning from P4 code after commit 6307a5b.", allow_module_level=True)
 
 # Arguments in pytest are magic:
 # * if you declare an argument called p4run, it will take care of p4run for you

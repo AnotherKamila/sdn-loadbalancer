@@ -1,0 +1,3 @@
+#!/bin/sh
+
+python -m controller.l2_lazy $1
