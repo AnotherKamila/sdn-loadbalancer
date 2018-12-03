@@ -35,30 +35,30 @@ def run_python_m(module, host, background=True):
     return run_cmd(['pipenv', 'run', 'python', '-m', module], host, background)
 
 @pt.inlineCallbacks
-def test_equal_balancing_inprocess(p4run, pools):
+def test_equal_balancing_inprocess(p4run):
     NUM_CONNS = 1000
     TOLERANCE = 0.9
 
     mypool = '10.0.1.1:8000'
-    pool_ip, pool_port = hostport(mypool)
+    myservers = ['h1:8001', 'h2:8002', 'h3:8003']
 
     servers = []
-    for s in pools[mypool]:
+    for s in myservers:
         host, port = hostport(s)
         servers.append(run_server(host=host, port=port, wait_to_bind=False))
     time.sleep(0.5)  # give them time to bind
 
     lb = yield LoadBalancer.get_initialised('s1')
 
-    for vip, dips in pools.items():
-        handle = yield lb.add_pool(vip)
-        for dip in dips:
-            yield lb.add_dip(handle, dip)
+    handle = yield lb.add_pool(mypool)
+    for dip in myservers:
+        yield lb.add_dip(handle, dip)
 
+    pool_ip, pool_port = hostport(mypool)
     assert run_client(NUM_CONNS, pool_ip, pool_port, host='h4') == 0
 
     for s in servers:
-        assert get_conns_and_die(s) >= TOLERANCE*NUM_CONNS/len(pools[mypool])
+        assert get_conns_and_die(s) >= TOLERANCE*NUM_CONNS/len(myservers)
 
 
     # # ctrl = yield LoadBalancer.get_initialised('s1')
