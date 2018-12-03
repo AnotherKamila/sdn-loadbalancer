@@ -1,4 +1,4 @@
-from twisted.internet import defer
+from twisted.internet import defer, task
 from controller.base_controller_twisted import BaseController, main
 from controller.l3_router_lazy          import Router
 from controller.settings              import load_pools
@@ -6,8 +6,6 @@ from controller.settings              import load_pools
 
 def hostport(s):
     return s.split(':')
-
-pools = load_pools('./pools.json')  # FIXME remove
 
 
 class LoadBalancer(Router):
@@ -53,23 +51,30 @@ class LoadBalancer(Router):
         yield self.controller.table_modify(
             "ipv4_vips", 'set_dip_pool', entry_handle, [pool_handle, str(size)])
 
-    @defer.inlineCallbacks
     def init(self):
         # TODO in an ideal world, this + handles would be abstracted
         self._ipv4_vips = {}
         self._ipv4_vips_handles = {}
         self._ipv4_dips = {}
 
-        # FIXME remove
-        for vip, dips in pools.items():
-            handle = yield self.add_pool(vip)
-            for dip in dips:
-                yield self.add_dip(handle, dip)
 
+@defer.inlineCallbacks
+def init_pools_json(lb):
+    pools = load_pools('./pools.json')
+    for vip, dips in pools.items():
+        handle = yield lb.add_pool(vip)
+        for dip in dips:
+            yield lb.add_dip(handle, dip)
+
+@defer.inlineCallbacks
+def main(reactor, sw_name):
+    lb = yield LoadBalancer.get_initialised(sw_name)
+    yield init_pools_json(lb)
 
 if __name__ == '__main__':
-    print('hi')
-    main(LoadBalancer)
+    import sys
+    sw_name = sys.argv[1] if len(sys.argv) > 1 else 's1'
+    task.react(main, [sw_name])
 
 # # FIXME this is not supposed to be here :D
 # from twisted.spread import pb
