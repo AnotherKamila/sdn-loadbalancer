@@ -1,5 +1,6 @@
-import pytest
 import os
+import pytest
+import pytest_twisted as pt
 
 from controller.settings import load_pools
 

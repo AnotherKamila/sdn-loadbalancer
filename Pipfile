@@ -12,6 +12,8 @@ ptpython = "*"
 twisted = "*"
 pytest = "*"
 prometheus-client = "*"
+pytest-twisted = "*"
+attrs = "*"
 
 [requires]
 python_version = "2.7"

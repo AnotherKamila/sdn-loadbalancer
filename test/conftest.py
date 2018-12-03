@@ -1,9 +1,10 @@
 import json
 import os
-import pytest
 import re
 import subprocess
 import time
+import pytest
+import pytest_twisted as pt
 
 from p4utils.utils.topology import Topology
 

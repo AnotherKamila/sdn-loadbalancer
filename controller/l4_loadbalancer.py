@@ -1,14 +1,89 @@
-from controller.base_controller_twisted import main
-from controller.l4_loadbalancing_ecmp import EqualCostLoadBalancer
-from controller.l3_router_lazy        import Router
+from twisted.internet import defer
+from controller.base_controller_twisted import BaseController, main
+from controller.l3_router_lazy          import Router
 from controller.settings              import load_pools
 
-pools = load_pools('./pools.json')
 
-class LoadBalancer(EqualCostLoadBalancer, Router):
+def hostport(s):
+    return s.split(':')
+
+pools = load_pools('./pools.json')  # FIXME remove
+
+
+class LoadBalancer(Router):
+    """Fills the flat loadbalancing tables (IPv4 only):
+
+    * ipv4_vips
+    * ipv4_dips
+
+    TODO UDP :D
+    """
+
+    @defer.inlineCallbacks
+    def add_pool(self, vip):
+        pool_handle = str(len(self._ipv4_vips))
+        vhost, vport = hostport(vip)
+        self._ipv4_vips[pool_handle] = (vhost, vport)
+        self._ipv4_dips[pool_handle] = []
+        # on the way there table
+        self._ipv4_vips_handles[pool_handle] = yield self.controller.table_add(
+            "ipv4_vips", "set_dip_pool", [vhost, vport], [pool_handle, "0"])
+        # inverse table
+        yield self.controller.table_add(
+            "ipv4_vips_inverse", "ipv4_tcp_rewrite_src", [pool_handle], [vhost, vport])
+        defer.returnValue(pool_handle)
+
+    @defer.inlineCallbacks
+    def add_dip(self, pool_handle, dip):
+        dhost, dport = hostport(dip)
+        dip = self.topo.get_host_ip(dhost)
+        flow_hash = len(self._ipv4_dips[pool_handle])
+        self._ipv4_dips[pool_handle].append((dip, dport))
+        yield self.controller.table_add("ipv4_dips", "ipv4_tcp_rewrite_dst", [pool_handle, str(flow_hash)], [dip, dport])
+        # inverse table
+        yield self.controller.table_add(
+            "ipv4_dips_inverse", "set_dip_pool_idonly", [dip, dport], [pool_handle])
+        yield self._fix_pool_size(pool_handle)
+
+    @defer.inlineCallbacks
+    def _fix_pool_size(self, pool_handle):
+        entry_handle = self._ipv4_vips_handles[pool_handle]
+        size = str(len(self._ipv4_dips[pool_handle]))
+        print("modifying size for pool {} => {}".format(self._ipv4_vips[pool_handle], size))
+        yield self.controller.table_modify(
+            "ipv4_vips", 'set_dip_pool', entry_handle, [pool_handle, str(size)])
+
+    @defer.inlineCallbacks
     def init(self):
-        return EqualCostLoadBalancer.init_pools(self, pools)
+        # TODO in an ideal world, this + handles would be abstracted
+        self._ipv4_vips = {}
+        self._ipv4_vips_handles = {}
+        self._ipv4_dips = {}
+
+        # FIXME remove
+        for vip, dips in pools.items():
+            handle = yield self.add_pool(vip)
+            for dip in dips:
+                yield self.add_dip(handle, dip)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
+    print('hi')
     main(LoadBalancer)
+
+# # FIXME this is not supposed to be here :D
+# from twisted.spread import pb
+
+# class LBRemoteInterface(pb.Root):
+#     def remote_add_pool(self, vip):
+#         return defer.succeed(47)
+
+#     def remote_add_dip(self, pool_handle, dip):
+#         return defer.succeed(42)
+
+# # FIXME neither is this :D
+# if __name__ == '__main__':
+#     from twisted.internet import reactor
+#     # TODO socket path should include switch name
+#     reactor.listenUNIX('/tmp/p4crap-controller.socket', pb.PBServerFactory(LBRemoteInterface()))
+#     reactor.run()
