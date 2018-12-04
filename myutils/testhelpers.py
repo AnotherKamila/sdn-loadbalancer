@@ -1,8 +1,9 @@
 from __future__ import print_function
 
 import subprocess
+import os
+import signal
 import time
-
 
 def run_cmd(cmd, host=None, background=False):
     if host: cmd = ['mx', host] + cmd
@@ -15,7 +16,14 @@ def run_cmd(cmd, host=None, background=False):
             realcmd,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
+            preexec_fn=os.setsid,
         )
+
+# what the fuckity fuck why is this so difficult
+def kill_with_children(process):
+    return run_cmd([
+        'sudo', 'kill', '-SIGTERM', '--', '-{}'.format(os.getpgid(process.pid))
+    ])
 
 
 def test_all_host_pairs(hosts, testfn):

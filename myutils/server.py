@@ -18,9 +18,8 @@ class ConnCounter(pb.Root, object):
         self.count = 0
         self.load  = 0.3
 
-    # @raise_all_exceptions_on_client
+    @raise_all_exceptions_on_client
     def remote_get_conn_count(self):
-        reactor.callLater(2, lambda: print("I am here", self.count))
         return self.count
 
     @raise_all_exceptions_on_client

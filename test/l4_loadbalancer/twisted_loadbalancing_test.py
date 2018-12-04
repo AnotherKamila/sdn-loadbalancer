@@ -1,7 +1,7 @@
 import pytest_twisted as pt
 import pytest
 import os
-from twisted.internet import defer
+from twisted.internet import defer, task
 from twisted.spread import pb
 from twisted.internet import reactor
 import itertools
@@ -9,74 +9,108 @@ import itertools
 from controller.l4_loadbalancer import LoadBalancer
 
 import time
-from myutils.testhelpers import run_cmd
+from myutils.testhelpers import run_cmd, kill_with_children
 
 def hostport(s):
-    return s.split(':')
+    h, p = s.split(':')
+    return h, int(p)
 
 @pytest.fixture()
 def process(request):
     ps = []
     def run(cmd, host=None, background=True):
-        ps.append(run_cmd(cmd, host, background=True))
+        ps.append((run_cmd(cmd, host, background=True), host))
     yield run
-
-    for p in ps:
-        p.terminate()
+    for p, host in ps:
+        # cannot exit them with .terminate() if they're in mx :-(
+        # p.terminate()
+        assert kill_with_children(p) == 0
 
 def python_m(module, *args):
     return ['pipenv', 'run', 'python', '-m', module] + list(args)
 
 def sock(*args):
-    return '/tmp/p4crap-{}.socket'.format('-'.join(str(a)) for a in args)
+    return '/tmp/p4crap-{}.socket'.format('-'.join(str(a) for a in args))
 
 @pytest.fixture()
 def remote_module(request, process):
     sock_counter = itertools.count(1)
+    remotes = []
+
+    @defer.inlineCallbacks
     def run(module, *m_args, **p_kwargs):
         sock_name = sock(module, next(sock_counter))
         process(python_m(module, sock_name, *m_args), **p_kwargs)
-        time.sleep(1)  # TODO
+        yield task.deferLater(reactor, 1, (lambda: None))
         conn = pb.PBClientFactory()
         reactor.connectUNIX(sock_name, conn)
-        return conn.getRootObject()
+        obj = yield conn.getRootObject()
+        remotes.append(obj)
+        defer.returnValue(obj)
+
     return run
+
 
 @pt.inlineCallbacks
 def test_inprocess_server_client(remote_module):
-    server = yield remote_module('myutils.server')
+    server = yield remote_module('myutils.server', 6000)
     client = yield remote_module('myutils.client')
-    yield client.callRemote('make_connections', 'localhost', 8000, count=47)
+    yield client.callRemote('make_connections', 'localhost', 6000, count=47)
     num_conns = yield server.callRemote('get_conn_count')
     assert num_conns == 47
 
 @pt.inlineCallbacks
-def test_equal_balancing_inprocess(p4run, process):
+def test_inprocess_server_client_p4hosts(remote_module, p4run):
+    lb = yield LoadBalancer.get_initialised('s1')
+    server = yield remote_module('myutils.server', 6000, host='h1')
+    client = yield remote_module('myutils.client', host='h2')
+    yield client.callRemote('make_connections', '10.1.1.2', 6000, count=47)
+    num_conns = yield server.callRemote('get_conn_count')
+    assert num_conns == 47
+
+@pt.inlineCallbacks
+def test_equal_balancing_inprocess(remote_module, p4run):
     NUM_CONNS = 1000
-    TOLERANCE = 0.9
+    TOLERANCE = 0.8
 
     pools = {
         "10.0.1.1:8000": ["h1:8001", "h2:8002", "h3:8003"],
         "10.0.1.1:7000": ["h1:7000"]
     }
 
+    # create pools
     lb = yield LoadBalancer.get_initialised('s1')
-
-    servers = {}
     for vip, dips in pools.items():
-        servers[vip] = []
-        vhost, vport = hostport(vip)
         handle = yield lb.add_pool(vip)
         for dip in dips:
             yield lb.add_dip(handle, dip)
+
+    # run the servers
+    servers = {}  # vip => [server remote]
+    for vip, dips in pools.items():
+        servers[vip] = []
+        server_ds = []
+        for dip in dips:
             dhost, dport = hostport(dip)
-            servers[vip].append(run_server(host=dhost, port=dport, wait_to_bind=False))
-    time.sleep(2.5)  # give them time to bind
+            server_ds.append(remote_module('myutils.server', dport, host=dhost))
+        server_conns = yield defer.DeferredList(server_ds)
+        for success, conn in server_conns:
+            assert success
+            servers[vip].append(conn)
 
-    for vip, dips in pools.items():
+    # raw_input(' -------------------- press enter to continue ---------------------')
+
+    # run the client
+    client = yield remote_module('myutils.client', host='h4')
+    for vip in pools:
         vip, vport = hostport(vip)
-        assert run_client(NUM_CONNS, vip, vport, host='h4') == 0
+        yield client.callRemote('make_connections', vip, vport, count=NUM_CONNS)
 
+    # raw_input(' -------------------- press enter to continue ---------------------')
+
+    # check the servers' connection counts
     for vip, dips in pools.items():
-        s = servers[vip]
-        assert get_conns_and_die(s) >= TOLERANCE*NUM_CONNS/len(dips)
+        expected_conns = TOLERANCE * NUM_CONNS/len(dips)
+        for server in servers[vip]:
+            num_conns = yield server.callRemote('get_conn_count')
+            assert num_conns >= expected_conns

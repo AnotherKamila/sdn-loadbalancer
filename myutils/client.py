@@ -50,7 +50,6 @@ class ConnMaker(pb.Root, object):
             print('{} connections failed'.format(factory.num_failed))
             raise e
 
-
 def main():
     from twisted.internet import reactor
     path = sys.argv[1] if len(sys.argv) > 1 else '/tmp/p4crap-client.socket'
