@@ -1,4 +1,5 @@
 import pytest_twisted as pt
+import pytest
 import os
 from twisted.internet import defer
 
@@ -31,68 +32,75 @@ def run_client(nconns, shost, port, host=None):
 
 path = os.path.dirname(os.path.realpath(__file__))
 
-def run_python_m(module, host, background=True):
-    return run_cmd(['pipenv', 'run', 'python', '-m', module], host, background)
+def run_python_m(module, args=[], host=None, background=True):
+    return run_cmd(['pipenv', 'run', 'python', '-m', module]+args, host, background)
 
 @pt.inlineCallbacks
 def test_equal_balancing_inprocess(p4run):
     NUM_CONNS = 1000
     TOLERANCE = 0.9
 
-    mypool = '10.0.1.1:8000'
-    myservers = ['h1:8001', 'h2:8002', 'h3:8003']
-
-    servers = []
-    for s in myservers:
-        host, port = hostport(s)
-        servers.append(run_server(host=host, port=port, wait_to_bind=False))
-    time.sleep(0.5)  # give them time to bind
+    pools = {
+        "10.0.1.1:8000": ["h1:8001", "h2:8002", "h3:8003"],
+        "10.0.1.1:7000": ["h1:7000"]
+    }
 
     lb = yield LoadBalancer.get_initialised('s1')
 
-    handle = yield lb.add_pool(mypool)
-    for dip in myservers:
-        yield lb.add_dip(handle, dip)
+    servers = {}
+    for vip, dips in pools.items():
+        servers[vip] = []
+        vhost, vport = hostport(vip)
+        handle = yield lb.add_pool(vip)
+        for dip in dips:
+            yield lb.add_dip(handle, dip)
+            dhost, dport = hostport(dip)
+            servers[vip].append(run_server(host=dhost, port=dport, wait_to_bind=False))
+    time.sleep(2.5)  # give them time to bind
 
-    pool_ip, pool_port = hostport(mypool)
-    assert run_client(NUM_CONNS, pool_ip, pool_port, host='h4') == 0
+    for vip, dips in pools.items():
+        vip, vport = hostport(vip)
+        assert run_client(NUM_CONNS, vip, vport, host='h4') == 0
 
-    for s in servers:
-        assert get_conns_and_die(s) >= TOLERANCE*NUM_CONNS/len(myservers)
+    for vip, dips in pools.items():
+        s = servers[vip]
+        assert get_conns_and_die(s) >= TOLERANCE*NUM_CONNS/len(dips)
 
+####################################################################
 
-    # # ctrl = yield LoadBalancer.get_initialised('s1')
-    # ctrl_process = run_python_m('controller.l4_loadbalancer_flat', host='h1')
-    # time.sleep(0.5)
+@pytest.fixture()
+def process(request):
+    ps = []
+    def run(cmd, host=None, background=True):
+        ps.append(run_cmd(cmd, host, background=True))
+    yield run
 
+    for p in ps:
+        p.terminate()
 
-    # from twisted.spread import pb
-    # from twisted.internet import reactor
+def python_m(module, args=None):
+    if not args: args = []
+    return ['pipenv', 'run', 'python', '-m', module]+args
 
-    # ctrl_client_factory = pb.PBClientFactory()
-    # reactor.connectUNIX('/tmp/p4crap-controller.socket', ctrl_client_factory)
-    # ctrl = yield ctrl_client_factory.getRootObject()
+@pt.inlineCallbacks
+def test_inprocess_server_client(process):
+    process(python_m('myutils.server'))
+    process(python_m('myutils.client'))
+    time.sleep(1.5)  # wait for bind
 
-    # pool1 = yield ctrl.callRemote("add_pool", mypool)
-    # # FIXME
-    # assert pool1 == 47
+    from twisted.spread import pb
+    from twisted.internet import reactor
 
-    # setups = []
-    # servers = []
-    # for s in ["h1:8001", "h2:8002", "h3:8003"]:
-    #     setups.append(ctrl.callRemote("add_dip", pool1, s))
-    #     h, p = hostport(s)
-    #     servers.append(run_server(p, host=h))  # TODO setups.append and things
-
-    # # FIXME
-    # results = yield defer.DeferredList(setups)  # wait for setup things to complete
-    # assert len(results) == 3
-    # for r in results:
-    #     assert r == (True, 42)
-
-    # # TODO :D
-    # # assert run_client(NUM_CONNS, pool_ip, pool_port, host='h4') == 0
-
-    # # TODO :D
-    # # for s in servers:
-    # #     assert get_conns_and_die(s) >= TOLERANCE*NUM_CONNS/len(pools[mypool])
+    server_conn = pb.PBClientFactory()
+    client_conn = pb.PBClientFactory()
+    print('***** here 1 ******')
+    reactor.connectUNIX('/tmp/p4crap-server.socket', server_conn)
+    reactor.connectUNIX('/tmp/p4crap-client.socket', client_conn)
+    print('***** here 2 ******')
+    server = yield server_conn.getRootObject()
+    client = yield client_conn.getRootObject()
+    print('***** here 3 ******')
+    yield client.callRemote('make_connections', 'localhost', 8000, count=47)
+    num_conns = yield server.callRemote('get_conn_count')
+    print('***** here 4 ******')
+    assert num_conns == 47

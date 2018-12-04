@@ -75,20 +75,3 @@ if __name__ == '__main__':
     import sys
     sw_name = sys.argv[1] if len(sys.argv) > 1 else 's1'
     task.react(main, [sw_name])
-
-# # FIXME this is not supposed to be here :D
-# from twisted.spread import pb
-
-# class LBRemoteInterface(pb.Root):
-#     def remote_add_pool(self, vip):
-#         return defer.succeed(47)
-
-#     def remote_add_dip(self, pool_handle, dip):
-#         return defer.succeed(42)
-
-# # FIXME neither is this :D
-# if __name__ == '__main__':
-#     from twisted.internet import reactor
-#     # TODO socket path should include switch name
-#     reactor.listenUNIX('/tmp/p4crap-controller.socket', pb.PBServerFactory(LBRemoteInterface()))
-#     reactor.run()

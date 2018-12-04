@@ -1,4 +1,6 @@
 import functools
+from twisted.spread import pb
+from twisted.internet import defer
 
 
 def as_list(f):
@@ -26,3 +28,25 @@ def deferred_print_entry_exit(f):
         print(' *** return from {}, returned: {} *** '.format(f.__name__, res))
         defer.returnValue(res)
     return decorated
+
+def remote_all_the_things(cls):
+    """THIS IS A TERRIBLE IDEA DO NOT USE IN PRODUCTION EVER"""
+    for name, attr in cls.__dict__.items():
+        if not callable(attr): continue
+        setattr(cls, 'remote_'+name, attr)
+    return cls
+
+
+class UnexpectedServerError(pb.Error):
+    pass
+
+def raise_all_exceptions_on_client(f):
+    @defer.inlineCallbacks
+    @functools.wraps(f)
+    def wrapped(*args, **kwargs):
+        try:
+            res = yield f(*args, **kwargs)
+            defer.returnValue(res)
+        except Exception as e:
+            raise UnexpectedServerError(e)
+    return wrapped
