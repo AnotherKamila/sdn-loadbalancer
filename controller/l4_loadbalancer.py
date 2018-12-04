@@ -1,3 +1,4 @@
+import attr
 from twisted.internet import defer, task
 from controller.base_controller_twisted import BaseController, main
 from controller.l3_router_lazy          import Router
@@ -8,6 +9,27 @@ def hostport(s):
     return s.split(':')
 
 
+@attr.s
+class P4Table(object):
+    name = attr.ib()
+    data    = attr.ib(factory=dict)
+    handles = attr.ib(factory=dict)
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def __setitem__(self, key, value):
+        raise NotImplementedError(
+            "To write to the table, use the .add / .modify methods."
+            "(Remember that they are async and MUST NOT run in parallel!)")
+
+    def __len__(self):
+        return len(self.data)
+
+    def add(self, keys, action, values):
+        raise NotImplementedError("TODO")
+
+
 class LoadBalancer(Router):
     """Fills the flat loadbalancing tables (IPv4 only):
 
@@ -15,7 +37,22 @@ class LoadBalancer(Router):
     * ipv4_dips
 
     TODO UDP :D
+    TODO IPv6
     """
+
+    def init(self):
+        # TODO in an ideal world, this + handles would be abstracted
+        self._ipv4_vips = {}
+        self._ipv4_vips_handles = {}
+        self._ipv4_dips = {}
+
+        self.vips = P4Table("ipv4_vips")
+        self.dips = P4Table("ipv4_dips")
+
+    @defer.inlineCallbacks
+    def new_add_pool(self, vip):
+        pool_handle = str(len(self.vips))
+        vhost, vport = hostport(vip)
 
     @defer.inlineCallbacks
     def add_pool(self, vip):
@@ -43,6 +80,10 @@ class LoadBalancer(Router):
             "ipv4_dips_inverse", "set_dip_pool_idonly", [dip, dport], [pool_handle])
         yield self._fix_pool_size(pool_handle)
 
+    # @defer.inlineCallbacks
+    def set_weight(self, dip, weight):
+        pass  # FIXME
+
     @defer.inlineCallbacks
     def _fix_pool_size(self, pool_handle):
         entry_handle = self._ipv4_vips_handles[pool_handle]
@@ -50,12 +91,6 @@ class LoadBalancer(Router):
         print("modifying size for pool {} => {}".format(self._ipv4_vips[pool_handle], size))
         yield self.controller.table_modify(
             "ipv4_vips", 'set_dip_pool', entry_handle, [pool_handle, str(size)])
-
-    def init(self):
-        # TODO in an ideal world, this + handles would be abstracted
-        self._ipv4_vips = {}
-        self._ipv4_vips_handles = {}
-        self._ipv4_dips = {}
 
 
 @defer.inlineCallbacks

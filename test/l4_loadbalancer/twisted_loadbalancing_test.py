@@ -41,7 +41,7 @@ def remote_module(request, process):
     def run(module, *m_args, **p_kwargs):
         sock_name = sock(module, next(sock_counter))
         process(python_m(module, sock_name, *m_args), **p_kwargs)
-        yield task.deferLater(reactor, 1, (lambda: None))
+        yield task.deferLater(reactor, 1.5, (lambda: None))
         conn = pb.PBClientFactory()
         reactor.connectUNIX(sock_name, conn)
         obj = yield conn.getRootObject()
@@ -49,6 +49,15 @@ def remote_module(request, process):
         defer.returnValue(obj)
 
     return run
+
+@defer.inlineCallbacks
+def all_results(ds):
+    results = yield defer.DeferredList(ds)
+    ret = []
+    for success, r in results:
+        assert success
+        ret.append(r)
+    defer.returnValue(ret)
 
 
 @pt.inlineCallbacks
@@ -84,10 +93,7 @@ def test_equal_balancing_inprocess(remote_module, p4run):
         for dip in dips:
             dhost, dport = hostport(dip)
             server_ds.append(remote_module('myutils.server', dport, host=dhost))
-        server_conns = yield defer.DeferredList(server_ds)
-        for success, conn in server_conns:
-            assert success
-            servers[vip].append(conn)
+        servers[vip] = yield all_results(server_ds)
 
     # run the client
     client = yield remote_module('myutils.client', host='h4')
@@ -102,5 +108,41 @@ def test_equal_balancing_inprocess(remote_module, p4run):
             num_conns = yield server.callRemote('get_conn_count')
             assert num_conns >= expected_conns
 
+@pytest.mark.xfail(reason="Weights not implemented yet")
+@pt.inlineCallbacks
 def test_weighted_balancing(remote_module, p4run):
-    pass
+    NUM_CONNS = 1000
+    TOLERANCE = 0.8
+    mypool = '10.0.0.1:8000'
+    pool_ip, pool_port = hostport(mypool)
+    dips = ["h1:8001", "h2:8002", "h3:8003"]
+    client = yield remote_module('myutils.client', host='h4')
+
+    # run the servers
+    server_ds = []
+    for dip in dips:
+        dhost, dport = hostport(dip)
+        server_ds.append(remote_module('myutils.server', dport, host=dhost))
+    servers = yield all_results(server_ds)
+
+    # create pool + set weights
+    weights = []
+    lb = yield LoadBalancer.get_initialised('s1', topology_db_file=p4run.topo_path)
+    pool_handle = yield lb.add_pool(mypool)
+    for i, dip in enumerate(dips):
+        yield lb.add_dip(pool_handle, dip)
+        weights.append(i*i + 1)
+        yield lb.set_weight(dip, weights[i])
+
+    # run the client
+    yield client.callRemote('make_connections', pool_ip, pool_port, count=NUM_CONNS)
+
+    # check the servers' connection counts
+    expected_conns = [
+        (float(weights[i])/sum(weights)) * NUM_CONNS * TOLERANCE
+        for i in range(len(servers))
+    ]
+    for i, server in enumerate(servers):
+        num_conns = yield server.callRemote('get_conn_count')
+        print(' ========= ', num_conns, '/', expected_conns[i], ' =========== ')
+        assert num_conns >= expected_conns[i]

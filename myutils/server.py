@@ -26,12 +26,14 @@ class ConnCounter(pb.Root, object):
     def remote_get_load(self):
         return self.load
 
+    def remote_reset_conn_count(self):
+        self.count = 0
+
 class ConnCounterProtocol(Protocol, object):
     def connectionMade(self):
         self.factory.conn_counter.count += 1
         self.factory.conn_counter.load  += 0.1
         self.transport.write('{}\n'.format(self.factory.conn_counter.count).encode('utf-8'))
-        print("got connection, count: ", self.factory.conn_counter.count)
 
     def connectionLost(self, reason):
         self.factory.conn_counter.load -= 0.1  # this doesn't simulate _average_ load, but immediate one, but whatever :D
