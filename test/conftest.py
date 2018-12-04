@@ -22,7 +22,8 @@ P4APP_EXEC_SCRIPTS_EXAMPLE = """
 class P4Obj:
     """Utility class for p4run-related stuff. Given by the p4run fixture."""
     def __init__(self, workdir):
-        self.topo = Topology(db=os.path.join(workdir, "topology.db"))
+        self.topo_path = os.path.join(workdir, "topology.db")
+        self.topo = Topology(self.topo_path)
 
     def host_IPs(self):
         """Returns a dict of hosts and IPs.

@@ -60,15 +60,6 @@ def test_inprocess_server_client(remote_module):
     assert num_conns == 47
 
 @pt.inlineCallbacks
-def test_inprocess_server_client_p4hosts(remote_module, p4run):
-    lb = yield LoadBalancer.get_initialised('s1')
-    server = yield remote_module('myutils.server', 6000, host='h1')
-    client = yield remote_module('myutils.client', host='h2')
-    yield client.callRemote('make_connections', '10.1.1.2', 6000, count=47)
-    num_conns = yield server.callRemote('get_conn_count')
-    assert num_conns == 47
-
-@pt.inlineCallbacks
 def test_equal_balancing_inprocess(remote_module, p4run):
     NUM_CONNS = 1000
     TOLERANCE = 0.8
@@ -79,7 +70,7 @@ def test_equal_balancing_inprocess(remote_module, p4run):
     }
 
     # create pools
-    lb = yield LoadBalancer.get_initialised('s1')
+    lb = yield LoadBalancer.get_initialised('s1', topology_db_file=p4run.topo_path)
     for vip, dips in pools.items():
         handle = yield lb.add_pool(vip)
         for dip in dips:
@@ -98,15 +89,11 @@ def test_equal_balancing_inprocess(remote_module, p4run):
             assert success
             servers[vip].append(conn)
 
-    # raw_input(' -------------------- press enter to continue ---------------------')
-
     # run the client
     client = yield remote_module('myutils.client', host='h4')
     for vip in pools:
         vip, vport = hostport(vip)
         yield client.callRemote('make_connections', vip, vport, count=NUM_CONNS)
-
-    # raw_input(' -------------------- press enter to continue ---------------------')
 
     # check the servers' connection counts
     for vip, dips in pools.items():
@@ -114,3 +101,6 @@ def test_equal_balancing_inprocess(remote_module, p4run):
         for server in servers[vip]:
             num_conns = yield server.callRemote('get_conn_count')
             assert num_conns >= expected_conns
+
+def test_weighted_balancing(remote_module, p4run):
+    pass
