@@ -29,8 +29,8 @@ asyncified = [
     'table_set_timeout',
 ]
 # synchronize all of those methods, because RuntimeAPI is *not* threadsafe
-# RuntimeAPI.synchronized = asyncified
-# threadable.synchronize(RuntimeAPI)
+RuntimeAPI.synchronized = asyncified
+threadable.synchronize(RuntimeAPI)
 
 class SimpleSwitchAPIAsyncWrapper(object):
     """
