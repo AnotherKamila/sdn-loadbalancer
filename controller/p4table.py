@@ -10,7 +10,7 @@ class P4Table(object):
     data       = attr.ib(factory=dict)
 
     def __getitem__(self, key):
-        key = tuple(str(k) for k in key)
+        key = self._fix_values(key)
         return self.data[key]
 
     def __setitem__(self, key, value):
@@ -21,22 +21,32 @@ class P4Table(object):
 
     @print_method_call
     @defer.inlineCallbacks
-    def add(self, keys, action, values):
-        keys, values = self._fix_keys_values(keys, values)
-        assert keys not in self.data, "add called with duplicate keys!"
-        res = yield self.controller.table_add(self.name, action, keys, values)
+    def add(self, keys, action, params):
+        keys, params = self._fix_keys_params(keys, params)
+        if keys in self.data:
+            raise ValueError("add called with duplicate keys: {}".format(keys))
+        res = yield self.controller.table_add(self.name, action, keys, params)
         assert res != None, "table_add failed!"
-        self.data[keys]    = (action, values)
+        self.data[keys] = (action, params)
 
     @print_method_call
     @defer.inlineCallbacks
-    def modify(self, keys, new_action, new_values):
-        keys, new_values = self._fix_keys_values(keys, new_values)
-        assert keys in self.data, "modify called without existing entry!"
-        yield self.controller.table_modify_match(self.name, new_action, keys, new_values)
-        self.data[keys] = (new_action, new_values)
+    def modify(self, keys, new_action, new_params):
+        keys, new_params = self._fix_keys_params(keys, new_params)
+        if not keys in self.data:
+            raise ValueError("modify called without existing entry: {}".format(keys))
+        yield self.controller.table_modify_match(self.name, new_action, keys, new_params)
+        self.data[keys] = (new_action, new_params)
 
-    def _fix_keys_values(self, keys, values):
-        keys   = tuple(str(k) for k in keys)
-        values = tuple(str(v) for v in values)
-        return keys, values
+    def rm(self, keys):
+        keys = self._fix_values(keys)
+        if not keys in self.data:
+            raise ValueError("rm called for a non-existent entry: {}".format(keys))
+        yield self.controller.table_delete_match(self.name, keys)
+        del self.data[keys]
+
+    def _fix_keys_params(self, keys, params):
+        return [self._fix_values(x) for x in (keys, params)]
+
+    def _fix_values(self, xs):
+        return tuple(str(x) for x in xs)

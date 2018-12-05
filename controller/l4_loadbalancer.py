@@ -26,8 +26,8 @@ class LoadBalancer(Router):
         # pool => ipv4_tcp_rewrite_src saddr sport
         self.vips_inverse = P4Table('ipv4_vips_inverse', self.controller)
 
-        self.pool_IPs      = {}
-        self.pool_contents = {}
+        self.pool_IPs      = {}  # pool => (vip, vport)
+        self.pool_contents = {}  # pool => { (dip, dport) => hash }
 
     @print_method_call
     @defer.inlineCallbacks
@@ -36,7 +36,7 @@ class LoadBalancer(Router):
         yield self.vips.add([vip, vport], 'set_dip_pool', [pool, 0])
         yield self.vips_inverse.add([pool], 'ipv4_tcp_rewrite_src', [vip, vport])
         self.pool_IPs[pool] = (vip, vport)
-        self.pool_contents[pool] = set()
+        self.pool_contents[pool] = {}
         defer.returnValue(pool)
 
     @print_method_call
@@ -46,11 +46,27 @@ class LoadBalancer(Router):
         next_hash = len(self.pool_contents[pool])
         yield self.dips.add([pool, next_hash], 'ipv4_tcp_rewrite_dst', [dip, dport])
         yield self.dips_inverse.add([dip, dport], 'set_dip_pool_idonly', [pool])
-        self.pool_contents[pool].add((dip, dport))
-        yield self._fix_pool_size(pool)
+        self.pool_contents[pool][(dip, dport)] = next_hash
+        yield self._set_pool_size(pool)
 
-    # def rm_dip(self, pool, dip, dport):
-
+    @print_method_call
+    @defer.inlineCallbacks
+    def rm_dip(self, pool, dip, dport):
+        if (dip, dport) not in self.pool_contents[pool]:
+            raise ValueError("{}:{}: no such DIP in pool {}:{}".format(dip, dport, *self.pool_IPs[pool]))
+        # In order to not mess up hashes, I need to swap this with the last one
+        # instead of just deleting it.
+        size      = len(self.pool_contents[pool])
+        my_hash   = self.pool_contents[pool][(dip, dport)]
+        last_hash = size - 1
+        last_dip  = self.dips[(pool, last_hash)][1]
+        # First decrease size => don't leave the tables in a weird state
+        self._set_pool_size(pool, size - 1)
+        if my_hash != last_hash:
+            yield self.dips.modify([pool, my_hash], 'ipv4_tcp_rewrite_dst', last_dip)
+        yield self.dips.rm([pool, last_hash])
+        yield self.dips_inverse.rm([dip, dport])
+        del self.pool_contents[pool][(dip, dport)]
 
     # @defer.inlineCallbacks
     def set_weight(self, dip, dport, weight):
@@ -58,8 +74,8 @@ class LoadBalancer(Router):
 
     @print_method_call
     @defer.inlineCallbacks
-    def _fix_pool_size(self, pool):
-        size = len(self.pool_contents[pool])
+    def _set_pool_size(self, pool, size=None):
+        if not size: size = len(self.pool_contents[pool])
         print("modifying size for pool {} ({}) => {}".format(self.pool_IPs[pool], pool, size))
         yield self.vips.modify(self.pool_IPs[pool], 'set_dip_pool', [pool, size])
 

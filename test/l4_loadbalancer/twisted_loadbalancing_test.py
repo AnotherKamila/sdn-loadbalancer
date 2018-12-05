@@ -81,7 +81,6 @@ def test_add_dip(remote_module, p4run):
     num_conns = yield server.callRemote('get_conn_count')
     assert num_conns == 47
 
-@pytest.mark.xfail(reason="Not implemented yet")
 @pt.inlineCallbacks
 def test_rm_dip(remote_module, p4run):
     print(' --------- prepare server, client, and loadbalancer ---------')
@@ -94,11 +93,13 @@ def test_rm_dip(remote_module, p4run):
     pool_h = yield lb.add_pool('10.0.0.1', 8000)
     yield lb.add_dip(pool_h, p4run.topo.get_host_ip('h3'), 8001)  # will remove this later
     yield lb.add_dip(pool_h, p4run.topo.get_host_ip('h2'), 8001)
-    yield lb.rm_dip(pool_h, 'h3:8001')  # tadaaa :D
+    yield lb.rm_dip(pool_h, p4run.topo.get_host_ip('h3'), 8001)  # tadaaa :D
+    print(' ----- dips: -----')
+    pprint(lb.dips.data)
     print(' --------- check that it worked ---------')
     yield client.callRemote('make_connections', '10.0.0.1', 8000, count=47)
     num_conns = yield server.callRemote('get_conn_count')
-    assert num_conns == 47
+    assert num_conns == 47, "everything should go to h2 because h3 was removed"
 
 @pt.inlineCallbacks
 def test_equal_balancing(remote_module, p4run):
@@ -184,7 +185,6 @@ def test_weighted_balancing(remote_module, p4run):
         num_conns = yield server.callRemote('get_conn_count')
         print(' ========= ', num_conns, '/', expected_conns[i], ' =========== ')
         assert num_conns >= expected_conns[i]
-
 
 @pytest.mark.skip(reason="Not done yet")
 @pt.inlineCallbacks
