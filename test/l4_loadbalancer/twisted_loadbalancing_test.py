@@ -1,9 +1,12 @@
+from __future__ import print_function
+
 import pytest_twisted as pt
 import pytest
 import os
 from twisted.internet import defer, task
 from twisted.spread import pb
 from twisted.internet import reactor
+from pprint import pprint
 import itertools
 
 from controller.l4_loadbalancer import LoadBalancer
@@ -28,6 +31,8 @@ def process(request):
         assert kill_with_children(p) == 0
 
 def python_m(module, *args):
+    time.sleep(0.1) # pipenv run opens Pipfile in exclusive mode or something,
+                    # and then it throws up when I run more of them
     return ['pipenv', 'run', 'python', '-m', module] + list(args)
 
 def sock(*args):
@@ -66,8 +71,8 @@ def test_equal_balancing(remote_module, p4run):
     TOLERANCE = 0.8
 
     pools = {
-        "10.0.1.1:8000": ["h1:8001", "h2:8002", "h3:8003"],
-        "10.0.1.1:7000": ["h1:7000"]
+        "10.0.0.1:8000": ["h1:8001", "h2:8002", "h3:8003"],
+        "10.0.0.1:7000": ["h1:7000"]
     }
 
     # create pools
@@ -76,6 +81,13 @@ def test_equal_balancing(remote_module, p4run):
         handle = yield lb.add_pool(vip)
         for dip in dips:
             yield lb.add_dip(handle, dip)
+
+    print(' ----- vips + inverse: -----')
+    pprint(lb.vips.data)
+    pprint(lb.vips_inverse.data)
+    print(' ----- dips + inverse: -----')
+    pprint(lb.dips.data)
+    pprint(lb.dips_inverse.data)
 
     # run the servers
     servers = {}  # vip => [server remote]

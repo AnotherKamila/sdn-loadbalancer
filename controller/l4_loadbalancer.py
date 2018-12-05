@@ -9,88 +9,128 @@ def hostport(s):
     return s.split(':')
 
 
+import functools
+
+def print_method_call(f):
+    @functools.wraps(f)
+    @defer.inlineCallbacks
+    def wrapped(ctx, *args, **kwargs):
+        name = '<'+ctx.name+'>' if hasattr(ctx, 'name') else ''
+        sargs = ', '.join('{}'.format(a) for a in args)
+        skws  = ', '.join({ '{}={}'.format(k,v) for k,v in kwargs.items() })
+        a = ', '.join([x for x in sargs, skws if x])
+        call = "{klass}{name}: {method}({args})".format(
+            klass=ctx.__class__.__name__,
+            name=name,
+            method=f.__name__,
+            args=a,
+        )
+
+        print(call)
+        res = yield defer.maybeDeferred(f, ctx, *args, **kwargs)
+        print("{} -> {}".format(call, res))
+        defer.returnValue(res)
+    return wrapped
+
+
 @attr.s
 class P4Table(object):
-    name = attr.ib()
+    name       = attr.ib()
+    controller = attr.ib()
     data    = attr.ib(factory=dict)
-    handles = attr.ib(factory=dict)
 
     def __getitem__(self, key):
+        # TODO
+        # assert isinstance(key, iterable)
         return self.data[key]
 
     def __setitem__(self, key, value):
-        raise NotImplementedError(
-            "To write to the table, use the .add / .modify methods."
-            "(Remember that they are async and MUST NOT run in parallel!)")
+        raise NotImplementedError("To write to the table, use the .add / .modify methods.")
 
     def __len__(self):
         return len(self.data)
 
+    @print_method_call
+    @defer.inlineCallbacks
     def add(self, keys, action, values):
-        raise NotImplementedError("TODO")
+        keys, values = self._fix_keys_values(keys, values)
+        assert keys not in self.data, "add called with duplicate keys!"
+        res = yield self.controller.table_add(self.name, action, keys, values)
+        assert res != None, "table_add failed!"
+        self.data[keys]    = (action, values)
 
+    @print_method_call
+    @defer.inlineCallbacks
+    def modify(self, keys, new_action, new_values):
+        keys, new_values = self._fix_keys_values(keys, new_values)
+        assert keys in self.data, "modify called without existing entry!"
+        res = yield self.controller.table_modify_match(self.name, new_action, keys, new_values)
+        print(' ----- table_modify returned: {} -----'.format(res))
+        self.data[keys] = (new_action, new_values)
+
+    def _fix_keys_values(self, keys, values):
+        keys   = tuple(str(k) for k in keys)
+        values = tuple(str(v) for v in values)
+        return keys, values
 
 class LoadBalancer(Router):
     """Fills the flat loadbalancing tables (IPv4 only):
 
-    * ipv4_vips
-    * ipv4_dips
+    * ipv4_vips + inverse
+    * ipv4_dips + inverse
 
-    TODO UDP :D
     TODO IPv6
+    TODO UDP
     """
 
     def init(self):
-        # TODO in an ideal world, this + handles would be abstracted
-        self._ipv4_vips = {}
-        self._ipv4_vips_handles = {}
-        self._ipv4_dips = {}
+        # ipv4.dst_addr tcp.dst_port => set_dip_pool pool size
+        self.vips = P4Table('ipv4_vips', self.controller)
+        # pool flow_hash => ipv4_tcp_rewrite_dst daddr dport
+        self.dips = P4Table('ipv4_dips', self.controller)
+        # saddr sport => set_dip_pool_idonly pool
+        self.dips_inverse = P4Table('ipv4_dips_inverse', self.controller)
+        # pool => ipv4_tcp_rewrite_src saddr sport
+        self.vips_inverse = P4Table('ipv4_vips_inverse', self.controller)
 
-        self.vips = P4Table("ipv4_vips")
-        self.dips = P4Table("ipv4_dips")
+        self.pool_IPs      = {}
+        self.pool_contents = {}
 
-    @defer.inlineCallbacks
-    def new_add_pool(self, vip):
-        pool_handle = str(len(self.vips))
-        vhost, vport = hostport(vip)
-
+    @print_method_call
     @defer.inlineCallbacks
     def add_pool(self, vip):
-        pool_handle = str(len(self._ipv4_vips))
+        # TODO the API should be (host, port) tuple instead of joint address thing
+        pool = len(self.vips)
         vhost, vport = hostport(vip)
-        self._ipv4_vips[pool_handle] = (vhost, vport)
-        self._ipv4_dips[pool_handle] = []
-        # on the way there table
-        self._ipv4_vips_handles[pool_handle] = yield self.controller.table_add(
-            "ipv4_vips", "set_dip_pool", [vhost, vport], [pool_handle, "0"])
-        # inverse table
-        yield self.controller.table_add(
-            "ipv4_vips_inverse", "ipv4_tcp_rewrite_src", [pool_handle], [vhost, vport])
-        defer.returnValue(pool_handle)
+        yield self.vips.add([vhost, vport], 'set_dip_pool', [pool, 0])
+        yield self.vips_inverse.add([pool], 'ipv4_tcp_rewrite_src', [vhost, vport])
+        self.pool_IPs[pool] = (vhost, vport)
+        self.pool_contents[pool] = set()
+        defer.returnValue(pool)
 
+    @print_method_call
     @defer.inlineCallbacks
-    def add_dip(self, pool_handle, dip):
+    def add_dip(self, pool, dip):
+        # TODO maybe the API shouldn't use pool handles, just (host, port) tuples
         dhost, dport = hostport(dip)
+        # FIXME the person who wrote this code was an idiot -- this should get IP, not hostname!!!
         dip = self.topo.get_host_ip(dhost)
-        flow_hash = len(self._ipv4_dips[pool_handle])
-        self._ipv4_dips[pool_handle].append((dip, dport))
-        yield self.controller.table_add("ipv4_dips", "ipv4_tcp_rewrite_dst", [pool_handle, str(flow_hash)], [dip, dport])
-        # inverse table
-        yield self.controller.table_add(
-            "ipv4_dips_inverse", "set_dip_pool_idonly", [dip, dport], [pool_handle])
-        yield self._fix_pool_size(pool_handle)
+        next_hash = len(self.pool_contents[pool])
+        yield self.dips.add([pool, next_hash], 'ipv4_tcp_rewrite_dst', [dip, dport])
+        yield self.dips_inverse.add([dip, dport], 'set_dip_pool_idonly', [pool])
+        self.pool_contents[pool].add((dhost, dport))
+        yield self._fix_pool_size(pool)
 
     # @defer.inlineCallbacks
     def set_weight(self, dip, weight):
-        pass  # FIXME
+        pass  # TODO
 
+    @print_method_call
     @defer.inlineCallbacks
-    def _fix_pool_size(self, pool_handle):
-        entry_handle = self._ipv4_vips_handles[pool_handle]
-        size = str(len(self._ipv4_dips[pool_handle]))
-        print("modifying size for pool {} => {}".format(self._ipv4_vips[pool_handle], size))
-        yield self.controller.table_modify(
-            "ipv4_vips", 'set_dip_pool', entry_handle, [pool_handle, str(size)])
+    def _fix_pool_size(self, pool):
+        size = len(self.pool_contents[pool])
+        print("modifying size for pool {} ({}) => {}".format(self.pool_IPs[pool], pool, size))
+        yield self.vips.modify(self.pool_IPs[pool], 'set_dip_pool', [pool, size])
 
 
 @defer.inlineCallbacks

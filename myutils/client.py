@@ -43,7 +43,7 @@ class ConnMaker(pb.Root, object):
         factory = MultiConnectionFactory.forProtocol(NullClient, count)
         for i in range(count):
             delay = i*(1.0/CONN_RATE) if CONN_RATE > 0 else 0
-            reactor.callLater(delay, reactor.connectTCP, host, port, factory)
+            reactor.callLater(delay, reactor.connectTCP, host, port, factory, timeout=5)
         try:
             yield factory.done
         except Exception as e:

@@ -18,7 +18,7 @@ class BaseController(object):
 
     def __init__(self, sw_name, topology_db_file="./topology.db"):
         self.topo = Topology(db=topology_db_file)
-        print(self.topo)
+        # print(self.topo)
         self.sw_name = sw_name
         self.thrift_port = self.topo.get_thrift_port(sw_name)
         self.cpu_port =  self.topo.get_cpu_port_index(self.sw_name)
