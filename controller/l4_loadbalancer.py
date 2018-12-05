@@ -18,13 +18,13 @@ class LoadBalancer(Router):
 
     def init(self):
         # ipv4.dst_addr tcp.dst_port => set_dip_pool pool size
-        self.vips = P4Table('ipv4_vips', self.controller)
+        self.vips         = P4Table(self.controller, 'ipv4_vips')
         # pool flow_hash => ipv4_tcp_rewrite_dst daddr dport
-        self.dips = P4Table('ipv4_dips', self.controller)
+        self.dips         = P4Table(self.controller, 'ipv4_dips')
         # saddr sport => set_dip_pool_idonly pool
-        self.dips_inverse = P4Table('ipv4_dips_inverse', self.controller)
+        self.dips_inverse = P4Table(self.controller, 'ipv4_dips_inverse')
         # pool => ipv4_tcp_rewrite_src saddr sport
-        self.vips_inverse = P4Table('ipv4_vips_inverse', self.controller)
+        self.vips_inverse = P4Table(self.controller, 'ipv4_vips_inverse')
 
         self.pool_IPs      = {}  # pool => (vip, vport)
         self.pool_contents = {}  # pool => { (dip, dport) => hash }

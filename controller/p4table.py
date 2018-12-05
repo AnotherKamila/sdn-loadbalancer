@@ -5,8 +5,8 @@ from myutils.twisted_utils import print_method_call
 
 @attr.s
 class P4Table(object):
-    name       = attr.ib()
     controller = attr.ib()
+    name       = attr.ib()
     data       = attr.ib(factory=dict)
 
     def __getitem__(self, key):
