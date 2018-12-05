@@ -1,31 +1,11 @@
 #!/usr/bin/env python
 
 from p4utils.utils.topology import Topology
-from p4utils.utils.sswitch_API import SimpleSwitchAPI
 from twisted.internet import defer, task
-from twisted.internet import threads
 
-import functools
+from controller.sswitch_API_async_wrapper import SimpleSwitchAPIAsyncWrapper
 
 defer.setDebugging(True)
-
-class SimpleSwitchAPIAsyncWrapper(object):
-    """IMPORTANT: The underlying thing is NOT thread-safe, so I *cannot* call
-    multiple thingies here in parallel. Everything is terrible.
-    """
-
-    def __init__(self, *args, **kwargs):
-        self._switch_api = SimpleSwitchAPI(*args, **kwargs)
-
-    def __getattr__(self, name):
-        f = getattr(self._switch_api, name)
-        if not callable(f): return f
-
-        @functools.wraps(f)
-        def wrapped(*args, **kwargs):
-            return threads.deferToThread(f, *args, **kwargs)
-
-        return wrapped
 
 
 class BaseController(object):

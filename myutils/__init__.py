@@ -19,6 +19,15 @@ def print_entry_exit(f):
         return res
     return wrapper
 
+@defer.inlineCallbacks
+def all_results(ds):
+    results = yield defer.DeferredList(ds)
+    ret = []
+    for success, r in results:
+        assert success
+        ret.append(r)
+    defer.returnValue(ret)
+
 def deferred_print_entry_exit(f):
     @functools.wraps(f)
     @defer.inlineCallbacks

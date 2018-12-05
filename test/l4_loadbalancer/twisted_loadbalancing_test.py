@@ -10,6 +10,7 @@ from controller.l4_loadbalancer import LoadBalancer
 
 import time
 from myutils.testhelpers import run_cmd, kill_with_children
+from myutils import all_results
 
 def hostport(s):
     h, p = s.split(':')
@@ -50,15 +51,6 @@ def remote_module(request, process):
 
     return run
 
-@defer.inlineCallbacks
-def all_results(ds):
-    results = yield defer.DeferredList(ds)
-    ret = []
-    for success, r in results:
-        assert success
-        ret.append(r)
-    defer.returnValue(ret)
-
 
 @pt.inlineCallbacks
 def test_inprocess_server_client(remote_module):
@@ -69,7 +61,7 @@ def test_inprocess_server_client(remote_module):
     assert num_conns == 47
 
 @pt.inlineCallbacks
-def test_equal_balancing_inprocess(remote_module, p4run):
+def test_equal_balancing(remote_module, p4run):
     NUM_CONNS = 1000
     TOLERANCE = 0.8
 

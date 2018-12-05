@@ -4,7 +4,7 @@
 - [X] flat loadbalancer (ECMP)
 - [X] convert existing stuff into a twisted-friendly class
 - [X] make testing arbitrary scenarios easier
-- [X] tests for ^^
+- [X] tests for weighted
 - [ ] simple weighted loadbalancer (big bucket table)
 - [ ] don't drop connections
 - [ ] tree thing
