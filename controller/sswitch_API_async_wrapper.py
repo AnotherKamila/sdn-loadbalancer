@@ -13,17 +13,24 @@ only use SimpleSwitchAPIAsyncWrapper.
 
 
 import functools
+from p4utils.utils.runtime_API import RuntimeAPI
 from p4utils.utils.sswitch_API import SimpleSwitchAPI
 from twisted.internet          import threads
 from twisted.python            import threadable
 
+# Actually, the interesting methods are apparently on RuntimeAPI. Should check
+# source if I want to use another method.
 asyncified = [
-    m for m in dir(SimpleSwitchAPI)
-    if callable(getattr(SimpleSwitchAPI, m)) and not m.startswith('__')
+    'table_add',
+    'table_clear',
+    'table_delete',
+    'table_modify',
+    'table_set_default',
+    'table_set_timeout',
 ]
-# synchronize all of those methods, because SimpleSwitchAPI is *not* threadsafe
-# SimpleSwitchAPI.synchronized = asyncified
-# threadable.synchronize(SimpleSwitchAPI)
+# synchronize all of those methods, because RuntimeAPI is *not* threadsafe
+# RuntimeAPI.synchronized = asyncified
+# threadable.synchronize(RuntimeAPI)
 
 class SimpleSwitchAPIAsyncWrapper(object):
     """

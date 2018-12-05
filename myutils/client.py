@@ -5,6 +5,7 @@ from __future__ import print_function
 from twisted.internet import reactor, task, defer, address
 from twisted.internet.protocol import ClientFactory, Protocol
 from twisted.spread            import pb
+from warnings import warn
 import sys
 from myutils import raise_all_exceptions_on_client
 
@@ -40,6 +41,8 @@ class ConnMaker(pb.Root, object):
     @raise_all_exceptions_on_client
     @defer.inlineCallbacks
     def remote_make_connections(self, host, port, count=1):
+        if not isinstance(port, (int, long)):
+            warn('Received string port: {}. Possibly a bug?'.format(port))
         factory = MultiConnectionFactory.forProtocol(NullClient, count)
         for i in range(count):
             delay = i*(1.0/CONN_RATE) if CONN_RATE > 0 else 0
