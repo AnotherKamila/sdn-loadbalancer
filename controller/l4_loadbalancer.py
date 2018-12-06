@@ -6,7 +6,7 @@ from controller.p4table                 import P4Table
 from myutils.twisted_utils              import print_method_call
 
 
-class LoadBalancer(Router):
+class LoadBalancerUnversioned(Router):
     """Fills the flat loadbalancing tables (IPv4 only):
 
     * ipv4_vips + inverse
@@ -80,6 +80,17 @@ class LoadBalancer(Router):
         yield self.vips.modify(self.pool_IPs[pool], 'set_dip_pool', [pool, size])
 
 
+class LoadBalancer(LoadBalancerUnversioned):
+    def init(self):
+        self.dips = VersionedP4Table(self.controller, 'ipv4_dips',
+            version_signalling_table='ipv4_dips_version_signalling',
+            max_versions=4,
+        )
+
+    def commit(self):
+        self.dips.commit_and_slide()
+
+
 @defer.inlineCallbacks
 def init_pools_json(lb):
     def hostport(s):
@@ -95,7 +106,8 @@ def init_pools_json(lb):
 
 @defer.inlineCallbacks
 def main(reactor, sw_name):
-    lb = yield LoadBalancer.get_initialised(sw_name)
+    """Only used in old-style tests. Don't use it in new ones."""
+    lb = yield LoadBalancerUnversioned.get_initialised(sw_name)
     yield init_pools_json(lb)
 
 if __name__ == '__main__':

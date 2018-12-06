@@ -9,7 +9,7 @@ from twisted.internet import reactor
 from pprint import pprint
 import itertools
 
-from controller.l4_loadbalancer import LoadBalancer
+from controller.l4_loadbalancer import LoadBalancerUnversioned as LoadBalancer
 
 import time
 from myutils.testhelpers import run_cmd, kill_with_children

@@ -5,6 +5,14 @@ import subprocess
 import time
 import pytest
 import pytest_twisted as pt
+from twisted.spread import pb
+from twisted.internet import defer, task, reactor
+import itertools
+
+from controller.l4_loadbalancer import LoadBalancer
+
+from myutils.testhelpers import run_cmd, kill_with_children
+from myutils import all_results
 
 from p4utils.utils.topology import Topology
 
@@ -147,3 +155,43 @@ def controller(request):
         if retcode not in [None, 0]:
             raise Exception("controller exited with error status: {}".format(retcode))
     return ctrls
+
+
+################### Twisted helpers ###################
+
+@pytest.fixture()
+def process(request):
+    ps = []
+    def run(cmd, host=None, background=True):
+        ps.append((run_cmd(cmd, host, background=True), host))
+    yield run
+    for p, host in ps:
+        # cannot exit them with .terminate() if they're in mx :-(
+        # p.terminate()
+        assert kill_with_children(p) == 0
+
+def python_m(module, *args):
+    time.sleep(0.1) # pipenv run opens Pipfile in exclusive mode or something,
+                    # and then it throws up when I run more of them
+    return ['pipenv', 'run', 'python', '-m', module] + list(args)
+
+def sock(*args):
+    return '/tmp/p4crap-{}.socket'.format('-'.join(str(a) for a in args))
+
+@pytest.fixture()
+def remote_module(request, process):
+    sock_counter = itertools.count(1)
+    remotes = []
+
+    @defer.inlineCallbacks
+    def run(module, *m_args, **p_kwargs):
+        sock_name = sock(module, next(sock_counter))
+        process(python_m(module, sock_name, *m_args), **p_kwargs)
+        yield task.deferLater(reactor, 2, (lambda: None))
+        conn = pb.PBClientFactory()
+        reactor.connectUNIX(sock_name, conn)
+        obj = yield conn.getRootObject()
+        remotes.append(obj)
+        defer.returnValue(obj)
+
+    return run
