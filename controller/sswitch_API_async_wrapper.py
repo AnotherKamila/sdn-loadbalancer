@@ -21,6 +21,9 @@ from twisted.python            import threadable
 # Actually, the interesting methods are apparently on RuntimeAPI. Should check
 # source if I want to use another method.
 asyncified = [
+    'register_read',
+    'register_reset',
+    'register_write',
     'table_add',
     'table_clear',
     'table_delete',

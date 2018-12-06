@@ -26,6 +26,7 @@ class ConnCounter(pb.Root, object):
     def remote_get_load(self):
         return self.load
 
+    @raise_all_exceptions_on_client
     def remote_reset_conn_count(self):
         self.count = 0
 

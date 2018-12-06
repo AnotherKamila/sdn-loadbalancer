@@ -9,7 +9,7 @@ from warnings import warn
 import sys
 from myutils import raise_all_exceptions_on_client
 
-CONN_RATE = 1000  # connections per second
+CONN_RATE = 500  # connections per second
 # actually switch cares about pps, starts dropping at 10kpps => lower if you start sending more stuff
 
 defer.setDebugging(True)
@@ -40,13 +40,13 @@ class MultiConnectionFactory(ClientFactory):
 class ConnMaker(pb.Root, object):
     @raise_all_exceptions_on_client
     @defer.inlineCallbacks
-    def remote_make_connections(self, host, port, count=1):
+    def remote_make_connections(self, host, port, count=1, conn_rate=CONN_RATE):
         if not isinstance(port, (int, long)):
             warn('Received string port: {}. Possibly a bug?'.format(port))
         factory = MultiConnectionFactory.forProtocol(NullClient, count)
         for i in range(count):
-            delay = i*(1.0/CONN_RATE) if CONN_RATE > 0 else 0
-            reactor.callLater(delay, reactor.connectTCP, host, port, factory, timeout=5)
+            delay = i*(1.0/conn_rate) if conn_rate > 0 else 0
+            reactor.callLater(delay, reactor.connectTCP, host, port, factory, timeout=10)
         try:
             yield factory.done
         except Exception as e:

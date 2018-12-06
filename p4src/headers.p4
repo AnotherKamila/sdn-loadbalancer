@@ -18,6 +18,7 @@ typedef bit<16>  l4_port_t;   // tcp or udp port
 typedef bit<4> interface_t;
 typedef bit<6> dip_pool_t;
 typedef bit<6> pool_size_t;
+typedef bit<2> table_version_t; // => max_versions = 4
 
 const bit<16> TYPE_IPV4 = 0x0800;
 const bit<16> TYPE_IPV6 = 0x86DD;
@@ -88,6 +89,8 @@ struct metadata {
     dip_pool_t  dip_pool;      // Direct IP pool -- pool of servers we are loadbalancing to
     pool_size_t pool_size;     // Note: This field could be removed by restructuring the code, if short on memory
     pool_size_t flow_hash;     // [0, pool size)
+
+    table_version_t ipv4_pools_version;
 }
 
 

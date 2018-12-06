@@ -26,8 +26,13 @@ control MyIngress(inout headers hdr,
     }
 
     /*********************** L4 / LOAD BALANCING *************************/
+    // IMPORTANT: I am only handling IPv4 and TCP here!
 
-    // IMPORTANT: I am only handling TCP here!
+    // 0. get the active version
+    register<table_version_t>(1) table_versions;  // will be written to by the control plane
+    action init_versioning() {
+        table_versions.read(meta.ipv4_pools_version, 0);
+    }
 
     // 1. should we loadbalance? where to?
 
@@ -42,6 +47,7 @@ control MyIngress(inout headers hdr,
     // applications, so why not :D
     table ipv4_vips {
         key = {
+            meta.ipv4_pools_version: exact;
             hdr.ipv4.dst_addr: exact;
             hdr.tcp.dst_port:  exact;
         }
@@ -79,6 +85,7 @@ control MyIngress(inout headers hdr,
 
     table ipv4_dips {
         key = {
+            meta.ipv4_pools_version: exact;
             meta.dip_pool:  exact;
             meta.flow_hash: exact;
         }
@@ -92,16 +99,12 @@ control MyIngress(inout headers hdr,
 
     ///////////////// ON THE WAY BACK: We need to undo the NATting //////////
 
-    // Note: All of this is terribly wrong! This should be per connection --
+    // Note: This is ahem a bit awkward! This should be per connection --
     // because what if someone connects to the same thing directly. FIXME!!!
     // TODO I should either track whether the connection is NATted
     // (so a set membership/bloom filter) OR drop direct connections to backends.
     // Ask the TA!
 
-    // We can fill this statically at the beginning because we are assuming a
-    // static pool. Therefore, we don't have the "it takes time to write to a
-    // table" problem. In reality, we'd have to deal with that!
-    //
     // We could do this in one table, but that would require a lot more space,
     // so instead I'll "normalise the tables" and split it into two, joinable
     // by the pool ID.
@@ -110,6 +113,7 @@ control MyIngress(inout headers hdr,
     }
     table ipv4_dips_inverse {
         key = {
+            meta.ipv4_pools_version: exact;
             hdr.ipv4.src_addr: exact;
             hdr.tcp.src_port:  exact;
         }
@@ -129,6 +133,7 @@ control MyIngress(inout headers hdr,
     // We really don't want src rewriting on the way in :D
     table ipv4_vips_inverse {
         key = {
+            meta.ipv4_pools_version: exact;
             meta.dip_pool: exact;
         }
         actions = {
@@ -261,6 +266,8 @@ control MyIngress(inout headers hdr,
     // There is no MAC or ARP.
     // Wheee.
     apply {
+        init_versioning();
+
         //////// L4/TCP LOADBALANCING ////////
         if (hdr.tcp.isValid()) {
             if (ipv4_vips.apply().hit) {
