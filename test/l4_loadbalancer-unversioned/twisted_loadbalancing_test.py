@@ -145,4 +145,4 @@ def test_equal_balancing(remote_module, p4run):
         expected_conns = TOLERANCE * NUM_CONNS/len(dips)
         for server in servers[vip]:
             num_conns = yield server.callRemote('get_conn_count')
-            assert num_conns >= expected_conns
+            assert num_conns >= expected_conns, "[FLAKY] distribution should be approximately uniform"

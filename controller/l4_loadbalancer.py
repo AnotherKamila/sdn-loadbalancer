@@ -85,20 +85,29 @@ class LoadBalancerUnversioned(Router):
 
 
 class LoadBalancer(LoadBalancerUnversioned):
+    @defer.inlineCallbacks
     def init(self):
-        self.vips = VersionedP4Table(self.controller, 'ipv4_vips',
+        self.vips = yield VersionedP4Table.get_initialised(
+            self.controller,
+            'ipv4_vips',
             version_signalling_register=('table_versions', 0),
             max_versions=4,
         )
-        self.vips_inverse = VersionedP4Table(self.controller, 'ipv4_vips_inverse',
+        self.vips_inverse = yield VersionedP4Table.get_initialised(
+            self.controller,
+            'ipv4_vips_inverse',
             version_signalling_register=None,
             max_versions=4,
         )
-        self.dips = VersionedP4Table(self.controller, 'ipv4_dips',
+        self.dips = yield VersionedP4Table.get_initialised(
+            self.controller,
+            'ipv4_dips',
             version_signalling_register=None,
             max_versions=4,
         )
-        self.dips_inverse = VersionedP4Table(self.controller, 'ipv4_dips_inverse',
+        self.dips_inverse = yield VersionedP4Table.get_initialised(
+            self.controller,
+            'ipv4_dips_inverse',
             version_signalling_register=None,
             max_versions=4,
         )

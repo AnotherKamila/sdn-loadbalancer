@@ -81,19 +81,13 @@ def test_commits_work(remote_module, p4run):
     pool_handle = yield lb.add_pool('10.0.0.1', 8000)
 
     yield lb.add_dip(pool_handle, server1_ip, 8001)
-    lb.commit()
+    yield lb.commit()
     yield lb.add_dip(pool_handle, server2_ip, 8001)  # don't commit this yet
-    yield client.callRemote('make_connections', '10.0.0.1', 8000, count=47)
-    num_conns = yield server1.callRemote('get_conn_count')
-    assert num_conns == 47, "server1 should receive all, because server2 wasn't committed yet"
+    yield check_conns(client, server1, '10.0.0.1', 8000)
 
     yield lb.rm_dip(pool_handle, server1_ip, 8001)
-    lb.commit()
-    yield server.callRemote('reset_conn_count')
-    yield client.callRemote('make_connections', '10.0.0.1', 8000, count=47)
-    num_conns = yield server2.callRemote('get_conn_count')
-    assert num_conns == 47, ("server2 should receive all, because we committed "
-                             "adding it and removing server1")
+    yield lb.commit()
+    yield check_conns(client, server2, '10.0.0.1', 8000)
 
 @pt.inlineCallbacks
 def test_version_rollover(remote_module, p4run):

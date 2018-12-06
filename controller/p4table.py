@@ -95,10 +95,11 @@ class VersionedP4Table(P4Table):
     def _convert_values(self, keys, action, params):
         return (str(self.next_version),) + keys, action, params
 
-    @defer.inlineCallbacks
     def __attrs_post_init__(self):
         self.versioned_data = [{} for i in range(self.max_versions)]
-        yield self._set_next_and_data()
+
+    def init(self):
+        return self._set_next_and_data()
 
     def _set_next_and_data(self):
         self.next_version = (self.active_version + 1) % self.max_versions
@@ -145,3 +146,10 @@ class VersionedP4Table(P4Table):
         if self.version_signalling_register:
             reg_name, index = self.version_signalling_register
             yield self.controller.register_write(reg_name, index, self.active_version)
+
+    @classmethod
+    @defer.inlineCallbacks
+    def get_initialised(cls, *args, **kwargs):
+        obj = cls(*args, **kwargs)
+        yield obj.init()
+        defer.returnValue(obj)
