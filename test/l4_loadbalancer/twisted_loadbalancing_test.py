@@ -185,31 +185,3 @@ def test_weighted_balancing(remote_module, p4run):
         num_conns = yield server.callRemote('get_conn_count')
         print(' ========= ', num_conns, '/', expected_conns[i], ' =========== ')
         assert num_conns >= expected_conns[i]
-
-@pytest.mark.skip(reason="Not done yet")
-@pt.inlineCallbacks
-def test_versioned_tables(remote_module, p4run):
-    lb, client, server1, server2 = yield all_results([
-        VersionedLoadBalancer.get_initialised('s1', topology_db_file=p4run.topo_path),
-        remote_module('myutils.client', host='h3'),
-        remote_module('myutils.server', 8001, host='h1'),
-        remote_module('myutils.server', 8001, host='h2'),
-    ])
-    server1_ip, server2_ip = [p4run.topo.get_host_ip(h) for h in ('h1', 'h2')]
-
-    lb = yield VersionedLoadBalancer.get_initialised('s1', topology_db_file=p4run.topo_path)
-    pool_handle = yield lb.add_pool('10.0.0.1', 8000)
-
-    yield lb.add_dip(pool_handle, server1_ip, 8001)
-    lb.commit()
-    yield lb.add_dip(pool_handle, server2_ip, 8001)  # don't commit this yet
-    yield client.callRemote('make_connections', '10.0.0.1', 8000, count=47)
-    num_conns = yield server1.callRemote('get_conn_count')
-    assert num_conns == 47, "server1 should receive all, because server2 wasn't committed yet"
-
-    yield lb.rm_dip(pool_handle, server1_ip, 8001)
-    lb.commit()
-    yield client.callRemote('make_connections', '10.0.0.1', 8000, count=47)
-    num_conns = yield server2.callRemote('get_conn_count')
-    assert num_conns == 47, ("server2 should receive all, because we committed "
-                             "adding it and removing server1")
