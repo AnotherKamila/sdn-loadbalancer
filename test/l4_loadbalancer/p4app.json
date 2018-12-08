@@ -38,6 +38,7 @@
     },
     "switches": {
       "s1": {
+        "cpu_port": true
       }
     }
   },

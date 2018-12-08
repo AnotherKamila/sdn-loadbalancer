@@ -25,13 +25,49 @@ control MyIngress(inout headers hdr,
         drop();
     }
 
-    /*********************** L4 / LOAD BALANCING *************************/
-    // IMPORTANT: I am only handling IPv4 and TCP here!
+    /************************* TABLE VERSIONING *************************/
 
-    // 0. get the active version
     register<table_version_t>(1) table_versions;  // will be written to by the control plane
     action init_versioning() {
         table_versions.read(meta.ipv4_pools_version, 0);
+    }
+
+    /*********************** L4 / LOAD BALANCING *************************/
+    // IMPORTANT: I am only handling IPv4 and TCP here!
+
+    action ipv4_tcp_learn_connection() {
+        // TODO
+    }
+    action ipv4_tcp_rewrite_dst(ipv4_addr_t daddr, l4_port_t dport) {
+        hdr.ipv4.dst_addr = daddr;
+        hdr.tcp.dst_port  = dport;
+    }
+    action ipv4_tcp_rewrite_src(ipv4_addr_t saddr, l4_port_t sport) {
+        hdr.ipv4.src_addr = saddr;
+        hdr.tcp.src_port  = sport;
+    }
+
+    table ipv4_tcp_conn_table {
+        key = {
+            hdr.ipv4.src_addr: exact;
+            hdr.tcp.src_port:  exact;
+            hdr.ipv4.dst_addr: exact;
+            hdr.tcp.dst_port:  exact;
+            hdr.ipv4.protocol: exact;
+        }
+        actions = {
+            ipv4_tcp_learn_connection; // new connection => default action only
+            ipv4_tcp_rewrite_dst;      // on the way there
+            ipv4_tcp_rewrite_src;      // on the way back
+        }
+        default_action = ipv4_tcp_learn_connection();
+        size = CONN_TABLE_SIZE;
+    }
+
+    // check bloom filters: is this a new-ish conn with a version?
+    action ipv4_tcp_check_new_conn_pool_version() {
+        // TODO check Bloom filters
+        // note that init_versioning has set the current as default
     }
 
     // 1. should we loadbalance? where to?
@@ -78,11 +114,6 @@ control MyIngress(inout headers hdr,
     }
 
     // 3. stick flow into a server
-    action ipv4_tcp_rewrite_dst(ipv4_addr_t daddr, l4_port_t dport) {
-        hdr.ipv4.dst_addr = daddr;
-        hdr.tcp.dst_port  = dport;
-    }
-
     table ipv4_dips {
         key = {
             meta.ipv4_pools_version: exact;
@@ -125,10 +156,6 @@ control MyIngress(inout headers hdr,
         size = DIP_TABLE_SIZE;
     }
 
-    action ipv4_tcp_rewrite_src(ipv4_addr_t saddr, l4_port_t sport) {
-        hdr.ipv4.src_addr = saddr;
-        hdr.tcp.src_port  = sport;
-    }
     // IMPORTANT: This table must only be applied if the previous one matched!
     // We really don't want src rewriting on the way in :D
     table ipv4_vips_inverse {
@@ -269,7 +296,13 @@ control MyIngress(inout headers hdr,
         init_versioning();
 
         //////// L4/TCP LOADBALANCING ////////
-        if (hdr.tcp.isValid()) {
+        if (hdr.tcp.isValid() && hdr.ipv4.isValid()) {
+            ipv4_tcp_conn_table.apply(); // 0. is this a known connection?
+
+            // 1. check bloom filters: is this a new-ish conn with a version?
+            ipv4_tcp_check_new_conn_pool_version(); // fills out meta.ipv4_pool_version
+
+            // 2. rewrite its dst
             if (ipv4_vips.apply().hit) {
                 ipv4_compute_flow_hash();
                 ipv4_dips.apply();

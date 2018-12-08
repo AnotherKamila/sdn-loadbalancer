@@ -11,6 +11,7 @@
 #define ROUTING_TABLE_SIZE 1024
 #define VIP_TABLE_SIZE      256
 #define DIP_TABLE_SIZE     1024
+#define CONN_TABLE_SIZE    8192
 
 
 #endif
