@@ -84,7 +84,7 @@ class LoadBalancerUnversioned(Router):
         yield self.vips.modify(self.pool_IPs[pool], 'set_dip_pool', [pool, size])
 
 
-class LoadBalancer(LoadBalancerUnversioned):
+class LoadBalancerAtomic(LoadBalancerUnversioned):
     @defer.inlineCallbacks
     def init(self):
         self.vips = yield VersionedP4Table.get_initialised(
@@ -122,6 +122,15 @@ class LoadBalancer(LoadBalancerUnversioned):
         yield self.vips_inverse.commit_and_slide()
         yield self.dips.commit_and_slide()
         yield self.dips_inverse.commit_and_slide()
+
+
+class LoadBalancer(LoadBalancerAtomic):
+    @defer.inlineCallbacks
+    def init(self):
+        notifications_socket = yield self.controller.get_notifications_socket()
+        print(notifications_socket)
+        # add mirroring for learning
+        # yield self.controller.mirroring_add(MIRRORING_SID_CPU_PORT, self.cpu_port)
 
 
 ##### The rest of this file is here for compatibility with old tests only. #####

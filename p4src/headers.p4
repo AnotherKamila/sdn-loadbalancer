@@ -78,6 +78,14 @@ struct headers {
     tcp_t	     tcp;
 }
 
+struct ipv4_conn_learn_t {
+    ipv4_addr_t src_addr;
+    l3_port_t   src_port;
+    ipv4_addr_t dst_addr;
+    l3_port_t   dst_port;
+    bit<8>      protocol;
+}
+
 struct metadata {
     bit<16> l4_payload_length;
 
@@ -91,6 +99,8 @@ struct metadata {
     pool_size_t flow_hash;     // [0, pool size)
 
     table_version_t ipv4_pools_version;
+
+    ipv4_conn_learn_t ipv4_conn_learn;
 }
 
 

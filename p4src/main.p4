@@ -36,7 +36,12 @@ control MyIngress(inout headers hdr,
     // IMPORTANT: I am only handling IPv4 and TCP here!
 
     action ipv4_tcp_learn_connection() {
-        // TODO
+        meta.ipv4_conn_learn.src_addr = hdr.ipv4.src_addr;
+        meta.ipv4_conn_learn.src_port = hdr.tcp.src_port;
+        meta.ipv4_conn_learn.dst_addr = hdr.ipv4.dst_addr;
+        meta.ipv4_conn_learn.dst_port = hdr.tcp.dst_port;
+        meta.ipv4_conn_learn.protocol = hdr.ipv4.protocol;
+        digest(1, meta.ipv4_conn_learn);
     }
     action ipv4_tcp_rewrite_dst(ipv4_addr_t daddr, l3_port_t dport) {
         hdr.ipv4.dst_addr = daddr;
@@ -297,6 +302,14 @@ control MyIngress(inout headers hdr,
 
         //////// L4/TCP LOADBALANCING ////////
         if (hdr.tcp.isValid() && hdr.ipv4.isValid()) {
+
+
+
+            ipv4_tcp_learn_connection(); // TODO remove -- for testing only
+
+
+
+
             ipv4_tcp_conn_table.apply(); // 0. is this a known connection?
 
             // 1. check bloom filters: is this a new-ish conn with a version?

@@ -13,27 +13,50 @@ only use SimpleSwitchAPIAsyncWrapper.
 
 
 import functools
+import itertools
 from p4utils.utils.runtime_API import RuntimeAPI
 from p4utils.utils.sswitch_API import SimpleSwitchAPI
 from twisted.internet          import threads
 from twisted.python            import threadable
 
+# Indirectioooooooooooooooooooooooooooon!
+
+class SimplerSwitchAPI(SimpleSwitchAPI):
+    """:'("""
+    def get_notifications_socket(self):
+        return self.client.bm_mgmt_get_info().notifications_socket
+
+# BUG!!! The awfulness below creates 3 locks instead of one! TODO!
+
 # Actually, the interesting methods are apparently on RuntimeAPI. Should check
 # source if I want to use another method.
-asyncified = [
-    'register_read',
-    'register_reset',
-    'register_write',
-    'table_add',
-    'table_clear',
-    'table_delete',
-    'table_modify',
-    'table_set_default',
-    'table_set_timeout',
-]
+asyncified = {
+    'RuntimeAPI': [
+        'register_read',
+        'register_reset',
+        'register_write',
+        'table_add',
+        'table_clear',
+        'table_delete',
+        'table_modify',
+        'table_set_default',
+        'table_set_timeout',
+    ],
+    'SimpleSwitchAPI': [
+        'mirroring_add',
+    ],
+    'SimplerSwitchAPI': [
+        'get_notifications_socket',
+    ],
+}
+asyncified_flat = set(itertools.chain.from_iterable(asyncified.values()))
+print(asyncified_flat)
+
 # synchronize all of those methods, because RuntimeAPI is *not* threadsafe
-RuntimeAPI.synchronized = asyncified
-threadable.synchronize(RuntimeAPI)
+for cls in RuntimeAPI, SimpleSwitchAPI, SimplerSwitchAPI:
+    cls.synchronized = asyncified[cls.__name__]
+    threadable.synchronize(cls)
+
 
 class SimpleSwitchAPIAsyncWrapper(object):
     """
@@ -44,11 +67,11 @@ class SimpleSwitchAPIAsyncWrapper(object):
     """
 
     def __init__(self, *args, **kwargs):
-        self._switch_api = SimpleSwitchAPI(*args, **kwargs)
+        self._switch_api = SimplerSwitchAPI(*args, **kwargs)
 
     def __getattr__(self, name):
         f = getattr(self._switch_api, name)
-        if name not in asyncified: return f
+        if name not in asyncified_flat: return f
 
         @functools.wraps(f)
         def wrapped(*args, **kwargs):
