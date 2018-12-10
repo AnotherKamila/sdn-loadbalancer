@@ -50,8 +50,8 @@ class UnexpectedServerError(pb.Error):
     pass
 
 def raise_all_exceptions_on_client(f):
-    @defer.inlineCallbacks
     @functools.wraps(f)
+    @defer.inlineCallbacks
     def wrapped(*args, **kwargs):
         try:
             res = yield f(*args, **kwargs)

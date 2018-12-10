@@ -13,6 +13,18 @@ from twisted.internet import reactor
 defer.setDebugging(True)
 
 
+class ConnCounterProtocol(Protocol, object):
+    def connectionMade(self):
+        self.factory.conn_counter.count += 1
+        self.factory.conn_counter.load  += 0.1
+
+    def dataReceived(self, data):
+        self.transport.write(data)
+
+    def connectionLost(self, reason):
+        self.factory.conn_counter.load -= 0.1  # this doesn't simulate _average_ load, but immediate one, but whatever :D
+
+
 class ConnCounter(pb.Root, object):
     def __init__(self, *args, **kwargs):
         self.count = 0
@@ -29,18 +41,6 @@ class ConnCounter(pb.Root, object):
     @raise_all_exceptions_on_client
     def remote_reset_conn_count(self):
         self.count = 0
-
-class ConnCounterProtocol(Protocol, object):
-    def connectionMade(self):
-        self.factory.conn_counter.count += 1
-        self.factory.conn_counter.load  += 0.1
-
-    def dataReceived(self, data):
-        self.transport.write(data)
-
-    def connectionLost(self, reason):
-        self.factory.conn_counter.load -= 0.1  # this doesn't simulate _average_ load, but immediate one, but whatever :D
-
 
 def main():
     conn_counter = ConnCounter()
