@@ -4,12 +4,14 @@
 - [X] flat loadbalancer (ECMP)
 - [X] convert existing stuff into a twisted-friendly class
 - [X] make testing arbitrary scenarios easier
+- [ ] don't drop connections
+- [ ] send new connection packets to CPU & read them there & fill out conn_table
+- [ ] old versions Bloom filters
 - [X] tests for weighted
 - [ ] simple weighted loadbalancer (big bucket table)
-- [ ] don't drop connections
-- [ ] tree thing
-- [ ] exploring the behavior (oscillations and stuff)
 - [ ] use that controller from thingy that decides weight based on something
+- [ ] exploring the behavior / producing shiny graphs
+- [ ] tree thing
 
 Not really / not worth it:
 
