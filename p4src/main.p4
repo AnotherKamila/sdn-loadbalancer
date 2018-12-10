@@ -38,11 +38,11 @@ control MyIngress(inout headers hdr,
     action ipv4_tcp_learn_connection() {
         // TODO
     }
-    action ipv4_tcp_rewrite_dst(ipv4_addr_t daddr, l4_port_t dport) {
+    action ipv4_tcp_rewrite_dst(ipv4_addr_t daddr, l3_port_t dport) {
         hdr.ipv4.dst_addr = daddr;
         hdr.tcp.dst_port  = dport;
     }
-    action ipv4_tcp_rewrite_src(ipv4_addr_t saddr, l4_port_t sport) {
+    action ipv4_tcp_rewrite_src(ipv4_addr_t saddr, l3_port_t sport) {
         hdr.ipv4.src_addr = saddr;
         hdr.tcp.src_port  = sport;
     }
@@ -56,11 +56,11 @@ control MyIngress(inout headers hdr,
             hdr.ipv4.protocol: exact;
         }
         actions = {
-            ipv4_tcp_learn_connection; // new connection => default action only
             ipv4_tcp_rewrite_dst;      // on the way there
             ipv4_tcp_rewrite_src;      // on the way back
+            NoAction;
         }
-        default_action = ipv4_tcp_learn_connection();
+        default_action = NoAction;
         size = CONN_TABLE_SIZE;
     }
 
@@ -304,6 +304,7 @@ control MyIngress(inout headers hdr,
 
             // 2. rewrite its dst
             if (ipv4_vips.apply().hit) {
+                ipv4_tcp_learn_connection(); // hit on vips => this needs translation & wasn't in conn_table
                 ipv4_compute_flow_hash();
                 ipv4_dips.apply();
             } else {

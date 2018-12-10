@@ -72,7 +72,7 @@ control MyIngress(inout headers hdr,
     }
 
     // 3. stick flow into a server
-    action ipv4_tcp_rewrite_dst(ipv4_addr_t daddr, l4_port_t dport) {
+    action ipv4_tcp_rewrite_dst(ipv4_addr_t daddr, l3_port_t dport) {
         hdr.ipv4.dst_addr = daddr;
         hdr.tcp.dst_port  = dport;
     }
@@ -121,7 +121,7 @@ control MyIngress(inout headers hdr,
         size = DIP_TABLE_SIZE;
     }
 
-    action ipv4_tcp_rewrite_src(ipv4_addr_t saddr, l4_port_t sport) {
+    action ipv4_tcp_rewrite_src(ipv4_addr_t saddr, l3_port_t sport) {
         hdr.ipv4.src_addr = saddr;
         hdr.tcp.src_port  = sport;
     }

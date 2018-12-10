@@ -11,7 +11,7 @@ typedef bit<48>  mac_addr_t;
 typedef bit<9>   port_t;
 typedef bit<32>  ipv4_addr_t;
 typedef bit<128> ipv6_addr_t;
-typedef bit<16>  l4_port_t;   // tcp or udp port
+typedef bit<16>  l3_port_t;   // tcp or udp port
 
 // the following types are used only internally
 // => sizes can be changed
@@ -59,8 +59,8 @@ header ipv6_t {
 }
 
 header tcp_t{
-    l4_port_t src_port;
-    l4_port_t dst_port;
+    l3_port_t src_port;
+    l3_port_t dst_port;
     bit<32>   seq_no;
     bit<32>   ack_no;
     bit<4>    data_offset;
