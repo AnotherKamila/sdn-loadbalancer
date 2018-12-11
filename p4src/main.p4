@@ -41,6 +41,7 @@ control MyIngress(inout headers hdr,
         meta.ipv4_conn_learn.dst_addr = hdr.ipv4.dst_addr;
         meta.ipv4_conn_learn.dst_port = hdr.tcp.dst_port;
         meta.ipv4_conn_learn.protocol = hdr.ipv4.protocol;
+        meta.ipv4_conn_learn.ipv4_pools_version = meta.ipv4_pools_version;
         digest(1, meta.ipv4_conn_learn);
     }
     action ipv4_tcp_rewrite_dst(ipv4_addr_t daddr, l3_port_t dport) {
@@ -69,10 +70,77 @@ control MyIngress(inout headers hdr,
         size = CONN_TABLE_SIZE;
     }
 
-    // check bloom filters: is this a new-ish conn with a version?
-    action ipv4_tcp_check_new_conn_pool_version() {
-        // TODO check Bloom filters
-        // note that init_versioning has set the current as default
+    //////////// check bloom filters: is this a new-ish conn with a version? ////////////
+    // TODO 4 hashes instead of 2 would help a lot
+    // Note: even with this, there is a small race condition window: the
+    // controller may flip through the versions too quickly to learn that there is
+    // stuff in the bloom filters. Solution: Don't flip that often!
+    register<bit<1>>(VERSION_BLOOM_FILTER_ENTRIES*MAX_TABLE_VERSIONS) bloom_filters;
+
+    #define VERSION_BLOOM_FILTERS_INDEX(version, offset) \
+            ((bit<32>)(version)*(bit<32>)VERSION_BLOOM_FILTER_ENTRIES + (offset))
+
+    action _read_versions_bloom_filter(bit<TABLE_VERSIONS_SIZE> i) {
+        bit<32> index1;
+        bit<32> index2;
+        index1 = VERSION_BLOOM_FILTERS_INDEX(i, meta.fivetuple_hash_1);
+        index2 = VERSION_BLOOM_FILTERS_INDEX(i, meta.fivetuple_hash_2);
+        bit<1> r1;
+        bit<1> r2;
+        bloom_filters.read(r1, index1);
+        bloom_filters.read(r2, index2);
+        meta.bloom_filter_results.rs1 = (bit<MAX_TABLE_VERSIONS>)r1<<i;
+        meta.bloom_filter_results.rs2 = (bit<MAX_TABLE_VERSIONS>)r2<<i;
+        }
+
+    // fills out meta.version_bloom_filter_results
+    // after this, apply must check the result and fill out current version, then call update
+    action ipv4_tcp_check_version_bloom_filters() {
+        hash(meta.fivetuple_hash_1,
+            HashAlgorithm.crc16,
+            (bit<1>)0,
+            { hdr.ipv4.src_addr,
+              hdr.ipv4.dst_addr,
+              hdr.tcp.src_port,
+              hdr.tcp.dst_port,
+              hdr.ipv4.protocol },
+            (bit<16>)VERSION_BLOOM_FILTER_ENTRIES
+        );
+        hash(meta.fivetuple_hash_2,
+            HashAlgorithm.crc32,
+            (bit<1>)0,
+            { hdr.ipv4.src_addr,
+              hdr.ipv4.dst_addr,
+              hdr.tcp.src_port,
+              hdr.tcp.dst_port,
+              hdr.ipv4.protocol },
+            (bit<16>)VERSION_BLOOM_FILTER_ENTRIES
+        );
+
+        // TODO for loop of 4
+        _read_versions_bloom_filter(0);
+        _read_versions_bloom_filter(1);
+        _read_versions_bloom_filter(2);
+        _read_versions_bloom_filter(3);
+    }
+
+    action maybe_update_ipv4_pools_version(bit<TABLE_VERSIONS_SIZE> i) {
+        if ((((bit<MAX_TABLE_VERSIONS>)1<<i) &
+                meta.bloom_filter_results.rs1 & meta.bloom_filter_results.rs2) != 0) {
+            meta.ipv4_pools_version = i;
+        }
+    }
+
+    // add it to the bloom filter indicated by current_version
+    // note how I can just call this right after check without an if, because
+    // it's maybe a noop but whatever
+    action ipv4_tcp_update_version_bloom_filters() {
+        bit<32> index1;
+        bit<32> index2;
+        index1 = VERSION_BLOOM_FILTERS_INDEX(meta.ipv4_pools_version, meta.fivetuple_hash_1);
+        index2 = VERSION_BLOOM_FILTERS_INDEX(meta.ipv4_pools_version, meta.fivetuple_hash_2);
+        bloom_filters.write(index1, (bit<1>)1);
+        bloom_filters.write(index2, (bit<1>)1);
     }
 
     // 1. should we loadbalance? where to?
@@ -310,23 +378,34 @@ control MyIngress(inout headers hdr,
 
 
 
-            ipv4_tcp_conn_table.apply(); // 0. is this a known connection?
+            if (!ipv4_tcp_conn_table.apply().hit) { // 0. is this a known connection?
 
-            // 1. check bloom filters: is this a new-ish conn with a version?
-            ipv4_tcp_check_new_conn_pool_version(); // fills out meta.ipv4_pool_version
+                // 1. check bloom filters: is this a new-ish conn with a version?
+                ipv4_tcp_check_version_bloom_filters(); // fills out meta.ipv4_pool_version
 
-            // 2. rewrite its dst
-            if (ipv4_vips.apply().hit) {
-                ipv4_tcp_learn_connection(); // hit on vips => this needs translation & wasn't in conn_table
-                ipv4_compute_flow_hash();
-                ipv4_dips.apply();
-            } else {
-                if (ipv4_dips_inverse.apply().hit) {
-                    ipv4_vips_inverse.apply();
+                // TODO for loop
+                maybe_update_ipv4_pools_version(0);
+                maybe_update_ipv4_pools_version(1);
+                maybe_update_ipv4_pools_version(2);
+                maybe_update_ipv4_pools_version(3);
+
+                ipv4_tcp_update_version_bloom_filters();
+                
+
+                // 2. rewrite its dst
+                if (ipv4_vips.apply().hit) {
+                    ipv4_tcp_learn_connection(); // hit on vips => this needs translation & wasn't in conn_table
+                    ipv4_compute_flow_hash();
+                    ipv4_dips.apply();
+                } else {
+                    if (ipv4_dips_inverse.apply().hit) {
+                        ipv4_vips_inverse.apply();
+                    }
                 }
             }
         }
         /// Note: no loadbalancing for UDP! //
+
         /////////////// L3/IPv6 ////////////// 
         if (hdr.ipv6.isValid()) {
             // ipv6_decrease_hop_limit();

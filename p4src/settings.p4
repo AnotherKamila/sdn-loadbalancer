@@ -13,5 +13,8 @@
 #define DIP_TABLE_SIZE     1024
 #define CONN_TABLE_SIZE    8192
 
+// https://hur.st/bloomfilter/?n=100&p=1.0E-5&m=&k=4
+#define VERSION_BLOOM_FILTER_ENTRIES 8192
+
 
 #endif

@@ -18,7 +18,10 @@ typedef bit<16>  l3_port_t;   // tcp or udp port
 typedef bit<4> interface_t;
 typedef bit<6> dip_pool_t;
 typedef bit<6> pool_size_t;
-typedef bit<2> table_version_t; // => max_versions = 4
+
+#define TABLE_VERSIONS_SIZE  2
+#define MAX_TABLE_VERSIONS   (1<<TABLE_VERSIONS_SIZE)
+typedef bit<TABLE_VERSIONS_SIZE> table_version_t;
 
 const bit<16> TYPE_IPV4 = 0x0800;
 const bit<16> TYPE_IPV6 = 0x86DD;
@@ -84,6 +87,13 @@ struct ipv4_conn_learn_t {
     ipv4_addr_t dst_addr;
     l3_port_t   dst_port;
     bit<8>      protocol;
+    table_version_t ipv4_pools_version;
+}
+
+struct bloom_filter_result_t {
+    bit<MAX_TABLE_VERSIONS> rs1; // bitmask -- let's pretend it's an array :D
+    bit<MAX_TABLE_VERSIONS> rs2; // because apparently I can't have an array in a struct
+    // TODO 4 hashes
 }
 
 struct metadata {
@@ -100,6 +110,9 @@ struct metadata {
 
     table_version_t ipv4_pools_version;
 
+    bit<32> fivetuple_hash_1;
+    bit<32> fivetuple_hash_2;
+    bloom_filter_result_t bloom_filter_results;
     ipv4_conn_learn_t ipv4_conn_learn;
 }
 
