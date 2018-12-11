@@ -71,42 +71,15 @@ control MyIngress(inout headers hdr,
     }
 
     //////////// check bloom filters: is this a new-ish conn with a version? ////////////
-    // TODO 4 hashes instead of 2 would help a lot
     // Note: even with this, there is a small race condition window: the
     // controller may flip through the versions too quickly to learn that there is
     // stuff in the bloom filters. Solution: Don't flip that often!
-    register<bit<1>>(VERSION_BLOOM_FILTER_ENTRIES*MAX_TABLE_VERSIONS) bloom_filters;
 
-    #define VERSION_BLOOM_FILTERS_INDEX(version, offset) \
-            ((bit<32>)(version)*(bit<32>)VERSION_BLOOM_FILTER_ENTRIES + (offset))
-
-    action _read_versions_bloom_filter(bit<TABLE_VERSIONS_SIZE> i) {
-        bit<32> index1;
-        bit<32> index2;
-        index1 = VERSION_BLOOM_FILTERS_INDEX(i, meta.fivetuple_hash_1);
-        index2 = VERSION_BLOOM_FILTERS_INDEX(i, meta.fivetuple_hash_2);
-        bit<1> r1;
-        bit<1> r2;
-        bloom_filters.read(r1, index1);
-        bloom_filters.read(r2, index2);
-        meta.bloom_filter_results.rs1 = (bit<MAX_TABLE_VERSIONS>)r1<<i;
-        meta.bloom_filter_results.rs2 = (bit<MAX_TABLE_VERSIONS>)r2<<i;
-        }
-
-    // fills out meta.version_bloom_filter_results
-    // after this, apply must check the result and fill out current version, then call update
-    action ipv4_tcp_check_version_bloom_filters() {
-        hash(meta.fivetuple_hash_1,
-            HashAlgorithm.crc16,
-            (bit<1>)0,
-            { hdr.ipv4.src_addr,
-              hdr.ipv4.dst_addr,
-              hdr.tcp.src_port,
-              hdr.tcp.dst_port,
-              hdr.ipv4.protocol },
-            (bit<16>)VERSION_BLOOM_FILTER_ENTRIES
-        );
-        hash(meta.fivetuple_hash_2,
+    // Fills out meta.versions_meta.hash.
+    // After this, apply must read the bloom filters, check the result, fill out
+    // current version, and call update.
+    action ipv4_tcp_prepare_versions_meta() {
+        hash(meta.versions_meta.hash_1,
             HashAlgorithm.crc32,
             (bit<1>)0,
             { hdr.ipv4.src_addr,
@@ -114,34 +87,46 @@ control MyIngress(inout headers hdr,
               hdr.tcp.src_port,
               hdr.tcp.dst_port,
               hdr.ipv4.protocol },
-            (bit<16>)VERSION_BLOOM_FILTER_ENTRIES
+            (bit<16>)BLOOM_FILTER_ENTRIES
         );
-
-        // TODO for loop of 4
-        _read_versions_bloom_filter(0);
-        _read_versions_bloom_filter(1);
-        _read_versions_bloom_filter(2);
-        _read_versions_bloom_filter(3);
+        hash(meta.versions_meta.hash_2,
+            HashAlgorithm.csum16,
+            (bit<1>)0,
+            { hdr.ipv4.src_addr,
+              hdr.ipv4.dst_addr,
+              hdr.tcp.src_port,
+              hdr.tcp.dst_port,
+              hdr.ipv4.protocol },
+            (bit<16>)BLOOM_FILTER_ENTRIES
+        );
     }
 
-    action maybe_update_ipv4_pools_version(bit<TABLE_VERSIONS_SIZE> i) {
-        if ((((bit<MAX_TABLE_VERSIONS>)1<<i) &
-                meta.bloom_filter_results.rs1 & meta.bloom_filter_results.rs2) != 0) {
-            meta.ipv4_pools_version = i;
-        }
-    }
+    #define BLOOMFILTER_VOODOO(i)                                                  \
+        register<bit<1>>(BLOOM_FILTER_ENTRIES) bloom_filter_##i;                   \
+                                                                                   \
+        action read_versions_bloom_filter_##i() {                                  \
+            bloom_filter_##i.read(meta.versions_meta.r1_##i,                      \
+                                 meta.versions_meta.hash_1);                    \
+            bloom_filter_##i.read(meta.versions_meta.r2_##i,                      \
+                                 meta.versions_meta.hash_2);                    \
+        }                                                                          \
 
-    // add it to the bloom filter indicated by current_version
-    // note how I can just call this right after check without an if, because
-    // it's maybe a noop but whatever
-    action ipv4_tcp_update_version_bloom_filters() {
-        bit<32> index1;
-        bit<32> index2;
-        index1 = VERSION_BLOOM_FILTERS_INDEX(meta.ipv4_pools_version, meta.fivetuple_hash_1);
-        index2 = VERSION_BLOOM_FILTERS_INDEX(meta.ipv4_pools_version, meta.fivetuple_hash_2);
-        bloom_filters.write(index1, (bit<1>)1);
-        bloom_filters.write(index2, (bit<1>)1);
-    }
+    BLOOMFILTER_VOODOO(0)
+    BLOOMFILTER_VOODOO(1)
+    BLOOMFILTER_VOODOO(2)
+    BLOOMFILTER_VOODOO(3)
+
+    #define BLOOMFILTER_APPLY_VOODOO(i)                                        \
+        if ((meta.versions_meta.r1_##i & meta.versions_meta.r2_##i) != 0) {  \
+            meta.ipv4_pools_version = i;                                       \
+        }                                                                      \
+                                                                               \
+        if (meta.ipv4_pools_version == i) {                                    \
+            bloom_filter_##i.write(meta.versions_meta.hash_1, (bit<1>)1);   \
+            bloom_filter_##i.write(meta.versions_meta.hash_2, (bit<1>)1);   \
+        }                                                                      \
+
+    // ^ called in apply
 
     // 1. should we loadbalance? where to?
 
@@ -381,16 +366,15 @@ control MyIngress(inout headers hdr,
             if (!ipv4_tcp_conn_table.apply().hit) { // 0. is this a known connection?
 
                 // 1. check bloom filters: is this a new-ish conn with a version?
-                ipv4_tcp_check_version_bloom_filters(); // fills out meta.ipv4_pool_version
-
-                // TODO for loop
-                maybe_update_ipv4_pools_version(0);
-                maybe_update_ipv4_pools_version(1);
-                maybe_update_ipv4_pools_version(2);
-                maybe_update_ipv4_pools_version(3);
-
-                ipv4_tcp_update_version_bloom_filters();
-                
+                ipv4_tcp_prepare_versions_meta(); // fills out meta.versions_meta.hash
+                read_versions_bloom_filter_0();   // reads the bloom filters into versions_meta.v$i
+                read_versions_bloom_filter_1();
+                read_versions_bloom_filter_2();
+                read_versions_bloom_filter_3();
+                BLOOMFILTER_APPLY_VOODOO(0);
+                BLOOMFILTER_APPLY_VOODOO(1);
+                BLOOMFILTER_APPLY_VOODOO(2);
+                BLOOMFILTER_APPLY_VOODOO(3);
 
                 // 2. rewrite its dst
                 if (ipv4_vips.apply().hit) {

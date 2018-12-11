@@ -19,8 +19,6 @@ typedef bit<4> interface_t;
 typedef bit<6> dip_pool_t;
 typedef bit<6> pool_size_t;
 
-#define TABLE_VERSIONS_SIZE  2
-#define MAX_TABLE_VERSIONS   (1<<TABLE_VERSIONS_SIZE)
 typedef bit<TABLE_VERSIONS_SIZE> table_version_t;
 
 const bit<16> TYPE_IPV4 = 0x0800;
@@ -90,10 +88,26 @@ struct ipv4_conn_learn_t {
     table_version_t ipv4_pools_version;
 }
 
-struct bloom_filter_result_t {
-    bit<MAX_TABLE_VERSIONS> rs1; // bitmask -- let's pretend it's an array :D
-    bit<MAX_TABLE_VERSIONS> rs2; // because apparently I can't have an array in a struct
-    // TODO 4 hashes
+struct bloom_filter_hash_t {
+    bit<32> h1;
+    bit<32> h2;
+}
+struct bloom_filter_lookup_t {
+    bit<1> r1;
+    bit<1> r2;
+}
+
+struct bloom_filter_meta_t {
+    bit<32> hash_1;
+    bit<32> hash_2;
+    bit<1> r1_0;
+    bit<1> r1_1;
+    bit<1> r1_2;
+    bit<1> r1_3;
+    bit<1> r2_0;
+    bit<1> r2_1;
+    bit<1> r2_2;
+    bit<1> r2_3;
 }
 
 struct metadata {
@@ -110,9 +124,8 @@ struct metadata {
 
     table_version_t ipv4_pools_version;
 
-    bit<32> fivetuple_hash_1;
-    bit<32> fivetuple_hash_2;
-    bloom_filter_result_t bloom_filter_results;
+    bloom_filter_meta_t versions_meta;
+
     ipv4_conn_learn_t ipv4_conn_learn;
 }
 

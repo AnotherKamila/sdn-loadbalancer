@@ -1,11 +1,13 @@
 from twisted.internet                   import defer, task
 from controller.base_controller_twisted import BaseController, main
 from controller.l3_router_lazy          import Router
-from controller.settings                import load_pools
+from controller.settings                import load_pools, p4settings
 from controller.p4table                 import P4Table, VersionedP4Table
 from myutils.twisted_utils              import print_method_call
 from pprint import pprint
 
+BLOOM_FILTER_ENTRIES = p4settings['BLOOM_FILTER_ENTRIES']
+MAX_TABLE_VERSIONS   = p4settings['MAX_TABLE_VERSIONS']
 
 class LoadBalancerUnversioned(Router):
     """Fills the flat loadbalancing tables (IPv4 only):
@@ -91,30 +93,33 @@ class LoadBalancerAtomic(LoadBalancerUnversioned):
             self.controller,
             'ipv4_vips',
             version_signalling_register=('table_versions', 0),
-            max_versions=4,
+            max_versions=MAX_TABLE_VERSIONS,
         )
         self.vips_inverse = yield VersionedP4Table.get_initialised(
             self.controller,
             'ipv4_vips_inverse',
             version_signalling_register=None,
-            max_versions=4,
+            max_versions=MAX_TABLE_VERSIONS,
         )
         self.dips = yield VersionedP4Table.get_initialised(
             self.controller,
             'ipv4_dips',
             version_signalling_register=None,
-            max_versions=4,
+            max_versions=MAX_TABLE_VERSIONS,
         )
         self.dips_inverse = yield VersionedP4Table.get_initialised(
             self.controller,
             'ipv4_dips_inverse',
             version_signalling_register=None,
-            max_versions=4,
+            max_versions=MAX_TABLE_VERSIONS,
         )
 
     @print_method_call
     @defer.inlineCallbacks
     def commit(self):
+        # First clear out the Bloom filter for the version that is about to become active.
+        yield self.controller.register_reset('bloom_filter_{}'.format(self.vips.next_version))
+
         # Doesn't look like it, but the signalling is in fact atomic, because
         # the P4 code uses the vips signal for all tables.
         # We call the other 3 just to tell Python that we have advanced the versions.
