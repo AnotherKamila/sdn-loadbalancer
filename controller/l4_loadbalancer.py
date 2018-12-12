@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from twisted.internet                   import defer, task
 from controller.base_controller_twisted import BaseController, main
 from controller.l3_router_lazy          import Router
@@ -133,20 +135,17 @@ class LoadBalancerAtomic(LoadBalancerUnversioned):
 class CPU(scapy.Packet):
     name = 'CpuPacket'
     fields_desc = [
-        scapy.BitField('ipv4_pools_version', None, p4settings['TABLE_VERSIONS_SIZE'])
+        scapy.BitField('_dummy',             0, 8 - p4settings['TABLE_VERSIONS_SIZE']),
+        scapy.BitField('ipv4_pools_version', 3, p4settings['TABLE_VERSIONS_SIZE'])
     ]
 
 class LoadBalancer(LoadBalancerAtomic):
-    def recv_packet(raw_packet):
-        # cpu = CPU(str(raw_packet))
-        cpu = raw_packet
+    def recv_packet(self, packet):
+        print('+++++++++++++++++++++++++++++++++++++++++++')
+        cpu = CPU(str(packet.payload))
         ip  = scapy.IP(str(cpu.payload))
         tcp = scapy.TCP(str(ip.payload))
-        print('+++++++++++++++++++++++++++++++++++++++++++')
-        # print(raw_packet)
-        # print(cpu)
-        print(ip)
-        print(tcp)
+        print(cpu.ipv4_pools_version, ip.src, tcp.sport, ip.dst, tcp.dport, ip.proto)
         print('+++++++++++++++++++++++++++++++++++++++++++')
 
     def init(self):

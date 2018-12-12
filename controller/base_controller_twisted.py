@@ -27,10 +27,10 @@ class SnifferThread(Thread):
 
     def consume_packet(self, raw_packet):
         packet = Ether(str(raw_packet))
-        print('+++++++++++++++++++++++ {} +++++++++++++++++++++++'.format(packet.summary()))
+        print('received packet: {} +++ {}'.format(packet.summary(), packet.type))
 
         if packet.type == p4settings['ETHERTYPE_CPU']:
-            self.reactor.callFromThread(self.shared_queue.put, packet.payload)
+            self.reactor.callFromThread(self.shared_queue.put, packet)
 
 class BaseController(object):
     """A base P4 switch controller that your controllers probably want to inherit from.
@@ -79,8 +79,7 @@ class BaseController(object):
     @print_method_call
     def start_sniffer_thread(self):
         self.packet_queue = defer.DeferredQueue()
-        # cpu_port_intf = str(self.topo.get_cpu_port_intf(self.sw_name).replace("eth0", "eth1"))
-        cpu_port_intf = 's1-eth1'
+        cpu_port_intf = str(self.topo.get_cpu_port_intf(self.sw_name).replace("eth0", "eth1"))
         self.sniffer_thread = SnifferThread(reactor, self.packet_queue, cpu_port_intf)
         self.sniffer_thread.daemon = True  # die when the main thread dies
         self.sniffer_thread.start()
@@ -89,6 +88,7 @@ class BaseController(object):
         for i in range(workers):
             self._consume_from_packet_queue()
 
+    @defer.inlineCallbacks
     def init(self):
         """Reminder: init() is Special."""
         if self.cpu_port:

@@ -34,8 +34,9 @@ def demo(reactor):
     yield clients[0].callRemote('start_echo_clients', '10.0.0.1', 8000, count=5)
     yield sleep(1)
     yield clients[0].callRemote('close_all_connections')
-    # nconns = yield servers[0].callRemote('get_conn_count')
-    # assert nconns == 5
+
+    nconns = yield servers[0].callRemote('get_conn_count')
+    assert nconns == 5
 
 if __name__ == '__main__':
     try:

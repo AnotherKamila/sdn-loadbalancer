@@ -62,10 +62,7 @@ parser MyParser(packet_in packet,
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit(hdr.ethernet);
-
-        // will do either - the ingress/packet.emit() emits only if the header
-        // is valid, so our code must ensure that exactly one of ipv4, ipv6
-        // headers is valid (use packet.setValid()/packet.setInvalid())
+        packet.emit(hdr.cpu);
         packet.emit(hdr.ipv4);
         packet.emit(hdr.ipv6);
         packet.emit(hdr.tcp);
