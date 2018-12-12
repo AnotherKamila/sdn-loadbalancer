@@ -101,15 +101,15 @@ control MyIngress(inout headers hdr,
         );
     }
 
-    #define BLOOMFILTER_VOODOO(i)                                                  \
-        register<bit<1>>(BLOOM_FILTER_ENTRIES) bloom_filter_##i;                   \
-                                                                                   \
-        action read_versions_bloom_filter_##i() {                                  \
-            bloom_filter_##i.read(meta.versions_meta.r1_##i,                      \
+    #define BLOOMFILTER_VOODOO(i)                                               \
+        register<bit<1>>(BLOOM_FILTER_ENTRIES) bloom_filter_##i;                \
+                                                                                \
+        action read_versions_bloom_filter_##i() {                               \
+            bloom_filter_##i.read(meta.versions_meta.r1_##i,                    \
                                  meta.versions_meta.hash_1);                    \
-            bloom_filter_##i.read(meta.versions_meta.r2_##i,                      \
+            bloom_filter_##i.read(meta.versions_meta.r2_##i,                    \
                                  meta.versions_meta.hash_2);                    \
-        }                                                                          \
+        }                                                                       \
 
     BLOOMFILTER_VOODOO(0)
     BLOOMFILTER_VOODOO(1)
@@ -117,13 +117,13 @@ control MyIngress(inout headers hdr,
     BLOOMFILTER_VOODOO(3)
 
     #define BLOOMFILTER_APPLY_VOODOO(i)                                        \
-        if ((meta.versions_meta.r1_##i & meta.versions_meta.r2_##i) != 0) {  \
+        if ((meta.versions_meta.r1_##i & meta.versions_meta.r2_##i) != 0) {    \
             meta.ipv4_pools_version = i;                                       \
         }                                                                      \
                                                                                \
         if (meta.ipv4_pools_version == i) {                                    \
-            bloom_filter_##i.write(meta.versions_meta.hash_1, (bit<1>)1);   \
-            bloom_filter_##i.write(meta.versions_meta.hash_2, (bit<1>)1);   \
+            bloom_filter_##i.write(meta.versions_meta.hash_1, (bit<1>)1);      \
+            bloom_filter_##i.write(meta.versions_meta.hash_2, (bit<1>)1);      \
         }                                                                      \
 
     // ^ called in apply

@@ -33,7 +33,7 @@ def test_echo_client(remote_module):
 
 
 @pt.inlineCallbacks
-def test_old_versions(remote_module, p4run):
+def test_dont_drop(remote_module, p4run):
     lb, client, server1 = yield all_results([
         LoadBalancer.get_initialised('s1', topology_db_file=p4run.topo_path),
         remote_module('myutils.client', host='h3'),
