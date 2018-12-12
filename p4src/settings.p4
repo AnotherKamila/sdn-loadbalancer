@@ -21,5 +21,8 @@
 // https://hur.st/bloomfilter/?n=100&p=1.0E-5&m=&k=4
 #define BLOOM_FILTER_ENTRIES 8192
 
+#define CPU_PORT_MIRROR_ID 100
+#define ETHERTYPE_CPU      0xbeef
+
 
 #endif

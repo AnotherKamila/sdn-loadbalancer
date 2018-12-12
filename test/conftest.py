@@ -13,6 +13,7 @@ from controller.l4_loadbalancer import LoadBalancer
 
 from myutils.testhelpers import run_cmd, kill_with_children
 from myutils import all_results
+from myutils.twisted_utils import sleep
 
 from p4utils.utils.topology import Topology
 
@@ -187,7 +188,7 @@ def remote_module(request, process):
     def run(module, *m_args, **p_kwargs):
         sock_name = sock(module, next(sock_counter))
         process(python_m(module, sock_name, *m_args), **p_kwargs)
-        yield task.deferLater(reactor, 2, (lambda: None))
+        yield sleep(2)
         conn = pb.PBClientFactory()
         reactor.connectUNIX(sock_name, conn)
         obj = yield conn.getRootObject()

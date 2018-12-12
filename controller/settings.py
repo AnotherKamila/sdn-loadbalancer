@@ -21,10 +21,11 @@ def load_p4settings(filename):
             if len(split) < 3: continue
             _, key, value = split
             try:
-                value = int(value.strip())
+                value = int(value.strip(), 0)
             except ValueError:
                 continue
             d[key] = value
     return d
 
 p4settings = load_p4settings(os.path.join(os.path.dirname(__file__), '..', 'p4src', 'settings.p4'))
+# print(p4settings)

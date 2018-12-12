@@ -25,6 +25,8 @@ const bit<16> TYPE_IPV4 = 0x0800;
 const bit<16> TYPE_IPV6 = 0x86DD;
 const bit<8>  TYPE_TCP  = 6;
 
+// why oh why is this not defined somewhere
+#define PKT_INSTANCE_TYPE_INGRESS_CLONE 1
 
 header ethernet_t {
     mac_addr_t dst_addr;
@@ -72,20 +74,16 @@ header tcp_t{
     bit<16>   urgent_ptr;
 }
 
+header cpu_t {
+    table_version_t ipv4_pools_version;
+}
+
 struct headers {
     ethernet_t ethernet;
+    cpu_t      cpu;
     ipv4_t     ipv4;
     ipv6_t     ipv6;
     tcp_t	     tcp;
-}
-
-struct ipv4_conn_learn_t {
-    ipv4_addr_t src_addr;
-    l3_port_t   src_port;
-    ipv4_addr_t dst_addr;
-    l3_port_t   dst_port;
-    bit<8>      protocol;
-    table_version_t ipv4_pools_version;
 }
 
 struct bloom_filter_hash_t {
@@ -125,8 +123,6 @@ struct metadata {
     table_version_t ipv4_pools_version;
 
     bloom_filter_meta_t versions_meta;
-
-    ipv4_conn_learn_t ipv4_conn_learn;
 }
 
 

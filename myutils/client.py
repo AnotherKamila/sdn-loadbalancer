@@ -72,7 +72,7 @@ class EchoClient(Protocol):
 
         if self.num_dots_sent - self.num_dots_received <= 1:
             # if I stopped the connection before I received a reply, that's
-            # okay, so +-1 whatever
+            # okay, so +- whatever
             self.done.callback(self.num_dots_received)
         else:
             self.done.errback(RuntimeError("sent {}, received {}".format(

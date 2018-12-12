@@ -19,17 +19,12 @@ from p4utils.utils.sswitch_API import SimpleSwitchAPI
 from twisted.internet          import threads
 from twisted.python            import threadable
 
-# Indirectioooooooooooooooooooooooooooon!
+# BUG!!! The awfulness below creates 2 locks instead of one! TODO!
+# it works as long as I don't call things implemented in different classes in
+# the hierarchy at the same time, which I don't, but ugh :D
+# If I had more time, this would actually live in one background thread and
+# have a queue for crap.
 
-class SimplerSwitchAPI(SimpleSwitchAPI):
-    """:'("""
-    def get_notifications_socket(self):
-        return self.client.bm_mgmt_get_info().notifications_socket
-
-# BUG!!! The awfulness below creates 3 locks instead of one! TODO!
-
-# Actually, the interesting methods are apparently on RuntimeAPI. Should check
-# source if I want to use another method.
 asyncified = {
     'RuntimeAPI': [
         'register_read',
@@ -45,15 +40,11 @@ asyncified = {
     'SimpleSwitchAPI': [
         'mirroring_add',
     ],
-    'SimplerSwitchAPI': [
-        'get_notifications_socket',
-    ],
 }
 asyncified_flat = set(itertools.chain.from_iterable(asyncified.values()))
-print(asyncified_flat)
 
 # synchronize all of those methods, because RuntimeAPI is *not* threadsafe
-for cls in RuntimeAPI, SimpleSwitchAPI, SimplerSwitchAPI:
+for cls in RuntimeAPI, SimpleSwitchAPI:
     cls.synchronized = asyncified[cls.__name__]
     threadable.synchronize(cls)
 
@@ -67,7 +58,7 @@ class SimpleSwitchAPIAsyncWrapper(object):
     """
 
     def __init__(self, *args, **kwargs):
-        self._switch_api = SimplerSwitchAPI(*args, **kwargs)
+        self._switch_api = SimpleSwitchAPI(*args, **kwargs)
 
     def __getattr__(self, name):
         f = getattr(self._switch_api, name)

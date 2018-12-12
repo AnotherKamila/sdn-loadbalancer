@@ -5,6 +5,7 @@ from controller.settings                import load_pools, p4settings
 from controller.p4table                 import P4Table, VersionedP4Table
 from myutils.twisted_utils              import print_method_call
 from pprint import pprint
+import scapy.all as scapy
 
 BLOOM_FILTER_ENTRIES = p4settings['BLOOM_FILTER_ENTRIES']
 MAX_TABLE_VERSIONS   = p4settings['MAX_TABLE_VERSIONS']
@@ -129,13 +130,27 @@ class LoadBalancerAtomic(LoadBalancerUnversioned):
         yield self.dips_inverse.commit_and_slide()
 
 
+class CPU(scapy.Packet):
+    name = 'CpuPacket'
+    fields_desc = [
+        scapy.BitField('ipv4_pools_version', None, p4settings['TABLE_VERSIONS_SIZE'])
+    ]
+
 class LoadBalancer(LoadBalancerAtomic):
-    @defer.inlineCallbacks
+    def recv_packet(raw_packet):
+        # cpu = CPU(str(raw_packet))
+        cpu = raw_packet
+        ip  = scapy.IP(str(cpu.payload))
+        tcp = scapy.TCP(str(ip.payload))
+        print('+++++++++++++++++++++++++++++++++++++++++++')
+        # print(raw_packet)
+        # print(cpu)
+        print(ip)
+        print(tcp)
+        print('+++++++++++++++++++++++++++++++++++++++++++')
+
     def init(self):
-        notifications_socket = yield self.controller.get_notifications_socket()
-        print(notifications_socket)
-        # add mirroring for learning
-        # yield self.controller.mirroring_add(MIRRORING_SID_CPU_PORT, self.cpu_port)
+        self.start_sniffer_thread()
 
 
 ##### The rest of this file is here for compatibility with old tests only. #####

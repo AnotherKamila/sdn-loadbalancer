@@ -36,13 +36,7 @@ control MyIngress(inout headers hdr,
     // IMPORTANT: I am only handling IPv4 and TCP here!
 
     action ipv4_tcp_learn_connection() {
-        meta.ipv4_conn_learn.src_addr = hdr.ipv4.src_addr;
-        meta.ipv4_conn_learn.src_port = hdr.tcp.src_port;
-        meta.ipv4_conn_learn.dst_addr = hdr.ipv4.dst_addr;
-        meta.ipv4_conn_learn.dst_port = hdr.tcp.dst_port;
-        meta.ipv4_conn_learn.protocol = hdr.ipv4.protocol;
-        meta.ipv4_conn_learn.ipv4_pools_version = meta.ipv4_pools_version;
-        digest(1, meta.ipv4_conn_learn);
+        clone3(CloneType.I2E, CPU_PORT_MIRROR_ID, meta.ipv4_pools_version);
     }
     action ipv4_tcp_rewrite_dst(ipv4_addr_t daddr, l3_port_t dport) {
         hdr.ipv4.dst_addr = daddr;
@@ -419,7 +413,13 @@ control MyIngress(inout headers hdr,
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    apply {}
+    apply {
+        if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_INGRESS_CLONE) {
+            hdr.ethernet.ethertype = ETHERTYPE_CPU;
+            hdr.cpu.setValid();
+            hdr.cpu.ipv4_pools_version = meta.ipv4_pools_version;
+        }
+    }
 }
 
 /*************************************************************************

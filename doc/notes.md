@@ -27,6 +27,7 @@ Not really / not worth it:
 ## Notes:
 
 * switch goes x_x / starts dropping packets at about 10kpps
+* sniffing as non root with python: `$ sudo setcap cap_net_raw=eip $(which python)`
 
 # Report
 

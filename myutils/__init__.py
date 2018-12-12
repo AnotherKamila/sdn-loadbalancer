@@ -21,7 +21,7 @@ def print_entry_exit(f):
 
 @defer.inlineCallbacks
 def all_results(ds):
-    results = yield defer.DeferredList(ds)
+    results = yield defer.DeferredList(ds, fireOnOneErrback=True)
     ret = []
     for success, r in results:
         assert success

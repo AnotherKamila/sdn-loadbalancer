@@ -6,7 +6,10 @@ import signal
 import time
 
 def run_cmd(cmd, host=None, background=False):
-    if host: cmd = ['mx', host] + cmd
+    if host:
+        if subprocess.call(['pgrep', 'p4run'], stdout=open(os.devnull, 'w')) != 0:
+            raise RuntimeError('p4run is not running!')
+        cmd = ['mx', host] + cmd
     realcmd = [str(a) for a in cmd]
     print(' ****** ', ' '.join(realcmd), ' ****** ')
     if not background:

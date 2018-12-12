@@ -1,6 +1,5 @@
 import functools
-from twisted.internet import defer
-from twisted.spread import pb
+from twisted.internet import defer, task
 
 def print_method_call(f):
     @functools.wraps(f)
@@ -22,3 +21,10 @@ def print_method_call(f):
         print("{} -> {}".format(call, res))
         defer.returnValue(res)
     return wrapped
+
+def sleep(seconds):
+    """Like time.sleep, but does not block the reactor.
+
+    Put a yield in front."""
+    from twisted.internet import reactor
+    return task.deferLater(reactor, seconds, (lambda: None))
