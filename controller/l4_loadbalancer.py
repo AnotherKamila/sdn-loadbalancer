@@ -67,7 +67,6 @@ class LoadBalancerUnversioned(Router):
         my_hash   = self.pool_contents[pool][(dip, dport)]
         last_hash = size - 1
         last_dip, last_dport  = self.dips[(pool, last_hash)][1]
-        last_dport = int(last_dport)  # GRAAAAAAAAAAAH
         # First decrease size => don't leave the tables in a weird state
         self._set_pool_size(pool, size - 1)
         if my_hash != last_hash:
