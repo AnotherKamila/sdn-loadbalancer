@@ -33,6 +33,12 @@ def demo(reactor):
 
     yield clients[0].callRemote('start_echo_clients', '10.0.0.1', 8000, count=5)
     yield sleep(1)
+
+    yield lb.rm_dip(pool_handle, topo.get_host_ip('h1'), 9000)
+    # roll over all the versions
+    for i in range(10):
+        yield lb.commit()
+
     yield clients[0].callRemote('close_all_connections')
 
     nconns = yield servers[0].callRemote('get_conn_count')

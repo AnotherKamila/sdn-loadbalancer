@@ -36,7 +36,7 @@ control MyIngress(inout headers hdr,
     // IMPORTANT: I am only handling IPv4 and TCP here!
 
     action ipv4_tcp_learn_connection() {
-        clone3(CloneType.I2E, CPU_PORT_MIRROR_ID, meta.ipv4_pools_version);
+        clone3(CloneType.I2E, CPU_PORT_MIRROR_ID, meta);
     }
     action ipv4_tcp_rewrite_dst(ipv4_addr_t daddr, l3_port_t dport) {
         hdr.ipv4.dst_addr = daddr;
@@ -342,21 +342,13 @@ control MyIngress(inout headers hdr,
     }
 
     // Note: All of this uses tables pre-filled by the controller.
-    // There is no MAC or ARP.
+    // There is no MAC learning or ARP.
     // Wheee.
     apply {
         init_versioning();
 
         //////// L4/TCP LOADBALANCING ////////
         if (hdr.tcp.isValid() && hdr.ipv4.isValid()) {
-
-
-
-            ipv4_tcp_learn_connection(); // TODO remove -- for testing only
-
-
-
-
             if (!ipv4_tcp_conn_table.apply().hit) { // 0. is this a known connection?
 
                 // 1. check bloom filters: is this a new-ish conn with a version?
@@ -418,6 +410,7 @@ control MyEgress(inout headers hdr,
             hdr.ethernet.ethertype = ETHERTYPE_CPU;
             hdr.cpu.setValid();
             hdr.cpu.ipv4_pools_version = meta.ipv4_pools_version;
+            hdr.cpu.flow_hash          = meta.flow_hash;
         }
     }
 }

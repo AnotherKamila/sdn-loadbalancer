@@ -76,8 +76,8 @@ header tcp_t{
 
 header cpu_t {
 #define __dummy_len  (8 - TABLE_VERSIONS_SIZE)
-    bit<__dummy_len> _dummy;
-    table_version_t ipv4_pools_version;
+    table_version_t  ipv4_pools_version;
+    pool_size_t      flow_hash;
 }
 
 struct headers {

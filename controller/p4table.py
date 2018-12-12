@@ -34,9 +34,9 @@ class P4Table(object):
         if keys in self.data:
             raise ValueError("add called with duplicate keys: {}".format(keys))
         real_keys, real_action, real_params = self._convert_values(keys, action, params)
+        self.data[keys] = (action, params)
         res = yield self.controller.table_add(self.name, real_action, real_keys, real_params)
         assert res != None, "table_add failed!"
-        self.data[keys] = (action, params)
 
     @print_method_call
     @defer.inlineCallbacks

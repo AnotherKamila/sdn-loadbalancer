@@ -134,21 +134,43 @@ class LoadBalancerAtomic(LoadBalancerUnversioned):
 class CPU(scapy.Packet):
     name = 'CpuPacket'
     fields_desc = [
-        scapy.BitField('_dummy',             0, 8 - p4settings['TABLE_VERSIONS_SIZE']),
-        scapy.BitField('ipv4_pools_version', 3, p4settings['TABLE_VERSIONS_SIZE'])
+        scapy.BitField('ipv4_pools_version', 3, p4settings['TABLE_VERSIONS_SIZE']),
+        scapy.BitField('flow_hash',          3, 6),
     ]
 
 class LoadBalancer(LoadBalancerAtomic):
-    def recv_packet(self, packet):
-        print('+++++++++++++++++++++++++++++++++++++++++++')
+    def init(self):
+        # TODO things from the conn_table need to expire
+        # 5-tuple => ipv4_tcp_rewrite_{dst,src} addr port
+        self.conn_table = P4Table(self.controller, 'ipv4_tcp_conn_table')
+
+        self.start_sniffer_thread()
+
+    def parse_packet(self, packet):
         cpu = CPU(str(packet.payload))
         ip  = scapy.IP(str(cpu.payload))
         tcp = scapy.TCP(str(ip.payload))
-        print(cpu.ipv4_pools_version, ip.src, tcp.sport, ip.dst, tcp.dport, ip.proto)
-        print('+++++++++++++++++++++++++++++++++++++++++++')
+        return cpu, (ip.src, tcp.sport, ip.dst, tcp.dport, ip.proto)
 
-    def init(self):
-        self.start_sniffer_thread()
+    @defer.inlineCallbacks
+    def recv_packet(self, packet):
+        meta, fivetuple = self.parse_packet(packet)
+        src, sport, dst, dport, proto = fivetuple
+        version, hash = meta.ipv4_pools_version, meta.flow_hash
+        _, (pool, size)   = self.vips.versioned_data[version][(dst, dport)]
+        _, (dip, dipport) = self.dips.versioned_data[version][(pool, hash)]
+
+        if [src, sport, dst, dport, proto] in self.conn_table: return  # done already
+        yield self.conn_table.add(
+            [src, sport, dst, dport, proto],
+            'ipv4_tcp_rewrite_dst',
+            [dip, dipport]
+        )
+        yield self.conn_table.add(
+            [dip, dipport, src, sport, proto],
+            'ipv4_tcp_rewrite_src',
+            [dst, dport]
+        )
 
 
 ##### The rest of this file is here for compatibility with old tests only. #####
