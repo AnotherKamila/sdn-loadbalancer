@@ -12,17 +12,16 @@ from myutils import remote_all_the_things, raise_all_exceptions_on_client
 from twisted.internet import reactor
 defer.setDebugging(True)
 
-
 class ConnCounterProtocol(Protocol, object):
     def connectionMade(self):
         self.factory.conn_counter.count += 1
-        self.factory.conn_counter.load  += 0.1
+        self.factory.conn_counter.load  += 1.0/self.factory.load_factor
 
     def dataReceived(self, data):
         self.transport.write(data)
 
     def connectionLost(self, reason):
-        self.factory.conn_counter.load -= 0.1  # this doesn't simulate _average_ load, but immediate one, but whatever :D
+        self.factory.conn_counter.load -= 1.0/self.factory.load_factor  # this doesn't simulate _average_ load, but immediate one, but whatever :D
 
 
 class ConnCounter(pb.Root, object):
@@ -48,9 +47,11 @@ def main():
     path = sys.argv[1] if len(sys.argv) > 1 else '/tmp/p4crap-server.socket'
     reactor.listenUNIX(path, pb.PBServerFactory(conn_counter))
 
-    serverport = int(sys.argv[2]) if len(sys.argv) > 2 else 8000
+    serverport  =   int(sys.argv[2]) if len(sys.argv) > 2 else 8000
+    load_factor = float(sys.argv[3]) if len(sys.argv) > 3 else 10
     f = Factory.forProtocol(ConnCounterProtocol)
     f.conn_counter = conn_counter
+    f.load_factor  = load_factor
     reactor.listenTCP(serverport, f)
 
     reactor.run()

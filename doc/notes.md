@@ -29,6 +29,27 @@ Not really / not worth it:
 * switch goes x_x / starts dropping packets at about 10kpps
 * sniffing as non root with python: `$ sudo setcap cap_net_raw=eip $(which python)`
 
+# Interesting problems
+
+## something something
+
+### 1. How to assign weights
+
+=> put the server there 5 times instead of one
+=> more interesting idea (not implemented / future work): prefix tree thingy
+
+### 2. Which weights to assign
+
+=> control theory / not interesting from SDN viewpoint
+=> in our case: simple function of current load
+
+### 3. How do I dynamically change the weights without dropping connections?
+
+=> Bloom filter magic + conn_table:
+
+1. conn_table
+2. it takes a while to write into conn_table and packets are coming in => old versions + Bloom filters
+
 # Report
 
 

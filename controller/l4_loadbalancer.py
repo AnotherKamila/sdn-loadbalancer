@@ -188,6 +188,18 @@ class LoadBalancer(LoadBalancerAtomic):
         self.pending_conn_writes[self.vips.next_version] = []
         yield LoadBalancerAtomic.commit(self)
 
+
+# FIXME
+class LoadLoadBalancer(LoadBalancer):
+    """Periodically queries the servers for load and adjusts weights accordingly."""
+    def __init__(self, sw_name, get_load, *args, **kwargs):
+        LoadBalancer.__init__(self, sw_name, *args, **kwargs)
+        self.get_load = get_load
+
+    def get_weight(self, dip, port):
+        return 47
+
+
 ##### The rest of this file is here for compatibility with old tests only. #####
 
 @defer.inlineCallbacks
