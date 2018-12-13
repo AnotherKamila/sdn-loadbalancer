@@ -141,9 +141,10 @@ class CPU(scapy.Packet):
 class LoadBalancer(LoadBalancerAtomic):
     def init(self):
         # TODO things from the conn_table need to expire
+
         # 5-tuple => ipv4_tcp_rewrite_{dst,src} addr port
         self.conn_table = P4Table(self.controller, 'ipv4_tcp_conn_table')
-
+        self.pending_conn_writes = [[] for i in range(self.vips.max_versions)]
         self.start_sniffer_thread()
 
     def parse_packet(self, packet):
@@ -152,7 +153,6 @@ class LoadBalancer(LoadBalancerAtomic):
         tcp = scapy.TCP(str(ip.payload))
         return cpu, (ip.src, tcp.sport, ip.dst, tcp.dport, ip.proto)
 
-    @defer.inlineCallbacks
     def recv_packet(self, packet):
         meta, fivetuple = self.parse_packet(packet)
         src, sport, dst, dport, proto = fivetuple
@@ -160,18 +160,33 @@ class LoadBalancer(LoadBalancerAtomic):
         _, (pool, size)   = self.vips.versioned_data[version][(dst, dport)]
         _, (dip, dipport) = self.dips.versioned_data[version][(pool, hash)]
 
-        if [src, sport, dst, dport, proto] in self.conn_table: return  # done already
-        yield self.conn_table.add(
-            [src, sport, dst, dport, proto],
-            'ipv4_tcp_rewrite_dst',
-            [dip, dipport]
+        if (src, sport, dst, dport, proto) in self.conn_table.data: return  # done already
+
+        self.pending_conn_writes[version].append(
+            self.conn_table.add(
+                [src, sport, dst, dport, proto],
+                'ipv4_tcp_rewrite_dst',
+                [dip, dipport]
+            )
         )
-        yield self.conn_table.add(
-            [dip, dipport, src, sport, proto],
-            'ipv4_tcp_rewrite_src',
-            [dst, dport]
+        self.pending_conn_writes[version].append(
+            self.conn_table.add(
+                [dip, dipport, src, sport, proto],
+                'ipv4_tcp_rewrite_src',
+                [dst, dport]
+            )
         )
 
+    @defer.inlineCallbacks
+    def commit(self):
+        # Commit will overwrite next_version, so I wait for all conn_table
+        # writes of next_version to complete before rolling over.
+        yield defer.DeferredList(
+            self.pending_conn_writes[self.vips.next_version],
+            fireOnOneErrback=True
+        )
+        self.pending_conn_writes[self.vips.next_version] = []
+        yield LoadBalancerAtomic.commit(self)
 
 ##### The rest of this file is here for compatibility with old tests only. #####
 

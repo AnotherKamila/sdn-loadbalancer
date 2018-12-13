@@ -23,11 +23,10 @@ class SnifferThread(Thread):
     @print_method_call
     def run(self):
         sniff(iface=self.iface, prn=self.consume_packet)
-        # sniff(iface=self.iface, prn=lambda x: x.summary())
 
     def consume_packet(self, raw_packet):
         packet = Ether(str(raw_packet))
-        print('received packet: {} +++ {}'.format(packet.summary(), packet.type))
+        # print('received packet: {} +++ {}'.format(packet.summary(), packet.type))
 
         if packet.type == p4settings['ETHERTYPE_CPU']:
             self.reactor.callFromThread(self.shared_queue.put, packet)

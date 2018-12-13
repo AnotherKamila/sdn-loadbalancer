@@ -11,9 +11,9 @@ from controller.l4_loadbalancer import LoadBalancer
 def demo(reactor):
     server_hosts = [
         ('h1', 9000),
-        # ('h1', 9001),
-        # ('h2', 9002),
-        # ('h2', 9003),
+        ('h1', 9001),
+        ('h2', 9002),
+        ('h2', 9003),
     ]
     servers = yield all_results([
         remote_module('myutils.server', port, host=host)
@@ -43,6 +43,7 @@ def demo(reactor):
 
     nconns = yield servers[0].callRemote('get_conn_count')
     assert nconns == 5
+
 
 if __name__ == '__main__':
     try:
