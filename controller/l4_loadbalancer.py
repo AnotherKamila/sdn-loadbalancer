@@ -195,9 +195,13 @@ class LoadLoadBalancer(LoadBalancer):
     def __init__(self, sw_name, get_load, *args, **kwargs):
         LoadBalancer.__init__(self, sw_name, *args, **kwargs)
         self.get_load = get_load
+        self.adjust_weights_loop = task.LoopingCall(self.adjust_weights)
 
     def get_weight(self, dip, port):
         return 47
+
+    def adjust_weights(self):
+        pass
 
 
 ##### The rest of this file is here for compatibility with old tests only. #####
