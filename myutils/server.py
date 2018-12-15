@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 from twisted.internet.protocol import Protocol, Factory
-from twisted.internet          import defer
+from twisted.internet          import defer, task
 from twisted.spread            import pb
 import attr
 import sys
@@ -21,13 +21,18 @@ class ConnCounterProtocol(Protocol, object):
         self.transport.write(data)
 
     def connectionLost(self, reason):
-        self.factory.conn_counter.load -= 1.0/self.factory.load_factor  # this doesn't simulate _average_ load, but immediate one, but whatever :D
+        self.factory.conn_counter.load -= 1.0/self.factory.load_factor
 
 
 class ConnCounter(pb.Root, object):
     def __init__(self, *args, **kwargs):
         self.count = 0
         self.load  = 0.3
+        self.load_samples = [0]*20
+
+    def sample_load(self):
+        self.load_samples.pop(0)
+        self.load_samples.append(self.load)
 
     @raise_all_exceptions_on_client
     def remote_get_conn_count(self):
@@ -35,7 +40,7 @@ class ConnCounter(pb.Root, object):
 
     @raise_all_exceptions_on_client
     def remote_get_load(self):
-        return self.load
+        return sum(self.load_samples)/len(self.load_samples)
 
     @raise_all_exceptions_on_client
     def remote_reset_conn_count(self):
@@ -53,6 +58,8 @@ def main():
     f.conn_counter = conn_counter
     f.load_factor  = load_factor
     reactor.listenTCP(serverport, f)
+    load_sampler = task.LoopingCall(conn_counter.sample_load)
+    load_sampler.start(0.5)
 
     reactor.run()
 
