@@ -8,9 +8,53 @@ from myutils import all_results
 from myutils.twisted_utils import sleep
 from myutils.remote_utils import remote_module, kill_all_my_children
 from controller.l4_loadbalancer import LoadLoadBalancer
+from datetime import datetime
+
+from twisted.internet import stdio
+from twisted.protocols import basic
+import os
+
+class WaitForLines(basic.LineReceiver):
+    delimiter = os.linesep
+
+    def reset(self):
+        self.line_received = defer.Deferred()
+
+    def connectionMade(self):
+        self.reset()
+
+    def lineReceived(self, line):
+        callback = self.line_received.callback
+        self.reset()
+        callback(line)
+
+
+def setup_graph(server_IPs, lb):
+    servers = [s for ip,s in sorted(server_IPs.items())]
+
+    with open('./data.tsv', 'w') as f: pass  # the easiest way to truncate it :D
+    demo_start = datetime.now()
+
+    @defer.inlineCallbacks
+    def update_graph():
+        weights = [lb.get_weight(ip,p) for (ip,p) in server_IPs.keys()]
+        loads   = yield all_results([server.callRemote('get_load')       for server in servers])
+        conns   = yield all_results([server.callRemote('get_conn_count') for server in servers])
+        now     = (datetime.now() - demo_start).total_seconds()
+
+        data = [now]+weights+loads+conns
+        with open('./data.tsv', 'a') as f:
+            f.write('{}\n'.format('\t'.join([str(x) for x in data])))
+            f.flush()
+
+    graph_loop = task.LoopingCall(update_graph)
+    graph_loop.start(0.5)
+
 
 @defer.inlineCallbacks
 def demo(reactor):
+    lines = WaitForLines()
+    stdio.StandardIO(lines)
 
     ##### Preparation ################################################################
 
@@ -18,9 +62,9 @@ def demo(reactor):
     server_hosts = [
         # host, port, num CPUs
         ('h1', 9000, 1),
-        ('h1', 9001, 1),
-        ('h2', 9002, 2),
-        ('h3', 9003, 4),
+        ('h1', 9001, 2),
+        ('h2', 9002, 4),
+        ('h3', 9003, 6),
     ]
 
     # Run the server and client programs and get a "remote control" to them.
@@ -58,6 +102,13 @@ def demo(reactor):
 
     ##### Now the fun begins #########################################################
 
+    setup_graph(server_IPs, lb)
+
+    print()
+    print('--------------------- press Enter to continue ---------------------------')
+    yield lines.line_received
+    print()
+
     print()
     print('-------------------------- starting demo --------------------------------')
     print()
@@ -76,28 +127,13 @@ def demo(reactor):
         yield clients[1].callRemote('start_echo_clients', '10.0.0.1', 8000, count=20)
         reactor.callLater(2, clients[1].callRemote, 'close_all_connections')
 
-    # Run client0 every 12 seconds.
+    # Run client0 every 13 seconds.
     client0_loop = task.LoopingCall(client0)
-    client0_loop.start(12)
+    client0_loop.start(13)
 
-    # Run client1 every 3 seconds.
+    # Run client1 every 4 seconds.
     client1_loop = task.LoopingCall(client1)
-    client1_loop.start(3)
-
-
-    ##### and don't forget to make pretty graphs :-) #################################
-
-    @defer.inlineCallbacks
-    def update_graph():
-        weights = [lb.get_weight(ip,p) for (ip,p) in server_IPs.keys()]
-        loads   = yield all_results([server.callRemote('get_load')       for server in servers])
-        conns   = yield all_results([server.callRemote('get_conn_count') for server in servers])
-        print('!!!', loads)
-        print('!!!', weights)
-        print('!!!', conns)
-
-    graph_loop = task.LoopingCall(update_graph)
-    graph_loop.start(1.0)
+    client1_loop.start(4)
 
 
 if __name__ == '__main__':
