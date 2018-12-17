@@ -46,7 +46,7 @@ class P4Obj:
         return ip.split('/')[0]
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def p4run(request):
     """A fixture to automatically launch `p4run` when running tests.
 
@@ -122,7 +122,7 @@ def p4run(request):
     paranoia()
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def controller(request):
     """Runs our controller for each switch in the topology.
 

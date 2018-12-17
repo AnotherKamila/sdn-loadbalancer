@@ -35,6 +35,7 @@ def test_add_dip(remote_module, p4run):
     # raw_input(' -------------------- PRESS ENTER TO CONTINUE ---------------------- ')
     yield client.callRemote('make_connections', '10.0.0.1', 8000, count=47)
     num_conns = yield server.callRemote('get_conn_count')
+    print('{}/47 connections successful')
     assert num_conns == 47
 
 @pt.inlineCallbacks

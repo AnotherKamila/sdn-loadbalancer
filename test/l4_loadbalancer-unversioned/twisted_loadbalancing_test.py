@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 
 import pytest_twisted as pt
 import pytest
@@ -79,6 +79,7 @@ def test_add_dip(remote_module, p4run):
     print(' --------- check that it worked ---------')
     yield client.callRemote('make_connections', '10.0.0.1', 8000, count=47)
     num_conns = yield server.callRemote('get_conn_count')
+    print('{}/47 connections successful'.format(num_conns))
     assert num_conns == 47
 
 @pt.inlineCallbacks
