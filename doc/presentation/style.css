@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css?family=Lato:400,400i,700,700i&subset=latin-ext');
+@import url('https://fonts.googleapis.com/css?family=PT+Sans:700|Inconsolata:400,700');
+body {font-family: 'Lato', sans-serif; color: #002b36; text-rendering: optimizeLegibility;}
+h1, h2, h3 {font-family: 'PT Sans', sans-serif; color: #586e75;}
+pre, code {font-family: 'Input', 'Inconsolata', monospace; font-size: 0.8em}
+
+li ul {margin: 0.2em 0;}
+.expanded li {margin: 0.5em 0;}
+
+.floatleft {float: left; margin-right: 2em;}
+.floatright {float: right; margin-left: 2em;}
+.small {font-size: 0.8em;}
+.half {width: 50%;}
+.half img {width: 100%;}
+.contrast {
+    background: #002b36;
+    color: #839496;
+}
+.contrast h1,
+.contrast h2,
+.contrast h3 {color: #b3c1c1;}
+.contrast strong {color: #b3c1c1;}
+
+.green {color: #859900;}
+.red {color: #dc322f;}
+.blue {color: #268bd2;}
+.light {color: #839496;}
+.nobold {font-weight: normal;}
+
+.qrcode img {max-width: 150px;}

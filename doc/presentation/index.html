@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SDN presentation: Load balancer</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="asciinema-player.css" />
+    <style type="text/css">
+     <!-- @import url('https://fonts.googleapis.com/css?family=Lobster'); -->
+     .display { font-family: 'Lobster', cursive; font-size: 1.6em; }
+     .remark-slide-content {
+         padding: 1em 3em;
+         font-size: 32px;
+     }
+     .remark-code { font-size: 0.8em; }
+     .remark-inline-code {
+         border: 1px solid #eee;
+         background: #f9f9f9;
+         padding: 0 0.2em;
+     }
+     .remark-slide-content.wide {
+       padding: 0 1em;
+     }
+     .remark-slide-number {font-size: 0.6em;}
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle, contrast
+
+# Load-balancing requests based on server metrics such as system load
+
+Kamila Součková  
+Advanced Topics in Communication Networks  
+2018-12-20
+
+---
+
+class: contrast, expanded
+
+# Aims
+
+1. **Implement a simple L4 load balancer (equal cost):**  
+    rewrites and forwards connections to its _Virtual IP_ (VIP) to one of its multiple _Direct IPs_ (DIPs), i.e. the actual servers
+2. **Be able to choose the _distribution_ of the connections:**  
+    if server 1 is busy, it should get fewer new connections
+
+---
+
+# Simple L4 load balancer
+
+.floatright[.qrcode[![QR code](./img/how-routers-work.svg)]]
+
+* Up to L3: it is a router
+    * simplified implementation: MAC, ARP, and routing table pre-filled by the controller
+    * more details: [How do routers really work?](https://kamila.is/teaching/how-routers-work/)
+* address rewriting on L4:
+    1. match destination {addr, port} ⇒ server pool
+    2. select DIP from pool based on 5-tuple hash
+         (kind of like the ECMP exercise)
+    4. pass to L3
+    5. do the right thing on the return path
+    
+???
+
+also: TCP checksum
+
+---
+
+class: contrast, expanded
+
+# Changing the distribution
+
+Three problems:
+
+1. How to implement load balancing with a given distribution?
+2. Which distribution to choose?
+3. How to dynamically change the distribution while there are active connections?
+
+???
+
+2. is not that interesting
+
+---
+
+class: contrast, expanded
+count: false
+
+# Changing the distribution
+
+Three problems:
+
+1. **How to implement load balancing with a given distribution?**
+2. Which distribution to choose?
+3. How to dynamically change the distribution while there are active connections?
+
+???
+
+2. is not that interesting
+
+---
+
+# Trivial solution
+
+Same as the equal-cost case, only adds the server to the DIP table multiple times:
+
+* add server 1 entry 2x
+* add server 2 entry 3x
+
+⇒ server 1 will get 3/5 of requests, server 2 will get 2/5
+
+Disadvantage: table gets big quickly if we want decent precision
+
+---
+
+# Making the table smaller
+
+How can we conceptually add an entry N times with fewer actual entries?
+
+???
+
+Idea: Instead of using an exact match on the hash, use a prefix match!  
+It's just bit strings, who says they have to be addresses...
+
+--
+
+TODO picture:
+
+[server1, server1, server1, server1, server1] ⇒ tree with 4 + 1
+
+--
+
+.center[![table size \leq \ln \sum weights](./img/latex.svg)]
+
+---
+
+class: contrast, expanded
+count: false
+
+# Changing the distribution
+
+Three problems:
+
+1. How to implement load balancing with a given distribution?
+2. Which distribution to choose?
+3. **How to dynamically change the distribution while there are active connections?**
+
+---
+
+# The problem
+
+explain the problem -- TODO picture -> the one in notes
+
+---
+
+# Not dropping active connections
+
+**Problem:** When the pool changes, the same flow hash can point to a different server.
+
+--
+
+**Fix:** Add connections into a table ⇒ existing connections match and get rewritten immediately
+
+???
+
+get rewritten directly, and don't even need to be hashed  
+
+---
+
+# Outstanding `conn_table` writes
+
+**Problem:** Writes into tables take a long time ⇒ the packets arriving after the SYN and before the table write is completed still need to be sent to the correct server
+
+TODO picture: timeline
+
+--
+
+**Fix:** Keep old versions of the pools, discard a version only after all connections using it have been written into `conn_table`
+
+---
+
+# Determining pool version for a packet
+
+**Problem:** For a given packet, how do we know which old pool version it belongs to (if any)?
+
+--
+
+**Fix:** Use Bloom filters (set membership) to decide if the packet belongs to version _i_.
+
+---
+
+# Bloom filters (1/2)
+
+* hard-code the number of available "version slots" (a small number: I use 4)
+* create a Bloom filter for each version slot
+* check all the Bloom filters in P4 to find the correct version for the packet
+    * preprocessor magic to avoid writing the same function four times
+    
+---
+
+# Bloom filters (2/2)
+
+Cycle through the available version slots:
+
+Controller must keep track of outstanding writes and only overwrite a version when everything is in `conn_table`.
+
+TODO if time allows, mention Twisted (otherwise merge with previous slide)
+maybe just paste the code that does that
+
+---
+
+# Summary: Life of a packet
+
+TODO picture (flow diagram in tablet)
+
+---
+
+# How not to go crazy
+
+1.  Each component is written and tested separately:
+    ```py
+    class Router(IPv4Routing, ArpLazy,
+                    L2SwitchLazy, BaseController):
+        pass  # :D
+    ```
+2. Asynchronous (using the [Twisted](https://twistedmatrix.com/) framework)
+    * easier to handle `conn_table` writes correctly (see before)
+    * makes it much easier to test things
+3. Tests!
+
+???
+
+Cleanly structured code
+
+---
+
+class: wide
+
+# Tests
+
+* integration tests
+* launch `p4run`
+* run and communicate with clients, servers, and controller
+
+```py
+@pt.inlineCallbacks
+def test_add_dip(remote_module, p4run):
+    client, server, lb = # [...]
+    # [...]
+    pool_h = yield lb.add_pool('10.0.0.1', 8000)
+    yield lb.add_dip(pool_h, p4run.topo.get_host_ip('h2'), 8001)
+    # [...]
+    yield client.callRemote('make_connections',
+        '10.0.0.1', 8000, count=47)
+    num_conns = yield server.callRemote('get_conn_count')
+    assert num_conns == 47
+```
+
+---
+
+class: wide
+
+# Tests example: Single run
+
+<asciinema-player src="cast/test-singlerun.cast" speed='0.9' idle-time-limit='3'></asciinema-player>
+
+---
+
+class: wide
+
+# Tests example: Session
+
+<asciinema-player src="cast/test-session.cast" speed='5' idle-time-limit='0.8'></asciinema-player>
+
+---
+
+# Demo
+
+
+
+---
+
+class: center, middle
+
+# Questions?
+
+:-)
+
+
+    </textarea>
+    <script src="remark.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      var slideshow = remark.create();
+    </script>
+
+    <script>
+    var ds = document.getElementsByTagName('asciinema-player');
+    for (var i = 0; i < ds.length; ++i) {
+      var d = ds[i];
+      d.setAttribute('font-size', '0.5em');
+      d.setAttribute('rows', '21');
+    }
+    </script>
+    <script src="asciinema-player.js"></script>
+  </body>
+</html>
