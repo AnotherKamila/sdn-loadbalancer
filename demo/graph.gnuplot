@@ -5,17 +5,17 @@ set xlabel 'time / seconds'
 set xrange [0:240]
 set yrange [0:*]
 
-set title 'Weights'
-plot 'data.tsv' using 1:2  with lines title '1 CPU', \
+set title '{/=32 Weights}'
+plot 'data.tsv' using 1:2  with lines title '1 CPU' , \
      ''         using 1:3  with lines title '2 CPUs', \
-     ''         using 1:4  with lines title '4 CPUs', \
-     ''         using 1:5  with lines title '6 CPUs'
+     ''         using 1:4  with lines title '4 CPUs' lc "blue", \
+     ''         using 1:5  with lines title '6 CPUs' lc "#B03060"
 
-set title 'Loads'
+set title '{/=32 Loads}'
 plot 'data.tsv' using 1:6  with lines title '1 CPU', \
      ''         using 1:7  with lines title '2 CPUs', \
-     ''         using 1:8  with lines title '4 CPUs', \
-     ''         using 1:9  with lines title '6 CPUs'
+     ''         using 1:8  with lines title '4 CPUs' lc "blue", \
+     ''         using 1:9  with lines title '6 CPUs' lc "#B03060"
 
 # set yrange [0:24]
 # set title 'conns'
