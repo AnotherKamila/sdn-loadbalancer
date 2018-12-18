@@ -135,7 +135,33 @@ def test_version_rollover(remote_module, p4run):
         print(' --- now I have: nothing! ---')
         pprint(lb.dips.data)
 
-@pytest.mark.skip(reason="Weights not implemented yet")
+@pt.inlineCallbacks
+def test_weights(remote_module, p4run):
+    """Very basic check: make sure things don't explode."""
+    print(' --------- prepare server, client, and loadbalancer ---------')
+    client, server, lb = yield all_results([
+        remote_module('myutils.client', host='h1'),
+        remote_module('myutils.server', 8001, host='h2'),
+        LoadBalancer.get_initialised('s1', topology_db_file=p4run.topo_path),
+    ])
+    print(' --------- set up the pool ---------')
+    pool_h = yield lb.add_pool('10.0.0.1', 8000)
+    yield lb.add_dip(pool_h, p4run.topo.get_host_ip('h2'), 8001)
+    yield lb.set_dip_weight(pool_h, p4run.topo.get_host_ip('h2'), 8001, 5)
+    yield lb.commit()
+    yield lb.set_dip_weight(pool_h, p4run.topo.get_host_ip('h2'), 8001, 2)
+    yield lb.commit()
+    print(' --------- check that it worked ---------')
+    yield client.callRemote('make_connections', '10.0.0.1', 8000, count=47)
+    num_conns = yield server.callRemote('get_conn_count')
+    print('{}/47 connections successful')
+    assert num_conns == 47
+    yield lb.set_dip_weight(pool_h, p4run.topo.get_host_ip('h2'), 8001, 0)
+    yield lb.set_dip_weight(pool_h, p4run.topo.get_host_ip('h2'), 8001, 3)
+    yield lb.commit()
+
+
+@pytest.mark.skip(reason="Flaky and weird")
 @pt.inlineCallbacks
 def test_weighted_balancing(remote_module, p4run):
     NUM_CONNS = 1000
