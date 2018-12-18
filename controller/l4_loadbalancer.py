@@ -6,6 +6,7 @@ from controller.l3_router_lazy          import Router
 from controller.settings                import load_pools, p4settings
 from controller.p4table                 import P4Table, VersionedP4Table
 from myutils.twisted_utils              import print_method_call
+from myutils import all_results
 from pprint import pprint
 import scapy.all as scapy
 
@@ -32,8 +33,8 @@ class LoadBalancerUnversioned(Router):
         # pool => ipv4_tcp_rewrite_src saddr sport
         self.vips_inverse = P4Table(self.controller, 'ipv4_vips_inverse')
 
-        self.pool_IPs      = {}  # pool => (vip, vport)
-        self.pool_contents = {}  # pool => { (dip, dport) => hash }
+        self.pool_IPs    = {}  # pool => (vip, vport)
+        self.pool_hashes = {}  # pool => { (dip, dport) => [hash] }
 
     @print_method_call
     @defer.inlineCallbacks
@@ -42,48 +43,65 @@ class LoadBalancerUnversioned(Router):
         yield self.vips.add([vip, vport], 'set_dip_pool', [pool, 0])
         yield self.vips_inverse.add([pool], 'ipv4_tcp_rewrite_src', [vip, vport])
         self.pool_IPs[pool] = (vip, vport)
-        self.pool_contents[pool] = {}
+        self.pool_hashes[pool] = {}
         defer.returnValue(pool)
 
     @print_method_call
     @defer.inlineCallbacks
     def add_dip(self, pool, dip, dport):
-        # TODO maybe the API shouldn't use pool handles, just (host, port) tuples
-        next_hash = len(self.pool_contents[pool])
-        yield self.dips.add([pool, next_hash], 'ipv4_tcp_rewrite_dst', [dip, dport])
+        self.pool_hashes[pool][(dip, dport)] = []
         yield self.dips_inverse.add([dip, dport], 'set_dip_pool_idonly', [pool])
-        self.pool_contents[pool][(dip, dport)] = next_hash
+        yield self.set_dip_weight(pool, dip, dport, 1)  # default to 1
+
+    def get_dip_weight(self, pool, dip, dport):
+        return len(self.pool_hashes[pool][(dip, dport)])
+
+    @print_method_call
+    @defer.inlineCallbacks
+    def set_dip_weight(self, pool, dip, dport, weight):
+        diff = weight - self.get_dip_weight(pool, dip, dport)
+        # do we want to add or remove?
+        fn = self._inc_dip_weight if diff > 0 else self._dec_dip_weight
+        for i in range(abs(diff)): yield fn(pool, dip, dport)
         yield self._set_pool_size(pool)
+
+    def get_pool_size(self, pool):
+        return sum(len(hashlist) for hashlist in self.pool_hashes[pool].values())
+
+    @print_method_call
+    @defer.inlineCallbacks
+    def _inc_dip_weight(self, pool, dip, dport):
+        next_hash = self.get_pool_size(pool)
+        yield self.dips.add([pool, next_hash], 'ipv4_tcp_rewrite_dst', [dip, dport])
+        self.pool_hashes[pool][(dip, dport)].append(next_hash)
+
+    @print_method_call
+    @defer.inlineCallbacks
+    def _dec_dip_weight(self, pool, dip, dport):
+        # In order to not mess up hashes, I need to swap this with the last one
+        # instead of just deleting it.
+        size      = self.get_pool_size(pool)
+        last_hash = size - 1
+        my_hash   = self.pool_hashes[pool][(dip, dport)].pop()
+        if my_hash != last_hash:
+            # Exchange last_hash and my_hash:
+            # last_hash needs to go away, my_hash will be reused for that other dip
+            last_dip, last_dport  = self.dips[(pool, last_hash)][1]
+            self.pool_hashes[pool][(last_dip, last_dport)].remove(last_hash)
+            self.pool_hashes[pool][(last_dip, last_dport)].append(my_hash)
+            yield self.dips.modify([pool, my_hash], 'ipv4_tcp_rewrite_dst', [last_dip, last_dport])
+        yield self.dips.rm([pool, last_hash])
 
     @print_method_call
     @defer.inlineCallbacks
     def rm_dip(self, pool, dip, dport):
-        # TODO I could probably save myself some awfulness by wanting a handle instead of dip and dport.
-        if (dip, dport) not in self.pool_contents[pool]:
-            raise ValueError("{}:{}: no such DIP in pool {}:{}".format(dip, dport, *self.pool_IPs[pool]))
-        # In order to not mess up hashes, I need to swap this with the last one
-        # instead of just deleting it.
-        size      = len(self.pool_contents[pool])
-        my_hash   = self.pool_contents[pool][(dip, dport)]
-        last_hash = size - 1
-        last_dip, last_dport  = self.dips[(pool, last_hash)][1]
-        # First decrease size => don't leave the tables in a weird state
-        self._set_pool_size(pool, size - 1)
-        if my_hash != last_hash:
-            yield self.dips.modify([pool, my_hash], 'ipv4_tcp_rewrite_dst', [last_dip, last_dport])
-            self.pool_contents[pool][(last_dip, last_dport)] = my_hash
-        yield self.dips.rm([pool, last_hash])
+        yield self.set_dip_weight(pool, dip, dport, 0)  # remove all of them
         yield self.dips_inverse.rm([dip, dport])
-        del self.pool_contents[pool][(dip, dport)]
-
-    # @defer.inlineCallbacks
-    def set_weight(self, dip, dport, weight):
-        pass  # TODO
 
     @print_method_call
     @defer.inlineCallbacks
     def _set_pool_size(self, pool, size=None):
-        if not size: size = len(self.pool_contents[pool])
+        if not size: size = self.get_pool_size(pool)
         print("modifying size for pool {} ({}) => {}".format(self.pool_IPs[pool], pool, size))
         yield self.vips.modify(self.pool_IPs[pool], 'set_dip_pool', [pool, size])
 
