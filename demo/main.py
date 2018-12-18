@@ -58,18 +58,14 @@ def demo(reactor):
     pool_handle = yield lb.add_pool('10.0.0.1', 8000)
     for ip, port in server_IPs.keys():
         yield lb.add_dip(pool_handle, ip, port)
-
     yield lb.commit()
-    # yield lb.adjust_weights()
-    # lb.start_loop()
-
 
     ##### Now the fun begins #########################################################
 
     setup_graph(server_IPs, lb)
 
     print()
-    print('--------------------- press Enter to continue ---------------------------')
+    print('--------------------- press Enter to start clients ----------------------')
     yield lines.line_received
     print()
 
@@ -101,6 +97,11 @@ def demo(reactor):
     client1_loop = task.LoopingCall(client1)
     client1_loop.start(4)
 
+
+    print('---------------- press Enter to start adjusting weights ----------------')
+    yield lines.line_received
+
+    lb.start_loop()
 
 if __name__ == '__main__':
     try:

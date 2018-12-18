@@ -207,7 +207,7 @@ class LoadBalancer(LoadBalancerAtomic):
         yield LoadBalancerAtomic.commit(self)
 
 
-BUCKETS_PER_POOL = 64
+BUCKETS_PER_POOL = 32
 
 class MetricsLoadBalancer(LoadBalancer):
     """Periodically queries the servers for load and adjusts weights accordingly.
@@ -237,17 +237,17 @@ class MetricsLoadBalancer(LoadBalancer):
     @defer.inlineCallbacks
     def adjust_weights(self):
         for pool, dips in self.pool_hashes.items():
-            # print('++++++++ {} +++++++++'.format(dips.keys()))
             loads = yield all_results([
                 defer.maybeDeferred(self.get_metrics, *dip)
                 for dip in dips.keys()
             ])
             wanted_weights = self.metrics_to_weights(loads)
             for (dip, dport), wanted_weight in zip(dips.keys(), wanted_weights):
+                print(dip, dport, wanted_weight)
                 yield self.set_dip_weight(pool, dip, dport, wanted_weight)
         yield self.commit()
 
-    def start_loop(self, seconds=5):
+    def start_loop(self, seconds=2):
         self.adjust_weights_loop.start(seconds)
 
 ##### The rest of this file is here for compatibility with old tests only. #####
