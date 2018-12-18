@@ -3,53 +3,14 @@
 from __future__ import print_function
 
 from p4utils.utils.topology import Topology
-from twisted.internet import defer, task
+from twisted.internet import defer, task, stdio
 from myutils import all_results
-from myutils.twisted_utils import sleep
+from myutils.twisted_utils import sleep, WaitForLines
 from myutils.remote_utils import remote_module, kill_all_my_children
-from controller.l4_loadbalancer import LoadLoadBalancer
-from datetime import datetime
+from controller.l4_loadbalancer import MetricsLoadBalancer
+from demo.utils import setup_graph
 
-from twisted.internet import stdio
-from twisted.protocols import basic
-import os
-
-class WaitForLines(basic.LineReceiver):
-    delimiter = os.linesep
-
-    def reset(self):
-        self.line_received = defer.Deferred()
-
-    def connectionMade(self):
-        self.reset()
-
-    def lineReceived(self, line):
-        callback = self.line_received.callback
-        self.reset()
-        callback(line)
-
-
-def setup_graph(server_IPs, lb):
-    servers = [s for ip,s in sorted(server_IPs.items())]
-
-    with open('./data.tsv', 'w') as f: pass  # the easiest way to truncate it :D
-    demo_start = datetime.now()
-
-    @defer.inlineCallbacks
-    def update_graph():
-        weights = [lb.get_weight(ip,p) for (ip,p) in server_IPs.keys()]
-        loads   = yield all_results([server.callRemote('get_load')       for server in servers])
-        conns   = yield all_results([server.callRemote('get_conn_count') for server in servers])
-        now     = (datetime.now() - demo_start).total_seconds()
-
-        data = [now]+weights+loads+conns
-        with open('./data.tsv', 'a') as f:
-            f.write('{}\n'.format('\t'.join([str(x) for x in data])))
-            f.flush()
-
-    graph_loop = task.LoopingCall(update_graph)
-    graph_loop.start(0.5)
-
+defer.setDebugging(True)
 
 @defer.inlineCallbacks
 def demo(reactor):
@@ -64,7 +25,7 @@ def demo(reactor):
         ('h1', 9000, 1),
         ('h1', 9001, 2),
         ('h2', 9002, 4),
-        ('h3', 9003, 6),
+        ('h2', 9003, 6),
     ]
 
     # Run the server and client programs and get a "remote control" to them.
@@ -84,20 +45,23 @@ def demo(reactor):
         for (h, p, _), remote in zip(server_hosts, servers)
     }
 
-    # Run my load balancer controller and teach it how to get load from the
-    # servers.
+    # Teach my load balancer controller how to get load from the servers.
     # In real life I could be e.g. SSHing into the servers, or using my
     # monitoring infrastructure.
-    lb = yield LoadLoadBalancer.get_initialised(
-        's1',
-        get_load=lambda ip, p: server_IPs[(ip, p)].callRemote('get_load')
-    )
+    def get_load(ip, port):
+        return server_IPs[(ip, port)].callRemote('get_load')
+
+    # And start the controller.
+    lb = yield MetricsLoadBalancer.get_initialised('s1', get_metrics=get_load)
 
     # Create a server pool on the loadbalancer.
     pool_handle = yield lb.add_pool('10.0.0.1', 8000)
     for ip, port in server_IPs.keys():
         yield lb.add_dip(pool_handle, ip, port)
+
     yield lb.commit()
+    # yield lb.adjust_weights()
+    # lb.start_loop()
 
 
     ##### Now the fun begins #########################################################
@@ -118,14 +82,16 @@ def demo(reactor):
         """Client 0 will send long-running requests: closes after 10 seconds."""
         print('client0 running')
         yield clients[0].callRemote('start_echo_clients', '10.0.0.1', 8000, count=5)
-        reactor.callLater(10, clients[0].callRemote, 'close_all_connections')
+        yield sleep(10)
+        yield clients[0].callRemote('close_all_connections')
 
     @defer.inlineCallbacks
     def client1():
-        print('client1 running')
         """Client 1 will send bursts of short connections (2s)."""
+        print('client1 running')
         yield clients[1].callRemote('start_echo_clients', '10.0.0.1', 8000, count=20)
-        reactor.callLater(2, clients[1].callRemote, 'close_all_connections')
+        yield sleep(2)
+        yield clients[1].callRemote('close_all_connections')
 
     # Run client0 every 13 seconds.
     client0_loop = task.LoopingCall(client0)

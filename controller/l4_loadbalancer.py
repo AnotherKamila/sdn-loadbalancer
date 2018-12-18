@@ -207,20 +207,48 @@ class LoadBalancer(LoadBalancerAtomic):
         yield LoadBalancerAtomic.commit(self)
 
 
-# FIXME
-class LoadLoadBalancer(LoadBalancer):
-    """Periodically queries the servers for load and adjusts weights accordingly."""
-    def __init__(self, sw_name, get_load, *args, **kwargs):
+BUCKETS_PER_POOL = 64
+
+class MetricsLoadBalancer(LoadBalancer):
+    """Periodically queries the servers for load and adjusts weights accordingly.
+
+    @param get_metrics: function: (dip, port) -> something
+
+    @param metrics_to_weights: function [something] -> [int]
+           Determines the behavior: what weights do we assign given these loads?
+
+           This is the application-specific behavior that you'll want to change.
+           Pass the metrics_to_weights parameter to init to override this.
+    """
+    def __init__(self, sw_name, get_metrics, metrics_to_weights=None, *args, **kwargs):
         LoadBalancer.__init__(self, sw_name, *args, **kwargs)
-        self.get_load = get_load
+        self.get_metrics = get_metrics
+        self.metrics_to_weights = metrics_to_weights or self.default_metrics_to_weights
         self.adjust_weights_loop = task.LoopingCall(self.adjust_weights)
 
-    def get_weight(self, dip, port):
-        return 47
+    def default_metrics_to_weights(self, loads):
+        relative_weights = [1.0/load for load in loads]
+        return [
+            int(BUCKETS_PER_POOL * weight / sum(relative_weights))
+            for weight in relative_weights
+        ]
 
+    @print_method_call
+    @defer.inlineCallbacks
     def adjust_weights(self):
-        pass
+        for pool, dips in self.pool_hashes.items():
+            # print('++++++++ {} +++++++++'.format(dips.keys()))
+            loads = yield all_results([
+                defer.maybeDeferred(self.get_metrics, *dip)
+                for dip in dips.keys()
+            ])
+            wanted_weights = self.metrics_to_weights(loads)
+            for (dip, dport), wanted_weight in zip(dips.keys(), wanted_weights):
+                yield self.set_dip_weight(pool, dip, dport, wanted_weight)
+        yield self.commit()
 
+    def start_loop(self, seconds=5):
+        self.adjust_weights_loop.start(seconds)
 
 ##### The rest of this file is here for compatibility with old tests only. #####
 

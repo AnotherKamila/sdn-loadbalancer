@@ -220,7 +220,7 @@ control MyIngress(inout headers hdr,
             NoAction;
         }
         default_action = NoAction();
-        size = DIP_TABLE_SIZE;
+        size = VIP_TABLE_SIZE;
     }
 
     /************************* L3 / ROUTING ******************************/

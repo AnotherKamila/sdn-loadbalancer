@@ -1,5 +1,7 @@
 import functools
 from twisted.internet import defer, task
+from twisted.protocols import basic
+import os
 
 def print_method_call(f):
     @functools.wraps(f)
@@ -28,3 +30,18 @@ def sleep(seconds):
     Put a yield in front."""
     from twisted.internet import reactor
     return task.deferLater(reactor, seconds, (lambda: None))
+
+
+class WaitForLines(basic.LineReceiver):
+    delimiter = os.linesep
+
+    def reset(self):
+        self.line_received = defer.Deferred()
+
+    def connectionMade(self):
+        self.reset()
+
+    def lineReceived(self, line):
+        callback = self.line_received.callback
+        self.reset()
+        callback(line)
