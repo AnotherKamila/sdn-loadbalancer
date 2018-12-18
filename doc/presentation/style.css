@@ -28,3 +28,5 @@ li ul {margin: 0.2em 0;}
 .nobold {font-weight: normal;}
 
 .qrcode img {max-width: 150px;}
+
+.fullwidth img {width: 90%; position: relative; top: -1ex;}

@@ -61,7 +61,7 @@ class: contrast, expanded
          (kind of like the ECMP exercise)
     4. pass to L3
     5. do the right thing on the return path
-    
+
 ???
 
 also: TCP checksum
@@ -76,6 +76,19 @@ Three problems:
 
 1. How to implement load balancing with a given distribution?
 2. Which distribution to choose?
+3. How to dynamically change the distribution while there are active connections?
+
+---
+
+class: contrast, expanded
+count: false
+
+# Changing the distribution
+
+Three problems:
+
+1. How to implement load balancing with a given distribution?
+2. Which distribution to choose? ⇒ not SDN
 3. How to dynamically change the distribution while there are active connections?
 
 ???
@@ -196,7 +209,7 @@ TODO picture: timeline
 * create a Bloom filter for each version slot
 * check all the Bloom filters in P4 to find the correct version for the packet
     * preprocessor magic to avoid writing the same function four times
-    
+
 ---
 
 # Bloom filters (2/2)
@@ -210,9 +223,11 @@ maybe just paste the code that does that
 
 ---
 
+class: wide
+
 # Summary: Life of a packet
 
-TODO picture (flow diagram in tablet)
+.center[.fullwidth[![flow diagram](./img/flow.svg)]]
 
 ---
 
@@ -271,7 +286,7 @@ class: wide
 
 # Tests example: Session
 
-<asciinema-player src="cast/test-session.cast" speed='5' idle-time-limit='0.8'></asciinema-player>
+<asciinema-player src="cast/test-session2.cast" speed='5' idle-time-limit='0.8'></asciinema-player>
 
 ---
 

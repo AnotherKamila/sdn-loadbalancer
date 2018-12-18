@@ -26,7 +26,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
-     inkscape:cx="82.272488"
+     inkscape:cx="527.02883"
      inkscape:cy="487.59627"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -58,7 +58,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -127,7 +127,7 @@
            height="97.14286"
            x="4.2857141"
            y="305.93362" /></flowRegion><flowPara
-         id="flowPara4164"></flowPara></flowRoot>    <g
+         id="flowPara4164" /></flowRoot>    <g
        id="g4177"
        transform="translate(190.35714,-474.28571)">
       <rect
