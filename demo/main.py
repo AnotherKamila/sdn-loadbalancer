@@ -25,7 +25,7 @@ def demo(reactor):
         ('h1', 9000, 1),
         ('h1', 9001, 2),
         ('h2', 9002, 4),
-        ('h2', 9003, 6),
+        ('h2', 9003, 8),
     ]
 
     # Run the server and client programs and get a "remote control" to them.
@@ -49,7 +49,7 @@ def demo(reactor):
     # In real life I could be e.g. SSHing into the servers, or using my
     # monitoring infrastructure.
     def get_load(ip, port):
-        return server_IPs[(ip, port)].callRemote('get_load')
+        return server_IPs[(ip, port)].callRemote('get_load', 20)
 
     # And start the controller.
     lb = yield MetricsLoadBalancer.get_initialised('s1', get_metrics=get_load)
@@ -62,7 +62,7 @@ def demo(reactor):
 
     ##### Now the fun begins #########################################################
 
-    setup_graph(server_IPs, lb)
+    setup_graph(server_IPs, lb, 10)
 
     print()
     print('--------------------- press Enter to start clients ----------------------')

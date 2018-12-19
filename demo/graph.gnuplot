@@ -3,7 +3,7 @@ set term x11 enhanced font 'bitstream charter,28' lw 4
 set multiplot layout 2,1
 set xlabel 'time / seconds'
 set offsets 0, 0, 1, 0
-set xrange [0:120]
+set xrange [0:180]
 set yrange [0:*]
 
 set title '{/=32 Load averages (over 10 seconds)}'

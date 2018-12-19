@@ -42,8 +42,9 @@ class ConnCounter(pb.Root, object):
         return self.count
 
     @raise_all_exceptions_on_client
-    def remote_get_load(self):
-        return sum(self.load_samples)/len(self.load_samples)
+    def remote_get_load(self, average_over=10):
+        num_samples = int(float(average_over)/LOAD_SAMPLING_INTERVAL)
+        return sum(self.load_samples[-num_samples:])/num_samples
 
     @raise_all_exceptions_on_client
     def remote_reset_conn_count(self):
