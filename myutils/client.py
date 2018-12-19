@@ -10,9 +10,9 @@ from warnings import warn
 import sys
 from myutils import raise_all_exceptions_on_client
 
-CONN_RATE = 500  # connections per second
+CONN_RATE = 300  # connections per second
 # actually switch cares about pps, starts dropping at 10kpps => lower if you start sending more stuff
-DATA_RATE = 10  # bytes/s
+DATA_RATE = 8  # bytes/s
 
 defer.setDebugging(True)
 

@@ -4,7 +4,7 @@ from myutils import all_results
 
 POOL_HANDLE = 0  # assume we want graphs for pool 0
 
-def setup_graph(server_IPs, lb):
+def setup_graph(server_IPs, lb, loadavg=10):
     servers = [s for ip,s in sorted(server_IPs.items())]
 
     with open('./data.tsv', 'w') as f: pass  # the easiest way to truncate it :D
@@ -12,9 +12,9 @@ def setup_graph(server_IPs, lb):
 
     @defer.inlineCallbacks
     def update_graph():
-        weights = [lb.get_dip_weight(POOL_HANDLE, ip,p) for (ip,p) in server_IPs.keys()]
-        loads   = yield all_results([server.callRemote('get_load')       for server in servers])
-        conns   = yield all_results([server.callRemote('get_conn_count') for server in servers])
+        weights = [lb.get_dip_weight(POOL_HANDLE, ip,p) for (ip,p) in sorted(server_IPs.keys())]
+        loads   = yield all_results([server.callRemote('get_load', loadavg) for server in servers])
+        conns   = yield all_results([server.callRemote('get_conn_count')    for server in servers])
         now     = (datetime.now() - demo_start).total_seconds()
 
         data = [now]+weights+loads+conns

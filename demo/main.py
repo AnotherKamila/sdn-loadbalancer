@@ -4,6 +4,7 @@ from __future__ import print_function
 
 from p4utils.utils.topology import Topology
 from twisted.internet import defer, task, stdio
+from twisted.python import failure
 from myutils import all_results
 from myutils.twisted_utils import sleep, WaitForLines
 from myutils.remote_utils import remote_module, kill_all_my_children
@@ -11,6 +12,7 @@ from controller.l4_loadbalancer import MetricsLoadBalancer
 from demo.utils import setup_graph
 
 defer.setDebugging(True)
+# failure.startDebugMode()
 
 @defer.inlineCallbacks
 def demo(reactor):
@@ -50,9 +52,13 @@ def demo(reactor):
     # monitoring infrastructure.
     def get_load(ip, port):
         return server_IPs[(ip, port)].callRemote('get_load', 20)
+    def set_weights(loads):
+        return [1.0/load for load in loads]
 
     # And start the controller.
-    lb = yield MetricsLoadBalancer.get_initialised('s1', get_metrics=get_load)
+    lb = yield MetricsLoadBalancer.get_initialised('s1',
+                                                   get_metrics=get_load,
+                                                   metrics_to_weights=set_weights)
 
     # Create a server pool on the loadbalancer.
     pool_handle = yield lb.add_pool('10.0.0.1', 8000)
@@ -77,7 +83,7 @@ def demo(reactor):
     def client0():
         """Client 0 will send long-running requests: closes after 10 seconds."""
         print('client0 running')
-        yield clients[0].callRemote('start_echo_clients', '10.0.0.1', 8000, count=5)
+        yield clients[0].callRemote('start_echo_clients', '10.0.0.1', 8000, count=4)
         yield sleep(10)
         yield clients[0].callRemote('close_all_connections')
 
@@ -95,7 +101,7 @@ def demo(reactor):
 
     # Run client1 every 4 seconds.
     client1_loop = task.LoopingCall(client1)
-    client1_loop.start(4)
+    client1_loop.start(3)
 
 
     print('---------------- press Enter to start adjusting weights ----------------')

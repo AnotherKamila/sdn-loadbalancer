@@ -9,7 +9,7 @@ import sys
 
 from myutils import remote_all_the_things, raise_all_exceptions_on_client
 
-LOAD_AVERAGE_WINDOW    = 15   # seconds
+LOAD_AVERAGE_WINDOW    = 30   # seconds
 LOAD_SAMPLING_INTERVAL = 0.2  # seconds
 
 from twisted.internet import reactor
@@ -30,8 +30,8 @@ class ConnCounterProtocol(Protocol, object):
 class ConnCounter(pb.Root, object):
     def __init__(self, *args, **kwargs):
         self.count = 0
-        self.load  = 0.3
-        self.load_samples = [0.3]*int(float(LOAD_AVERAGE_WINDOW)/LOAD_SAMPLING_INTERVAL)
+        self.load  = 0.1
+        self.load_samples = [0.1]*int(float(LOAD_AVERAGE_WINDOW)/LOAD_SAMPLING_INTERVAL)
 
     def sample_load(self):
         self.load_samples.pop(0)

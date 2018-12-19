@@ -208,7 +208,6 @@ class LoadBalancer(LoadBalancerAtomic):
 
 
 BUCKETS_PER_POOL = 30
-DAMPING          = 0.3
 
 class MetricsLoadBalancer(LoadBalancer):
     """Periodically queries the servers for load and adjusts weights accordingly.
@@ -224,32 +223,30 @@ class MetricsLoadBalancer(LoadBalancer):
     def __init__(self, sw_name, get_metrics, metrics_to_weights=None, *args, **kwargs):
         LoadBalancer.__init__(self, sw_name, *args, **kwargs)
         self.get_metrics = get_metrics
-        self.metrics_to_weights = metrics_to_weights or self.default_metrics_to_weights
+        self.metrics_to_weights = metrics_to_weights
         self.adjust_weights_loop = task.LoopingCall(self.adjust_weights)
 
-    def default_metrics_to_weights(self, loads):
-        relative_weights = [1.0/load for load in loads]
+    def normalise(self, weights):
         return [
-            int(BUCKETS_PER_POOL * weight / sum(relative_weights))
-            for weight in relative_weights
+            int((BUCKETS_PER_POOL * weight) / sum(weights))
+            for weight in weights
         ]
 
     @print_method_call
     @defer.inlineCallbacks
     def adjust_weights(self):
-        for pool, dips in self.pool_hashes.items():
+        for pool, dips_ in self.pool_hashes.items():
+            dips = sorted(dips_.keys())
             loads = yield all_results([
                 defer.maybeDeferred(self.get_metrics, *dip)
-                for dip in dips.keys()
+                for dip in dips
             ])
-            previous = [self.get_dip_weight(pool, *dip) for dip in dips.keys()]
-            wanted = self.metrics_to_weights(loads)
-            damped = [DAMPING*w + (1-DAMPING)*p for (w, p) in zip(wanted, previous)]
-            for (dip, dport), w in zip(dips.keys(), wanted):
+            wanted = self.normalise(self.metrics_to_weights(loads))
+            for (dip, dport), w in zip(dips, wanted):
                 yield self.set_dip_weight(pool, dip, dport, w)
         yield self.commit()
 
-    def start_loop(self, seconds=0.8):
+    def start_loop(self, seconds=1.0):
         self.adjust_weights_loop.start(seconds)
 
 ##### The rest of this file is here for compatibility with old tests only. #####
