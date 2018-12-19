@@ -19,7 +19,7 @@ def demo(reactor):
     lines = WaitForLines()
     stdio.StandardIO(lines)
 
-    ##### Preparation ################################################################
+    ##### Preparation #######################################################
 
     # These are our servers.
     server_hosts = [
@@ -56,9 +56,11 @@ def demo(reactor):
         return [1.0/load for load in loads]
 
     # And start the controller.
-    lb = yield MetricsLoadBalancer.get_initialised('s1',
-                                                   get_metrics=get_load,
-                                                   metrics_to_weights=set_weights)
+    lb = yield MetricsLoadBalancer.get_initialised(
+        's1',
+        get_metrics=get_load,
+        metrics_to_weights=set_weights
+    )
 
     # Create a server pool on the loadbalancer.
     pool_handle = yield lb.add_pool('10.0.0.1', 8000)
@@ -66,18 +68,12 @@ def demo(reactor):
         yield lb.add_dip(pool_handle, ip, port)
     yield lb.commit()
 
-    ##### Now the fun begins #########################################################
+    ##### Now the fun begins ################################################
 
     setup_graph(server_IPs, lb, 10)
 
-    print()
-    print('--------------------- press Enter to start clients ----------------------')
+    print('---------------- press Enter to start clients -----------------')
     yield lines.line_received
-    print()
-
-    print()
-    print('-------------------------- starting demo --------------------------------')
-    print()
 
     @defer.inlineCallbacks
     def client0():
@@ -96,13 +92,10 @@ def demo(reactor):
         yield clients[1].callRemote('close_all_connections')
 
     # Run client0 every 13 seconds.
-    client0_loop = task.LoopingCall(client0)
-    client0_loop.start(13)
+    task.LoopingCall(client0).start(13)
 
     # Run client1 every 4 seconds.
-    client1_loop = task.LoopingCall(client1)
-    client1_loop.start(3)
-
+    task.LoopingCall(client1).start(3)
 
     print('---------------- press Enter to start adjusting weights ----------------')
     yield lines.line_received

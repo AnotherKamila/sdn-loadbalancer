@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="80.5 357 917 614" width="917" height="614">
+  <defs>
+    <font-face font-family="Lato" font-size="22" panose-1="2 15 5 2 2 2 4 3 2 3" units-per-em="1000" underline-position="-233" underline-thickness="44.5" slope="0" x-height="506.5" cap-height="716.5" ascent="986.9995" descent="-212.99744" font-weight="400">
+      <font-face-src>
+        <font-face-name name="Lato-Regular"/>
+      </font-face-src>
+    </font-face>
+    <font-face font-family="Input Sans" font-size="22" panose-1="2 0 5 6 2 0 0 9 0 4" units-per-em="1000" underline-position="0" underline-thickness="64.404955" slope="0" x-height="545.45455" cap-height="727.2727" ascent="927.2766" descent="-272.72034" font-weight="400">
+      <font-face-src>
+        <font-face-name name="InputSans-Regular"/>
+      </font-face-src>
+    </font-face>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -3 7 6" markerWidth="7" markerHeight="6" color="black">
+      <g>
+        <path d="M 4.8 0 L 0 -1.8 L 0 1.8 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.9.4 
+    <dc:date>2018-12-19 18:17:28 +0000</dc:date>
+  </metadata>
+  <g id="Life_of_a_packet" stroke="none" stroke-dasharray="none" stroke-opacity="1" fill="none" fill-opacity="1">
+    <title>Life of a packet</title>
+    <g id="Life_of_a_packet: Layer 1">
+      <title>Layer 1</title>
+      <g id="Graphic_23">
+        <path d="M 309 425 L 460 485 L 309 545 L 158 485 Z" fill="#8080ff"/>
+        <path d="M 309 425 L 460 485 L 309 545 L 158 485 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <text transform="translate(203.77 454.8)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="27.301" y="22">Matches entry in </tspan>
+          <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="black" x="33.8275" y="52">conn_table</tspan>
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" y="52">?</tspan>
+        </text>
+      </g>
+      <g id="Graphic_47">
+        <rect x="539" y="460" width="457.5" height="50" fill="#8080ff"/>
+        <rect x="539" y="460" width="457.5" height="50" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <text transform="translate(544 471.5)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="129.447" y="22">Rewrite destination</tspan>
+        </text>
+      </g>
+      <g id="Graphic_75">
+        <rect x="539" y="535" width="457.5" height="70" fill="#ff8080"/>
+        <rect x="539" y="535" width="457.5" height="70" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <text transform="translate(544 541)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="87.6635" y="22">Match pool and server using</tspan>
+          <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="black" x="47.853" y="52">version</tspan>
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" y="52"> and </tspan>
+          <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="black" y="52">hash(five_tuple)</tspan>
+        </text>
+      </g>
+      <g id="Group_269">
+        <g id="Graphic_175">
+          <rect x="81.5" y="630" width="915" height="340" fill="white"/>
+          <rect x="81.5" y="630" width="915" height="340" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </g>
+        <g id="Graphic_187">
+          <rect x="101.5" y="640" width="875" height="45" fill="#ff80ff"/>
+          <rect x="101.5" y="640" width="875" height="45" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <text transform="translate(106.5 647)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="190.9775" y="25">Initialise version: </tspan>
+            <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="black" y="25">version = active_version</tspan>
+          </text>
+        </g>
+        <g id="Line_128">
+          <line x1="201.5" y1="841.1853" x2="201.5" y2="881.1" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </g>
+        <g id="Graphic_119">
+          <path d="M 201.5 700 L 311.5 770 L 201.5 840 L 91.5 770 Z" fill="#ff80ff"/>
+          <path d="M 201.5 700 L 311.5 770 L 201.5 840 L 91.5 770 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <text transform="translate(126.2 739.6)" fill="black">
+            <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="black" x="1.406" y="25">five_tuple</tspan>
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" y="25"> in</tspan>
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="7.056" y="53">Bloom filter 0?</tspan>
+          </text>
+        </g>
+        <g id="Graphic_120">
+          <path d="M 426.5 700 L 536.5 770 L 426.5 840 L 316.5 770 Z" fill="#ff80ff"/>
+          <path d="M 426.5 700 L 536.5 770 L 426.5 840 L 316.5 770 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <text transform="translate(351.2 739.6)" fill="black">
+            <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="black" x="1.406" y="25">five_tuple</tspan>
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" y="25"> in </tspan>
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="7.056" y="53">Bloom filter 1?</tspan>
+          </text>
+        </g>
+        <g id="Graphic_121">
+          <path d="M 651.5 700 L 761.5 770 L 651.5 840 L 541.5 770 Z" fill="#ff80ff"/>
+          <path d="M 651.5 700 L 761.5 770 L 651.5 840 L 541.5 770 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <text transform="translate(576.2 739.6)" fill="black">
+            <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="black" x="1.406" y="25">five_tuple</tspan>
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" y="25"> in </tspan>
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="7.056" y="53">Bloom filter 2?</tspan>
+          </text>
+        </g>
+        <g id="Graphic_122">
+          <path d="M 876.5 700 L 986.5 770 L 876.5 840 L 766.5 770 Z" fill="#ff80ff"/>
+          <path d="M 876.5 700 L 986.5 770 L 876.5 840 L 766.5 770 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <text transform="translate(801.2 739.6)" fill="black">
+            <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="black" x="1.406" y="25">five_tuple</tspan>
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" y="25"> in </tspan>
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="7.056" y="53">Bloom filter 3?</tspan>
+          </text>
+        </g>
+        <g id="Graphic_124">
+          <rect x="101.5" y="895" width="200" height="65" fill="#ff80ff"/>
+          <rect x="101.5" y="895" width="200" height="65" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <text transform="translate(106.5 898.5)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="19.2485" y="22">Update version:</tspan>
+            <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="black" x="21" y="52">version = 0</tspan>
+          </text>
+        </g>
+        <g id="Graphic_125">
+          <rect x="326.5" y="895" width="200" height="65" fill="#ff80ff"/>
+          <rect x="326.5" y="895" width="200" height="65" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <text transform="translate(331.5 898.5)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="19.2485" y="22">Update version:</tspan>
+            <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="black" x="21" y="52">version = 1</tspan>
+          </text>
+        </g>
+        <g id="Graphic_126">
+          <rect x="551.5" y="895" width="200" height="65" fill="#ff80ff"/>
+          <rect x="551.5" y="895" width="200" height="65" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <text transform="translate(556.5 898.5)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="19.2485" y="22">Update version:</tspan>
+            <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="black" x="21" y="52">version = 2</tspan>
+          </text>
+        </g>
+        <g id="Graphic_127">
+          <rect x="776.5" y="895" width="200" height="65" fill="#ff80ff"/>
+          <rect x="776.5" y="895" width="200" height="65" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <text transform="translate(781.5 898.5)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="19.2485" y="22">Update version:</tspan>
+            <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="black" x="21" y="52">version = 3</tspan>
+          </text>
+        </g>
+        <g id="Line_129">
+          <line x1="426.5" y1="841.1853" x2="426.5" y2="881.1" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </g>
+        <g id="Line_130">
+          <line x1="651.5" y1="841.1853" x2="651.5" y2="881.1" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </g>
+        <g id="Line_131">
+          <line x1="876.5" y1="841.1853" x2="876.5" y2="881.1" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </g>
+        <g id="Graphic_151">
+          <rect x="176.92552" y="843.8112" width="49" height="37" fill="white"/>
+          <text transform="translate(181.92552 848.8112)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".316" y="22">YES</tspan>
+          </text>
+        </g>
+        <g id="Graphic_154">
+          <rect x="402" y="843.8112" width="49" height="37" fill="white"/>
+          <text transform="translate(407 848.8112)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".316" y="22">YES</tspan>
+          </text>
+        </g>
+        <g id="Graphic_155">
+          <rect x="627" y="843.8112" width="49" height="37" fill="white"/>
+          <text transform="translate(632 848.8112)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".316" y="22">YES</tspan>
+          </text>
+        </g>
+        <g id="Graphic_156">
+          <rect x="852" y="843.8112" width="49" height="37" fill="white"/>
+          <text transform="translate(857 848.8112)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".316" y="22">YES</tspan>
+          </text>
+        </g>
+      </g>
+      <g id="Line_199">
+        <line x1="309" y1="358" x2="309" y2="411.02395" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_201">
+        <line x1="767.75" y1="459" x2="767.75" y2="374.1782" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_208">
+        <line x1="767.75" y1="534" x2="767.75" y2="523.9" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_273">
+        <line x1="309.52472" y1="545.86755" x2="310.1388" y2="617.1005" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_276">
+        <line x1="767.75" y1="630" x2="767.75" y2="618.9" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_277">
+        <line x1="462.70806" y1="485" x2="525.1" y2="485" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Graphic_278">
+        <rect x="225" y="365.8696" width="168" height="37" fill="white"/>
+        <text transform="translate(230 370.8696)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".24" y="22">Incoming packet</tspan>
+        </text>
+      </g>
+      <g id="Graphic_279">
+        <rect x="713.25" y="392.04653" width="109" height="37" fill="white"/>
+        <text transform="translate(718.25 397.04653)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".264" y="22">Pass to L3</tspan>
+        </text>
+      </g>
+      <g id="Graphic_280">
+        <rect x="287.38736" y="569.4338" width="45" height="37" fill="white"/>
+        <text transform="translate(292.38736 574.4338)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".296" y="22">NO</tspan>
+        </text>
+      </g>
+      <g id="Graphic_281">
+        <rect x="468.32484" y="466.5" width="49" height="37" fill="white"/>
+        <text transform="translate(473.32484 471.5)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".316" y="22">YES</tspan>
+        </text>
+      </g>
+    </g>
+  </g>
+</svg>

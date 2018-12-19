@@ -4,12 +4,16 @@ body {font-family: 'Lato', sans-serif; color: #002b36; text-rendering: optimizeL
 h1, h2, h3 {font-family: 'PT Sans', sans-serif; color: #586e75;}
 pre, code {font-family: 'Input', 'Inconsolata', monospace; font-size: 0.8em}
 
+.remark-slide-content h1 {font-size: 52px;}
+
 li ul {margin: 0.2em 0;}
 .expanded li {margin: 0.5em 0;}
 
 .floatleft {float: left; margin-right: 2em;}
 .floatright {float: right; margin-left: 2em;}
 .small {font-size: 0.8em;}
+.footnote {font-size: 0.6em;}
+
 .half {width: 50%;}
 .half img {width: 100%;}
 .contrast {
@@ -29,4 +33,11 @@ li ul {margin: 0.2em 0;}
 
 .qrcode img {max-width: 150px;}
 
-.fullwidth img {width: 90%; position: relative; top: -1ex;}
+.width100 img {width: 100%;}
+.width95  img {width:  95%;}
+.width90  img {width:  90%;}
+.width80  img {width:  80%;}
+.width70  img {width:  70%;}
+.width50  img {width:  50%;}
+.width30  img {width:  30%;}
+.width40  img {width:  30%;}

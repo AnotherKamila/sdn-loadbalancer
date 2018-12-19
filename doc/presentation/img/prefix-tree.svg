@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="-51 196 876 344" width="876" height="344">
+  <defs>
+    <font-face font-family="Lato" font-size="22" panose-1="2 15 5 2 2 2 4 3 2 3" units-per-em="1000" underline-position="-233" underline-thickness="44.5" slope="0" x-height="506.5" cap-height="716.5" ascent="986.9995" descent="-212.99744" font-weight="400">
+      <font-face-src>
+        <font-face-name name="Lato-Regular"/>
+      </font-face-src>
+    </font-face>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.9.4 
+    <dc:date>2018-12-19 15:21:56 +0000</dc:date>
+  </metadata>
+  <g id="Prefix_tree" stroke="none" stroke-dasharray="none" stroke-opacity="1" fill="none" fill-opacity="1">
+    <title>Prefix tree</title>
+    <g id="Prefix_tree: Layer 1">
+      <title>Layer 1</title>
+      <g id="Graphic_36">
+        <rect x="38" y="445" width="120" height="45" fill="#8080ff"/>
+        <text transform="translate(43 454)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="35.86" y="22">000</tspan>
+        </text>
+      </g>
+      <g id="Graphic_35">
+        <rect x="168" y="445" width="120" height="45" fill="#8080ff"/>
+        <text transform="translate(173 454)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="35.86" y="22">001</tspan>
+        </text>
+      </g>
+      <g id="Graphic_34">
+        <rect x="298" y="445" width="120" height="45" fill="#8080ff"/>
+        <text transform="translate(303 454)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="35.86" y="22">010</tspan>
+        </text>
+      </g>
+      <g id="Graphic_33">
+        <rect x="428" y="445" width="120" height="45" fill="#8080ff"/>
+        <text transform="translate(433 454)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="35.86" y="22">011</tspan>
+        </text>
+      </g>
+      <g id="Graphic_32">
+        <rect x="558" y="445" width="120" height="45" fill="#ff8080"/>
+        <text transform="translate(563 454)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="35.86" y="22">100</tspan>
+        </text>
+      </g>
+      <g id="Graphic_37">
+        <rect x="38" y="388.5" width="510" height="45" stroke="#7f80ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <text transform="translate(43 397.5)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="219.508" y="22">000/2</tspan>
+        </text>
+      </g>
+      <g id="Graphic_38">
+        <rect x="558" y="388.5" width="120" height="45" stroke="#ff807f" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <text transform="translate(563 397.5)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="24.508" y="22">100/1</tspan>
+        </text>
+      </g>
+      <g id="Group_123">
+        <g id="Line_119">
+          <line x1="692.5" y1="344.45427" x2="735.25" y2="359.82566" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_117">
+          <line x1="669.5" y1="344.84088" x2="631" y2="359.9784" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_113">
+          <line x1="782.5" y1="294.7469" x2="798.5" y2="303.43827" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_112">
+          <line x1="432.875" y1="344.63894" x2="474.25" y2="360.18034" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_111">
+          <line x1="409.875" y1="344.63894" x2="368.5" y2="360.18034" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_110">
+          <line x1="176" y1="344.5009" x2="216.75" y2="359.3184" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_109">
+          <line x1="153" y1="344.5974" x2="111" y2="360.22187" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_108">
+          <line x1="306.75" y1="293.22485" x2="409.875" y2="335.59443" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_107">
+          <line x1="283.75" y1="293.05772" x2="176" y2="335.76156" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_106">
+          <line x1="759.5" y1="295.12135" x2="692.5" y2="333.69793" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_105">
+          <line x1="544" y1="216.80574" x2="306.75" y2="285.1855" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_104">
+          <line x1="560" y1="217.2032" x2="759.5" y2="284.61416" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Graphic_103">
+          <text transform="translate(549 201)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="3" y="22"> </tspan>
+          </text>
+        </g>
+        <g id="Graphic_102">
+          <text transform="translate(288.75 275)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".12" y="22">0</tspan>
+          </text>
+        </g>
+        <g id="Graphic_101">
+          <text transform="translate(764.5 275)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".12" y="22">1</tspan>
+          </text>
+        </g>
+        <g id="Graphic_100">
+          <text transform="translate(674.5 326.81928)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".12" y="22">0</tspan>
+          </text>
+        </g>
+        <g id="Graphic_120">
+          <text transform="translate(740.25 351)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".212" y="22">...</tspan>
+          </text>
+        </g>
+        <g id="Graphic_114">
+          <text transform="translate(803.5 297)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".212" y="22">...</tspan>
+          </text>
+        </g>
+        <g id="Graphic_99">
+          <text transform="translate(158 326.81928)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".12" y="22">0</tspan>
+          </text>
+        </g>
+        <g id="Graphic_98">
+          <text transform="translate(414.875 326.81928)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".12" y="22">1</tspan>
+          </text>
+        </g>
+        <g id="Graphic_97">
+          <text transform="translate(93 351)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".12" y="22">0</tspan>
+          </text>
+        </g>
+        <g id="Graphic_96">
+          <text transform="translate(221.75 350)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".12" y="22">1</tspan>
+          </text>
+        </g>
+        <g id="Graphic_95">
+          <text transform="translate(350.5 351)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".12" y="22">0</tspan>
+          </text>
+        </g>
+        <g id="Graphic_94">
+          <text transform="translate(479.25 351)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".12" y="22">1</tspan>
+          </text>
+        </g>
+        <g id="Graphic_118">
+          <text transform="translate(613 351)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".12" y="22">0</tspan>
+          </text>
+        </g>
+      </g>
+      <g id="Graphic_124">
+        <text transform="translate(-46 454)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".244" y="22">hash:</tspan>
+        </text>
+      </g>
+      <g id="Graphic_125">
+        <rect x="38" y="501.5" width="640" height="37" stroke="#99999a" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <text transform="translate(43 506.5)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="276.126" y="22">server 1</tspan>
+        </text>
+      </g>
+    </g>
+  </g>
+</svg>

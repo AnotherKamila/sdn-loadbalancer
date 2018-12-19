@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="-51 196 876 344" width="876" height="344">
+  <defs>
+    <font-face font-family="Lato" font-size="22" panose-1="2 15 5 2 2 2 4 3 2 3" units-per-em="1000" underline-position="-233" underline-thickness="44.5" slope="0" x-height="506.5" cap-height="716.5" ascent="986.9995" descent="-212.99744" font-weight="400">
+      <font-face-src>
+        <font-face-name name="Lato-Regular"/>
+      </font-face-src>
+    </font-face>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.9.4 
+    <dc:date>2018-12-19 15:21:56 +0000</dc:date>
+  </metadata>
+  <g id="Prefix_tree_intro" stroke="none" stroke-dasharray="none" stroke-opacity="1" fill="none" fill-opacity="1">
+    <title>Prefix tree intro</title>
+    <g id="Prefix_tree_intro: Layer 1">
+      <title>Layer 1</title>
+      <g id="Graphic_36">
+        <rect x="38" y="445" width="120" height="45" fill="#999"/>
+        <text transform="translate(43 454)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="48.62" y="22">0</tspan>
+        </text>
+      </g>
+      <g id="Graphic_35">
+        <rect x="168" y="445" width="120" height="45" fill="#999"/>
+        <text transform="translate(173 454)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="48.62" y="22">1</tspan>
+        </text>
+      </g>
+      <g id="Graphic_34">
+        <rect x="298" y="445" width="120" height="45" fill="#999"/>
+        <text transform="translate(303 454)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="48.62" y="22">2</tspan>
+        </text>
+      </g>
+      <g id="Graphic_33">
+        <rect x="428" y="445" width="120" height="45" fill="#999"/>
+        <text transform="translate(433 454)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="48.62" y="22">3</tspan>
+        </text>
+      </g>
+      <g id="Graphic_32">
+        <rect x="558" y="445" width="120" height="45" fill="#999"/>
+        <text transform="translate(563 454)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="48.62" y="22">4</tspan>
+        </text>
+      </g>
+      <g id="Graphic_124">
+        <text transform="translate(-46 454)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".244" y="22">hash:</tspan>
+        </text>
+      </g>
+      <g id="Graphic_125">
+        <rect x="38" y="501.5" width="640" height="37" stroke="#99999a" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <text transform="translate(43 506.5)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="276.126" y="22">server 1</tspan>
+        </text>
+      </g>
+    </g>
+  </g>
+</svg>

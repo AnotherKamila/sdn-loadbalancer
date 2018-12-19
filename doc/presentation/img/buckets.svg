@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="137.5 376.5 428 172" width="428" height="172">
+  <defs>
+    <font-face font-family="Lato" font-size="22" panose-1="2 15 5 2 2 2 4 3 2 3" units-per-em="1000" underline-position="-233" underline-thickness="44.5" slope="0" x-height="506.5" cap-height="716.5" ascent="986.9995" descent="-212.99744" font-weight="400">
+      <font-face-src>
+        <font-face-name name="Lato-Regular"/>
+      </font-face-src>
+    </font-face>
+    <font-face font-family="Input Sans" font-size="22" panose-1="2 0 5 6 2 0 0 9 0 4" units-per-em="1000" underline-position="0" underline-thickness="64.404955" slope="0" x-height="545.45455" cap-height="727.2727" ascent="927.2766" descent="-272.72034" font-weight="400">
+      <font-face-src>
+        <font-face-name name="InputSans-Regular"/>
+      </font-face-src>
+    </font-face>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -3 7 6" markerWidth="7" markerHeight="6" color="black">
+      <g>
+        <path d="M 4.8 0 L 0 -1.8 L 0 1.8 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.9.4 
+    <dc:date>2018-12-19 18:17:28 +0000</dc:date>
+  </metadata>
+  <g id="buckets" stroke="none" stroke-dasharray="none" stroke-opacity="1" fill="none" fill-opacity="1">
+    <title>buckets</title>
+    <g id="buckets: Layer 1">
+      <title>Layer 1</title>
+      <g id="Graphic_39">
+        <rect x="138" y="377" width="427" height="171" fill="white"/>
+        <rect x="138" y="377" width="427" height="171" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(148 382)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="0" y="22">servers table</tspan>
+        </text>
+      </g>
+      <g id="Group_40">
+        <g id="Graphic_11">
+          <rect x="257.84735" y="464.2143" width="63.18852" height="30" fill="#8080ff"/>
+        </g>
+        <g id="Graphic_10">
+          <rect x="323.66873" y="464.2143" width="63.18852" height="30" fill="#ff80ff"/>
+        </g>
+        <g id="Graphic_9">
+          <rect x="389.4901" y="464.2143" width="63.18852" height="30" fill="#ff80ff"/>
+        </g>
+        <g id="Graphic_8">
+          <rect x="455.3115" y="464.2143" width="63.18852" height="30" fill="#ff80ff"/>
+        </g>
+        <g id="Graphic_7">
+          <rect x="192.02597" y="464.2143" width="63.18852" height="30" fill="#8080ff"/>
+        </g>
+        <g id="Graphic_12">
+          <text transform="translate(189.5 420.5)" fill="black">
+            <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="black" x="0" y="25">hash(five_tuple)</tspan>
+          </text>
+        </g>
+        <g id="Line_22">
+          <path d="M 411.47403 436 L 421.08436 436 L 421.08436 451.3143" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </g>
+        <g id="Graphic_25">
+          <rect x="192.02597" y="500.88095" width="129.0099" height="30" stroke="#7f80ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <text transform="translate(197.02597 502.38095)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="6.083449" y="22">blue server</tspan>
+          </text>
+        </g>
+        <g id="Graphic_26">
+          <rect x="323.66873" y="500.88095" width="194.83127" height="30" stroke="#ff7fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <text transform="translate(328.66873 502.38095)" fill="black">
+            <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="39.159137" y="22">pink server</tspan>
+          </text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

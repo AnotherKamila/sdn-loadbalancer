@@ -9,7 +9,7 @@
      <!-- @import url('https://fonts.googleapis.com/css?family=Lobster'); -->
      .display { font-family: 'Lobster', cursive; font-size: 1.6em; }
      .remark-slide-content {
-         padding: 1em 3em;
+         padding: 0.8em 2.4em;
          font-size: 32px;
      }
      .remark-code { font-size: 0.8em; }
@@ -18,8 +18,8 @@
          background: #f9f9f9;
          padding: 0 0.2em;
      }
-     .remark-slide-content.wide {
-       padding: 0 1em;
+     .remark-slide-content.tall {
+       padding-top: 0;
      }
      .remark-slide-number {font-size: 0.6em;}
     </style>
@@ -29,7 +29,7 @@
 
 class: center, middle, contrast
 
-# Load-balancing requests based on server metrics such as system load
+# "Load-aware" L4 load balancing
 
 Kamila Součková  
 Advanced Topics in Communication Networks  
@@ -37,14 +37,14 @@ Advanced Topics in Communication Networks
 
 ---
 
-class: contrast, expanded
+class: contrast, expanded, middle
 
 # Aims
 
-1. **Implement a simple L4 load balancer (equal cost):**  
-    rewrites and forwards connections to its _Virtual IP_ (VIP) to one of its multiple _Direct IPs_ (DIPs), i.e. the actual servers
-2. **Be able to choose the _distribution_ of the connections:**  
-    if server 1 is busy, it should get fewer new connections
+1. **Implement an L4 load balancer**  
+   have a server pool with multiple actual servers
+2. **Be able to choose the _distribution_:**  
+   if a server is busy, it should get fewer new connections
 
 ---
 
@@ -52,15 +52,15 @@ class: contrast, expanded
 
 .floatright[.qrcode[![QR code](./img/how-routers-work.svg)]]
 
-* Up to L3: it is a router
-    * simplified implementation: MAC, ARP, and routing table pre-filled by the controller
-    * more details: [How do routers really work?](https://kamila.is/teaching/how-routers-work/)
-* address rewriting on L4:
-    1. match destination {addr, port} ⇒ server pool
-    2. select DIP from pool based on 5-tuple hash
-         (kind of like the ECMP exercise)
-    4. pass to L3
-    5. do the right thing on the return path
+**Up to L3: it is a router**  
+Details: [How do routers really work?](https://kamila.is/teaching/how-routers-work/)
+
+**Address rewriting on L4:**
+
+.width90[![simple flow chart](./img/simple-packet.svg)]
+
+  * kind of like the ECMP exercise
+  * mind the return path
 
 ???
 
@@ -68,27 +68,27 @@ also: TCP checksum
 
 ---
 
-class: contrast, expanded
+class: contrast, expanded, middle
 
 # Changing the distribution
 
 Three problems:
 
-1. How to implement load balancing with a given distribution?
-2. Which distribution to choose?
+1. Which distribution to choose?
+2. How to implement load balancing with a given distribution?
 3. How to dynamically change the distribution while there are active connections?
 
 ---
 
-class: contrast, expanded
+class: contrast, expanded, middle
 count: false
 
 # Changing the distribution
 
 Three problems:
 
-1. How to implement load balancing with a given distribution?
-2. Which distribution to choose? ⇒ not SDN
+1. **Which distribution to choose? ⇒ not SDN**
+2. How to implement load balancing with a given distribution?
 3. How to dynamically change the distribution while there are active connections?
 
 ???
@@ -97,83 +97,83 @@ Three problems:
 
 ---
 
-class: contrast, expanded
+class: contrast, expanded, middle
 count: false
 
 # Changing the distribution
 
 Three problems:
 
-1. **How to implement load balancing with a given distribution?**
-2. Which distribution to choose?
+1. Which distribution to choose?
+2. **How to implement load balancing with a given distribution?**
 3. How to dynamically change the distribution while there are active connections?
 
-???
+---
 
-2. is not that interesting
+# Weighted load balancing
+
+Same as the equal-cost case, except we add the server multiple times:
+
+.center[![buckets](./img/buckets.svg)]
+
+blue server will get 2/5 of requests,  
+pink server will get 3/5
+
+**Disadvantage:** table gets big quickly
 
 ---
 
-# Trivial solution
-
-Same as the equal-cost case, only adds the server to the DIP table multiple times:
-
-* add server 1 entry 2x
-* add server 2 entry 3x
-
-⇒ server 1 will get 3/5 of requests, server 2 will get 2/5
-
-Disadvantage: table gets big quickly if we want decent precision
-
----
-
-# Making the table smaller
+# Idea: Making the table smaller
 
 How can we conceptually add an entry N times with fewer actual entries?
+
+.width90[![flat table](./img/prefix-tree-intro.svg)]
+.center[![table size \leq \ln \sum weights](./img/latex-sum.svg)]
+
+.footnote[\* not implemented due to lack of time]
 
 ???
 
 Idea: Instead of using an exact match on the hash, use a prefix match!  
 It's just bit strings, who says they have to be addresses...
 
---
+---
 
-TODO picture:
+count: false
 
-[server1, server1, server1, server1, server1] ⇒ tree with 4 + 1
+# Idea: Making the table smaller
 
---
+How can we conceptually add an entry N times with fewer actual entries?
 
+.width90[![prefix tree](./img/prefix-tree.svg)]
 .center[![table size \leq \ln \sum weights](./img/latex.svg)]
+
+.footnote[\* not implemented due to lack of time]
 
 ---
 
-class: contrast, expanded
+class: contrast, expanded, middle
 count: false
 
 # Changing the distribution
 
 Three problems:
 
-1. How to implement load balancing with a given distribution?
-2. Which distribution to choose?
+1. Which distribution to choose?
+2. How to implement load balancing with a given distribution?
 3. **How to dynamically change the distribution while there are active connections?**
 
 ---
 
-# The problem
+# The problem:
 
-explain the problem -- TODO picture -> the one in notes
-
----
-
-# Not dropping active connections
-
-**Problem:** When the pool changes, the same flow hash can point to a different server.
+.center.width80[![hash problem](./img/hash-problem.svg)]
 
 --
 
-**Fix:** Add connections into a table ⇒ existing connections match and get rewritten immediately
+**Fix:** Keep assigned connections in a table
+
+.center.width100[![conn table](./img/connections.svg)]
 
 ???
 
@@ -181,53 +181,89 @@ get rewritten directly, and don't even need to be hashed
 
 ---
 
-# Outstanding `conn_table` writes
+# The second problem:
 
-**Problem:** Writes into tables take a long time ⇒ the packets arriving after the SYN and before the table write is completed still need to be sent to the correct server
+Table writes are not instant:
 
-TODO picture: timeline
-
---
-
-**Fix:** Keep old versions of the pools, discard a version only after all connections using it have been written into `conn_table`
-
----
-
-# Determining pool version for a packet
-
-**Problem:** For a given packet, how do we know which old pool version it belongs to (if any)?
+.center.width95[![outstanding](./img/timeline.svg)]
 
 --
 
-**Fix:** Use Bloom filters (set membership) to decide if the packet belongs to version _i_.
+**Fix:** Keep old pool data,
+discard only after all connections using them are in `conn_table`
 
 ---
 
-# Bloom filters (1/2)
+# Not breaking connections
 
-* hard-code the number of available "version slots" (a small number: I use 4)
-* create a Bloom filter for each version slot
-* check all the Bloom filters in P4 to find the correct version for the packet
-    * preprocessor magic to avoid writing the same function four times
+.center.width90[![pinkbox](./img/pinkbox.svg)]
 
 ---
 
-# Bloom filters (2/2)
+# Old pool data???
 
-Cycle through the available version slots:
+**Fix:** Versioned tables:
 
-Controller must keep track of outstanding writes and only overwrite a version when everything is in `conn_table`.
+```c
+table ipv4_dips {
+    key = {
+*       meta.version: exact;
+        meta.server_pool: exact;
+        meta.flow_hash: exact;
+    }
+    ...
+}
+```
 
-TODO if time allows, mention Twisted (otherwise merge with previous slide)
-maybe just paste the code that does that
+* write to a register from the control plane to set the active version
+* **bonus:** transactions for free: poke at a "scratch" table version and only flip when ready
 
 ---
 
-class: wide
+# The fourth problem:
 
-# Summary: Life of a packet
+For a given connection, how do we know which pool version it belongs to (if any)?
 
-.center[.fullwidth[![flow diagram](./img/flow.svg)]]
+--
+
+**Fix:**
+
+Hard-code a few "version slots" (I use 4).
+
+Use a Bloom filter (set membership) to decide if the packet belongs to version slot _i_.
+
+Cycle through the available version slots.
+
+---
+
+class: tall
+
+# Life of a packet
+
+.center.width100[![flow diagram](./img/life-of-a-packet.svg)]
+
+---
+
+# Bloom filters: Controller
+
+1. Need to track outstanding writes
+   ⇒ make table writes asynchronous:
+    ```python
+    def recv_packet(self, packet):
+        ...
+        self.pending_writes[version].append(
+            self.conn_table.add(...))  # async
+    ```
+
+2. Wait for completion before overwriting a version:
+    ```python
+    def commit(self):
+        await DeferredList(
+            self.pending_writes[self.vips.next_version])
+        ...
+    ```
+
+.right.footnote[\* `await` is actually spelled `yield` in Python 2 + Twisted &nbsp;&nbsp;&nbsp;]
 
 ---
 
@@ -250,7 +286,7 @@ Cleanly structured code
 
 ---
 
-class: wide
+exclude: true
 
 # Tests
 
@@ -261,11 +297,11 @@ class: wide
 ```py
 @pt.inlineCallbacks
 def test_add_dip(remote_module, p4run):
-    client, server, lb = # [...]
-    # [...]
+    client, server, lb = ...
+    ...
     pool_h = yield lb.add_pool('10.0.0.1', 8000)
-    yield lb.add_dip(pool_h, p4run.topo.get_host_ip('h2'), 8001)
-    # [...]
+    yield lb.add_dip(pool_h, p4run.IP['h2'], 8001)
+    ...
     yield client.callRemote('make_connections',
         '10.0.0.1', 8000, count=47)
     num_conns = yield server.callRemote('get_conn_count')
@@ -274,15 +310,12 @@ def test_add_dip(remote_module, p4run):
 
 ---
 
-class: wide
-
 # Tests example: Single run
 
+TODO re-record with prints for starting servers & clients
 <asciinema-player src="cast/test-singlerun.cast" speed='0.9' idle-time-limit='3'></asciinema-player>
 
 ---
-
-class: wide
 
 # Tests example: Session
 
@@ -292,7 +325,17 @@ class: wide
 
 # Demo
 
+---
 
+# Conclusion
+
+* project completed:
+  * TODO screenshot of graph
+  * table versioning + Bloom filters to find version
+* bonus:
+    * universal abstraction over P4 tables with async writes, atomic operations (`.commit()`), transparent versioning
+    * composable controllers for L2 and L3
+    * integration tests made easy
 
 ---
 
@@ -306,7 +349,9 @@ class: center, middle
     </textarea>
     <script src="remark.js" type="text/javascript"></script>
     <script type="text/javascript">
-      var slideshow = remark.create();
+     var slideshow = remark.create({
+         highlightLines: true
+     });
     </script>
 
     <script>
