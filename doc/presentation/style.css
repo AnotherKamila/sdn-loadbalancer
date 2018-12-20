@@ -31,13 +31,14 @@ li ul {margin: 0.2em 0;}
 .light {color: #839496;}
 .nobold {font-weight: normal;}
 
-.qrcode img {max-width: 150px;}
+.qrcode img {max-width: 160px;}
 
 .width100 img {width: 100%;}
 .width95  img {width:  95%;}
 .width90  img {width:  90%;}
 .width80  img {width:  80%;}
 .width70  img {width:  70%;}
+.width60  img {width:  60%;}
 .width50  img {width:  50%;}
+.width40  img {width:  40%;}
 .width30  img {width:  30%;}
-.width40  img {width:  30%;}

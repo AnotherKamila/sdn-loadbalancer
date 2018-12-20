@@ -42,9 +42,11 @@ class: contrast, expanded, middle
 # Aims
 
 1. **Implement an L4 load balancer**  
-   have a server pool with multiple actual servers
+   Single virtual IP for a pool of application servers
 2. **Be able to choose the _distribution_:**  
-   if a server is busy, it should get fewer new connections
+   If a server is very busy, it should get fewer new connections
+
+(All in the data plane.)
 
 ---
 
@@ -55,16 +57,12 @@ class: contrast, expanded, middle
 **Up to L3: it is a router**  
 Details: [How do routers really work?](https://kamila.is/teaching/how-routers-work/)
 
-**Address rewriting on L4:**
+**L4 flow:**
 
 .width90[![simple flow chart](./img/simple-packet.svg)]
 
   * kind of like the ECMP exercise
   * mind the return path
-
-???
-
-also: TCP checksum
 
 ---
 
@@ -90,10 +88,6 @@ Three problems:
 1. **Which distribution to choose? ⇒ not SDN**
 2. How to implement load balancing with a given distribution?
 3. How to dynamically change the distribution while there are active connections?
-
-???
-
-2. is not that interesting
 
 ---
 
@@ -132,11 +126,6 @@ How can we conceptually add an entry N times with fewer actual entries?
 
 .footnote[\* not implemented due to lack of time]
 
-???
-
-Idea: Instead of using an exact match on the hash, use a prefix match!  
-It's just bit strings, who says they have to be addresses...
-
 ---
 
 count: false
@@ -171,13 +160,9 @@ Three problems:
 
 --
 
-**Fix:** Keep assigned connections in a table
+**Fix:** Keep server assignments in a connections table
 
 .center.width100[![conn table](./img/connections.svg)]
-
-???
-
-get rewritten directly, and don't even need to be hashed  
 
 ---
 
@@ -193,6 +178,8 @@ Table writes are not instant:
 discard only after all connections using them are in `conn_table`
 
 ---
+
+exclude: true
 
 # Not breaking connections
 
@@ -215,24 +202,23 @@ table ipv4_dips {
 }
 ```
 
-* write to a register from the control plane to set the active version
-* **bonus:** transactions for free: poke at a "scratch" table version and only flip when ready
+write to a register from the control plane to set the active version
 
 ---
 
-# The fourth problem:
+# The third problem:
 
-For a given connection, how do we know which pool version it belongs to (if any)?
+For a given packet, how to determine to which pool version that connection belongs?
 
 --
 
 **Fix:**
 
-Hard-code a few "version slots" (I use 4).
+Hard-code a few "version slots" (I use 4) and cycle through them.
 
-Use a Bloom filter (set membership) to decide if the packet belongs to version slot _i_.
+Use a Bloom filter (set membership) to decide whether the packet belongs to version slot _i_.
 
-Cycle through the available version slots.
+Insert new connections into its version's Bloom filter.
 
 ---
 
@@ -312,9 +298,17 @@ def test_add_dip(remote_module, p4run):
 
 # Tests example: Single run
 
-TODO re-record with prints for starting servers & clients
-<asciinema-player src="cast/test-singlerun.cast" speed='0.9' idle-time-limit='3'></asciinema-player>
+<asciinema-player src="cast/test-singlerun.cast" speed='0.9' idle-time-limit='4'></asciinema-player>
 
+???
+
+Here's an example of running one test:
+it's an integration test, so it starts p4run for me,
+then it starts the servers, clients, and the controller
+here you can see the table_add's from the controller, it also started the server and client
+now it has told the clients to connect to the servers through the loadbalancer and it's checking that the connections work
+here it says 47/47 connections succeeded
+and the test passed
 ---
 
 # Tests example: Session
@@ -323,19 +317,35 @@ TODO re-record with prints for starting servers & clients
 
 ---
 
-# Demo
+class: contrast, center, middle
+
+# Demo!
 
 ---
 
+exclude: true
+
+# Demo
+
+We need to:
+* start servers
+* configure load balancer:
+  * teach it how to get load and how to balance
+  * add server pools
+* connect to servers
+
+---
+
+class: tall
+
 # Conclusion
 
-* project completed:
-  * TODO screenshot of graph
-  * table versioning + Bloom filters to find version
-* bonus:
-    * universal abstraction over P4 tables with async writes, atomic operations (`.commit()`), transparent versioning
-    * composable controllers for L2 and L3
-    * integration tests made easy
+.center.width60[![screenshot](./img/demo1-narrow-loadonly.png)]
+
+* table versioning + Bloom filters to find version
+* prefixes idea for weights
+* test-driven development
+* interesting software engineering aspects
 
 ---
 
@@ -344,6 +354,10 @@ class: center, middle
 # Questions?
 
 :-)
+
+---
+
+.width100[![demo](./img/demo1-wide.png)]
 
 
     </textarea>

@@ -9,7 +9,7 @@
     </font-face>
   </defs>
   <metadata> Produced by OmniGraffle 7.9.4 
-    <dc:date>2018-12-19 15:21:56 +0000</dc:date>
+    <dc:date>2018-12-19 18:17:28 +0000</dc:date>
   </metadata>
   <g id="Prefix_tree" stroke="none" stroke-dasharray="none" stroke-opacity="1" fill="none" fill-opacity="1">
     <title>Prefix tree</title>
@@ -48,13 +48,13 @@
       <g id="Graphic_37">
         <rect x="38" y="388.5" width="510" height="45" stroke="#7f80ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
         <text transform="translate(43 397.5)" fill="black">
-          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="219.508" y="22">000/2</tspan>
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="219.508" y="22">000/1</tspan>
         </text>
       </g>
       <g id="Graphic_38">
         <rect x="558" y="388.5" width="120" height="45" stroke="#ff807f" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
         <text transform="translate(563 397.5)" fill="black">
-          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="24.508" y="22">100/1</tspan>
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="24.508" y="22">100/3</tspan>
         </text>
       </g>
       <g id="Group_123">
