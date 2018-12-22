@@ -4,6 +4,8 @@ L4 load balancer that can dynamically change the distribution for load balancing
 
 Current implementation allows for weighing based on server metrics such as request latency or server load (and this is easy to change).
 
+I use the [Twisted](https://twistedmatrix.com/) framework for the controller and tests. See `./twisted-intro.md` for a very quick run through things you need to know to read the code here.
+
 ## What's in here
 
 * `p4src`: the code for the switches (data plane)
@@ -25,14 +27,14 @@ The `demo/` directory and the various subdirectories under `/test` contain an ex
 
 #### Global install: No virtualenv
 
-Install the dependencies, then manually source `.env`:
+Install the dependencies, add current directory to PYTHONPATH, and source `.env`:
 ```sh
 $ sudo pip2 install attrs twisted pytest pytest-twisted
 $ ./fix-pythonpath.sh
 $ . .env
 $ pytest  # for example
 ```
-#### Virtualenv install
+#### Virtualenv install [more complicated => probably ignore this and install globally]
 
 ##### TL;DR
 

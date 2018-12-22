@@ -1,60 +1,73 @@
-# How to run the test
+# How to run the tests
 
-We use Python 3 and pytest to run the tests.
+We use pytest to run the tests.
 
-Therefore, to run the tests:
-
-1. make sure you have python 3 and pip 3: `sudo apt-get install python3 python3-pip`
-2. install pytest: `sudo pip2 install pytest`
-3. run the tests: `pytest`
+1. install pytest: `sudo pip2 install pytest pytest-twisted`
+2. run the tests: `pytest`
     * if you installed with pipenv, you need either to run `pytest` inside a `pipenv shell`, or use `pipenv run pytest` instead
 
-(Obviously, if you use the VM, you need to run this in the VM.)
+If you want to run all the tests, run `pytest` in the `test/` directory; if you just want some, you can give it a path as commandline argument and/or run it from a subdirectory.
 
-If you want to run all the tests, run `pytest` in the `test/` directory; if you just want some, you can give it commandline arguments and/or run it from a subdirectory.
+Note: Do not run `p4run` manually -- the tests will do it for you.
 
-Note: Do not run `p4run` manually -- the tests will do it for you if you ask for an argument called `p4run` (see existing).
+Some tests run a lot of connections, and the switch won't be able to cope with them if it has debugging enabled. Therefore, it is recommended to re-compile the switch without debugging.
 
+-----------------------------------------------------------------------
 
-## Hint Nico
+Some tests are a bit flaky. If things crash or fail, try re-running the same thing. Also, if things are stuck without any progress for more than ~30 seconds, it's probably gotten stuck and it should be restarted.
 
-```
-pyvenv venv
-. ./venv/bin/activate
-pip install pytest
-pytest
-```
+The causes for the flakiness are AFAIK one of:
 
-# How do the tests work?
+* `pipenv` race condition: pipenv likes to open the Pipfile in exclusive mode, so if the test tries to run several Python processes at the same time (such as multiple servers+clients), the open() in pipenv may fail.
+* crc32 is not a very good hash function: some tests check for the distribution of requests among several servers, and sometimes we get unlucky and crc32 hashes very non-uniformly.
+* things work when they shouldn't: one test tests that a connection breaks with the simple load balancer, but sometimes we get lucky and it doesn't.
+* leftovers from a previous run: Sometimes things can't bind to a socket because of the TCP timeout, or some UNIX socket weirdness happens. It works when tried again.
+
+# What's in here?
 
 Each subdirectory contains a `p4app.json` and some test cases.
 
-At the beginning of each file, we create a fixture that runs `p4run` with the `p4app.json` in the current directory. Therefore, each file is a collection of related test cases that can (and will) be run in the same p4run session.
+## What do we test?
 
-Then it is plain `pytest` that runs shell commands inside the hosts using `mx` and looks at the exit status. (This is horrible. And it works.)
+Each subdirectory maps to a component of the controller:
 
-See the existing stuff for examples.
+1. `l2_lazy` tests the L2 parts: switching => with `assignment_strategy: "l2"`
+2. `l3_router_lazy` tests the L3 parts: routing => with `assignment_strategy: "l3"`
+3. `l4_loadbalacer-unversioned` tests the simple load balancer: without table versioning -- just pool management
+4. `l4_loadbalacer` tests the full load balancer with table versioning, and it makes sure that connections don't break when updating the pools
 
-Make sure to copy the `exec_scripts` section of `p4app.json` from the existing stuff when creating a new config. (Wondering why? Read on...)
+Just like the controller components, the tests build on top of each other: the lower parts must work for the higher ones to work. Therefore, if something breaks, it makes sense to run the tests one by one in this order.
 
-If you need fixtures, you can implement them in the file or in a `conftest.py` file. See https://docs.pytest.org/en/latest/fixture.html .
+## Fixtures
 
-## Horrible hack
+Pytest is magic: if your test function asks for an argument, pytest will inspect it and do something with it. The `conftest.py` files define that something.
 
-I wanted to make pytest run p4run, so that running the tests really is one command and the setup/teardown is managed from within pytest. This has proven to be horrible, because `p4run` is not expecting to be used non-interactively. Therefore, workaround:
+Important fixtures (i.e. magic argument names) that I define:
+
+* `p4run`: runs `p4run` with the `p4app.json` in the current directory. The `p4app.json` must have `touch readyfile` in its `exec_scripts` (see existing; explanation below).
+* `controller`: runs `./controller` in the current directory, with the switch name as the first argument.
+* `process`: Allows running processes (also on mininet hosts), and kills them after the test finishes.
+* `remote_module`: Runs a Python module that provides a [`twisted.spread` "remote control"](https://twistedmatrix.com/documents/current/core/howto/pb-intro.html) in a separate process, binds to the socket, and returns the remote control. Kills the process after the test finishes.
+
+They are defined in `./conftest.py`.
+
+More fixtures can  be implemented in the test file or in a `conftest.py` file. See https://docs.pytest.org/en/latest/fixture.html .
+
+## How do the tests work?
+
+There are two "kinds" of tests: "old-style" and "new-style" tests.
+
+* The "old-style" tests are from the time before I switched to Twisted: these run the controller in a separate process and test using shell commands such as `ping` or `netcat` (run via `mx`).
+* The "new-style" tests use `remote_module` and Twisted async awesomeness to provide more fine-grained control and checking: for these, the controller runs inside the test process (so that its internal state can be inspected), and the clients and servers can be finely controlled with a [`twisted.spread` "remote control"](https://twistedmatrix.com/documents/current/core/howto/pb-intro.html).
+
+See `../twisted-intro.md` for a quick intro to Twisted.
+
+## Automatically running `p4run`
+
+I wanted to make pytest run p4run, so that running the tests really is one command and the setup/teardown is managed from within pytest. This has proven to be horrible, because `p4run` does not expect to be used non-interactively. Therefore, workaround:
 
 I use the `exec_scripts` config option in `p4app.json` to create a file. Then I wait for that file to appear within the test, and only proceed once it's there.
 
 The scripts are called when mininet is ready, so the file does not appear too early. This is the only reliable way I found to detect that it's ready. Everything is terrible. But it works. Just don't forget to put the thing into `p4app.json`.
 
-The horribleness is implemented in `./conftest.py`. Abandon all hope, ye who enter here.
-
-# Trick for debugging (not only for tests!)
-
-Best thing ever:
-
-```python
-# put this in there instead of that printf
-from ptpython.repl import embed
-embed(globals(), locals())  # has access to all the variables
-```
+The horribleness is implemented in `./conftest.py`.

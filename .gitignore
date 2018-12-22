@@ -7,3 +7,6 @@ readyfile
 
 *.py[co]
 .cache/
+
+set-switch.sh
+demo/data.tsv
