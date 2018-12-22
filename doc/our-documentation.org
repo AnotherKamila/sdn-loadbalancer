@@ -1,84 +1,8 @@
-* History
-** 2018-11-09
-*** Meeting Alexander
-**** Kick-off
-*** Follow up Sarah, Nico, Kamila
-**** Define tasks, basic structure
-** 2018-11-15
-*** Meeting Alexander
-**** Status overview
-**** No need to implement ARP/NDP
-*** Follow up with Sarah, Nico
-**** TODO Implement a simple switch with 2 IPv4 and 2 IPv6 hosts (Kamila)
-***** p4utils does not support manual assignment and other strategies don't support IPv6
-****** variant a) use the apptopo to build own topology [Sarah]
-****** variant b) to use the CLI options of p4run (?) [Nico]
-****** variant c) hack p4utils to include ipv6 support [Or: Nico]
-****** variant d) hack ifconfig's
-***** Will be done by Kamila by 2018-11-15
-**** TODO Implement address rewriting - ensure ALL hosts can reach each other
-***** 2001:db8::/?? for IPv6 host addresses
-***** 64:FF9B::/96 for fake IPv4 hosts addresses
-***** TODO Rewrite from IPv4 to IPv6 (Sarah)
-***** TODO Rewrite from IPv6 to IPv4 (Nico)
-***** TODO Kamila ensures that the meeting next week is well prepared
-***** TODO Send some / all packets to the controller (phase in dynamic) (if time)
-**** TODO Checkout jool and tayga (Sarah)
-*** Follow up with Kamila, Nico
-**** DONE Adjust some task owners, Kamila for basic switch setup
-**** TODO Create fancy pictures for the report (network stuff stuff)
 * Who did what
 |                                  |        |
-| Had many fun discsusions         | all    |
 | Header and Parser Bootstrap      | Nico   |
-| Write the documentation          | Nico   |
-| IPv6 address ingress learning    | Nico   |
 | Write the test framework         | Kamila |
 | IPv6 address egress learning     | Kamila |
 | IPv4 address ingress learning    | Sarah  |
 | Simple stateless 1:1 NAT64 table | Sarah  |
 |                                  |        |
-* Decisions
-** We don't care about mac addresses, because we are a router (2018-11-09)
-*** This implies we learn IP to Port mappings (don't care about mac addresses!)
-** master branch is always stable
-*** to be always able to merge w/o headache
-** In simple 1:1 NAT64 we DON'T do any IPv4 / IPv6 calculations
-* Meeting notes / preparation
-** 2018-11-15
-*** What we have done
-**** Defining the initial set of tasks
-**** Discussion about ARP/NDP/L2/L3 split, architecture definition
-**** L2 switching
-**** IPv4 and IPv6 parsing
-*** What we have not done
-**** 1:1 NAT64
-*** What are our next steps
-**** Merge L3 code
-**** Finish 1:1 NAT64 code
-**** Test 1:1 NAT64
-*** Presentation
-**** L2 fertig
-**** ARP / NDP discovery
-***** Assume we get the packets
-***** Assume we can talk to hosts
-***** Not do that for now
-**** Focus on the translation
-**** Argue against
-**** Can I just take that
-**** Decisions
-***** Don't need to look at topology
-***** Can reach stuff directly
-***** sending stuff from switch to controller
-****** Pick whatever you want
-****** cpu might be easier for whole packet
-****** Take what is easier
-***** Next steps
-****** Sending stuff to the cnotroller
-****** Find out how fast can we handle with the controller / depending on the http controller
-*** 2018-11-15 follow up w/ Sarah
-****     "assignment_strategy": "l2",
-**** TODO Implement the layer 2 topology (2x IPv4 host, 2x IPv6 host)
-***** auto_arp_tables: manual + auto_arp = true
-***** Ensure that IPv4 <-> IPv4 can talk to each other
-***** Ensure that IPv6 <-> IPv6 can talk to each other
