@@ -17,35 +17,62 @@ See the README files inside the directories for information about the specific p
 
 ## How to run everything in here
 
+### P4 stuff
+
+The `demo/` directory and the various subdirectories under `/test` contain an example `p4app.json` and more documentation.
+
 ### Python
 
-#### Python path
+#### Global install: No virtualenv
+
+Install the dependencies, then manually source `.env`:
+```sh
+$ sudo pip2 install attrs twisted pytest pytest-twisted
+$ ./fix-pythonpath.sh
+$ . .env
+$ pytest  # for example
+```
+#### Virtualenv install
+
+##### TL;DR
+
+Assuming this repository has been cloned to `my-repo`:
+
+```sh
+$ sudo pip2 install pipenv
+$ cd my-repo
+$ ./fix-pythonpath.sh
+$ pipenv sync
+$ # upgrade system packages if it complains: sudo pip2 install --upgrade six (see below)
+$ pipenv shell
+$ pipenv sync  # must be run again in the shell for some reason (pipenv/pytest bug)
+$ pytest  # for example
+```
+##### Python path
 
 The root of the repo needs to be in the Python path.
 
 The easiest way to achieve that is to run `./fix-pythonpath.sh` in the root of the repo right after cloning it. This will change `PYTHONPATH` in the `.env` file. (`pipenv` sources the `.env` automatically.)
 
-#### Virtual env
+##### Virtual env
 
-I use `pipenv` to manage the dependencies/virtualenvs. Assuming you have `pip2`, install `pipenv` using:
+I use `pipenv` to manage the dependencies/virtualenvs. Assuming you have `pip2`, install `pipenv` and then let it install dependencies using:
 
 ```sh
 sudo pip2 install pipenv
+pipenv sync
+pipenv run pipenv sync  # must be run again in the shell for some reason (pipenv/pytest bug)
 ```
 
-Then run everything inside a `pipenv shell` to get the virtualenv.
+If you run `pipenv` without `sudo`, it may fail because of conflicting packages in the base system. If that happens, upgrade the problematic package before running `pipenv`. Example:
 
-#### Summary
-
-Assuming this repository has been cloned to `my-repo`:
-
-```sh
-$ cd my-repo
-$ ./fix-pythonpath.sh
-$ pipenv shell
-$ pytest  # for example
+```
+$ pipenv sync
+...
+[pipenv.exceptions.InstallError]: ["Could not install packages due to an EnvironmentError: [Errno 13] Permission denied: '/usr/local/lib/python2.7/dist-packages/six-1.11.0.dist-info/DESCRIPTION.rst'", 'Consider using the `--user` option or check the permissions.']
+$ # ^^ Notice: it's complaining about six.
+$ sudo pip2 install --upgrade six  # fix it
+$ pipenv sync  # try again
 ```
 
-### P4 switch
-
-The `demo/` directory and the various subdirectories under `/test` contain an example `p4app.json` and more documentation.
+Then run everything inside a `pipenv shell` to get the virtualenv set up.

@@ -3,18 +3,11 @@ verify_ssl = true
 url = "https://pypi.org/simple"
 name = "pypi"
 
-[dev-packages]
-ptpython = "*"
-
 [packages]
-fabric = "*"
-ptpython = "*"
 twisted = "*"
 pytest = "*"
-prometheus-client = "*"
 pytest-twisted = "*"
 attrs = "*"
-pytest-timeout = "*"
 
 [requires]
 python_version = "2.7"
