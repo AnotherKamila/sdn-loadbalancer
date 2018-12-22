@@ -19,19 +19,31 @@ See the README files inside the directories for information about the specific p
 
 ### Python
 
-I use `pipenv` to manage the dependencies. Assuming you have `pip2`, install `pipenv` using:
+#### Python path
+
+The root of the repo needs to be in the Python path.
+
+The easiest way to achieve that is to run `./fix-pythonpath.sh` in the root of the repo right after cloning it. This will change `PYTHONPATH` in the `.env` file. (`pipenv` sources the `.env` automatically.)
+
+#### Virtual env
+
+I use `pipenv` to manage the dependencies/virtualenvs. Assuming you have `pip2`, install `pipenv` using:
 
 ```sh
 sudo pip2 install pipenv
 ```
 
-Then run everything inside a `pipenv shell` to get the virtualenv. Assuming this repository is at `/project`:
+Then run everything inside a `pipenv shell` to get the virtualenv.
+
+#### Summary
+
+Assuming this repository has been cloned to `my-repo`:
 
 ```sh
-$ cd /project
+$ cd my-repo
+$ ./fix-pythonpath.sh
 $ pipenv shell
-# pipenv will install dependencies
-# now you can run things inside the venv
+$ pytest  # for example
 ```
 
 ### P4 switch
