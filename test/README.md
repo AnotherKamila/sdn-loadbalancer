@@ -12,14 +12,15 @@ Note: Do not run `p4run` manually -- the tests will do it for you.
 
 -----------------------------------------------------------------------
 
-Some tests are a bit flaky. If things crash or fail, try re-running the same thing. Also, if things are stuck without any progress for more than ~30 seconds, it's probably gotten stuck and it should be restarted.
+Some tests are occasionally a bit flaky. If things crash or fail, try re-running the same thing. Also, if things are stuck without any progress for more than ~30 seconds, it's probably gotten stuck and it should be restarted.
 
 The causes for the flakiness are AFAIK one of:
 
-* `pipenv` race condition: pipenv likes to open the Pipfile in exclusive mode, so if the test tries to run several Python processes at the same time (such as multiple servers+clients), the open() in pipenv may fail.
-* crc32 is not a very good hash function: some tests check for the distribution of requests among several servers, and sometimes we get unlucky and crc32 hashes very non-uniformly.
-* things work when they shouldn't: one test tests that a connection breaks with the simple load balancer, but sometimes we get lucky and it doesn't.
-* leftovers from a previous run: Sometimes things can't bind to a socket because of the TCP timeout, or some UNIX socket weirdness happens. It works when tried again.
+* the switch is compiled with debugging, which makes it too slow to not drop packets
+* crc32 is not a very good hash function: some tests check for the distribution of requests among several servers, and sometimes we get unlucky and crc32 hashes very non-uniformly. (Currently those tests are disabled.)
+* things work when they shouldn't: one test tests that connections break with the simple load balancer, but once in a while we get lucky and it doesn't.
+* leftovers from a previous run: Sometimes things can't bind to a socket because of the TCP timeout, or some UNIX socket weirdness happens. It works when tried later.
+* `pipenv` race condition (only when using `pipenv`): pipenv likes to open the Pipfile in exclusive mode, so if the test tries to run several Python processes at the same time (such as multiple servers+clients), the open() in pipenv may fail.
 
 # What's in here?
 
@@ -60,7 +61,7 @@ There are two "kinds" of tests: "old-style" and "new-style" tests.
 
 See `../twisted-intro.md` for a quick intro to Twisted.
 
-## Automatically running `p4run`
+### Automatically running `p4run`
 
 I wanted to make pytest run p4run, so that running the tests really is one command and the setup/teardown is managed from within pytest. This has proven to be horrible, because `p4run` does not expect to be used non-interactively. Therefore, workaround:
 
