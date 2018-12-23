@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="92.02204 547.315 896.8359 294.78707" width="896.8359" height="294.78707">
+  <defs>
+    <filter id="Shadow" filterUnits="userSpaceOnUse" x="92.02204" y="547.315">
+      <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="1.308"/>
+      <feOffset in="blur" result="offset" dx="1.44" dy="1.44"/>
+      <feFlood flood-color="#757575" flood-opacity=".5" result="flood"/>
+      <feComposite in="flood" in2="offset" operator="in"/>
+    </filter>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -6 16 12" markerWidth="16" markerHeight="12" color="#414141">
+      <g>
+        <path d="M 13.2 0 L 0 -4.95 L 0 4.95 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="Ball_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-11 -6 12 12" markerWidth="12" markerHeight="12" color="#414141">
+      <g>
+        <circle cx="-4.949998" cy="0" r="4.94999562532748" fill="none" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker_2" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -6 16 12" markerWidth="16" markerHeight="12" color="#414141">
+      <g>
+        <path d="M 13.2 0 L 0 -4.95 L 0 4.95 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+    <font-face font-family="Lato" font-size="22" panose-1="2 15 5 2 2 2 4 3 2 3" units-per-em="1000" underline-position="-233" underline-thickness="44.5" slope="0" x-height="506.5" cap-height="716.5" ascent="986.9995" descent="-212.99744" font-weight="400">
+      <font-face-src>
+        <font-face-name name="Lato-Regular"/>
+      </font-face-src>
+    </font-face>
+    <font-face font-family="Input Sans" font-size="22" panose-1="2 0 5 6 2 0 0 9 0 4" units-per-em="1000" underline-position="0" underline-thickness="64.404955" slope="0" x-height="545.45455" cap-height="727.2727" ascent="927.2766" descent="-272.72034" font-weight="400">
+      <font-face-src>
+        <font-face-name name="InputSans-Regular"/>
+      </font-face-src>
+    </font-face>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.9.4 
+    <dc:date>2018-12-19 14:10:59 +0000</dc:date>
+  </metadata>
+  <g id="Timeline" stroke="none" stroke-dasharray="none" stroke-opacity="1" fill="none" fill-opacity="1">
+    <title>Timeline</title>
+    <g id="Timeline: Layer 1">
+      <title>Layer 1</title>
+      <g id="Graphic_274_shadow" filter="url(#Shadow)">
+        <path d="M 323.8197 589 C 327.21835 588.99994 329.9735 583.03044 329.97353 575.6667 L 329.97353 562.3333 C 329.9735 554.96956 327.21835 549.00006 323.8197 549 L 256.12738 549 C 252.72872 549.00006 249.97356 554.96956 249.97353 562.33333 L 249.97353 575.6667 C 249.97356 583.03044 252.72872 588.99994 256.12738 589 L 323.8197 589 Z" fill="#30bd5c"/>
+        <path d="M 323.8197 589 C 327.21835 588.99994 329.9735 583.03044 329.97353 575.6667 L 329.97353 562.3333 C 329.9735 554.96956 327.21835 549.00006 323.8197 549 L 256.12738 549 C 252.72872 549.00006 249.97356 554.96956 249.97353 562.33333 L 249.97353 575.6667 C 249.97356 583.03044 252.72872 588.99994 256.12738 589 L 323.8197 589 Z" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+      </g>
+      <g id="Graphic_275_shadow" filter="url(#Shadow)">
+        <path d="M 388.66667 837 C 401.55327 836.9999 411.9999 827.2995 412 815.3333 L 412 793.6667 C 411.9999 781.7005 401.55327 772.0001 388.66667 772 L 225.33333 772 C 212.44673 772.0001 202.0001 781.7005 202 793.6667 L 202 815.3333 C 202.0001 827.2995 212.44673 836.9999 225.33333 837 L 388.66667 837 Z" fill="#0085cc"/>
+        <path d="M 388.66667 837 C 401.55327 836.9999 411.9999 827.2995 412 815.3333 L 412 793.6667 C 411.9999 781.7005 401.55327 772.0001 388.66667 772 L 225.33333 772 C 212.44673 772.0001 202.0001 781.7005 202 793.6667 L 202 815.3333 C 202.0001 827.2995 212.44673 836.9999 225.33333 837 L 388.66667 837 Z" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+      </g>
+      <g id="Graphic_277_shadow" filter="url(#Shadow)">
+        <path d="M 805.6667 837.5371 C 818.5533 837.537 828.9999 827.8365 829 815.8704 L 829 794.2037 C 828.9999 782.2376 818.5533 772.5372 805.6667 772.5371 L 642.3333 772.5371 C 629.4467 772.5372 619.0001 782.2376 619 794.2037 L 619 815.8704 C 619.0001 827.8365 629.4467 837.537 642.3333 837.5371 L 805.6667 837.5371 Z" fill="#0085cc"/>
+        <path d="M 805.6667 837.5371 C 818.5533 837.537 828.9999 827.8365 829 815.8704 L 829 794.2037 C 828.9999 782.2376 818.5533 772.5372 805.6667 772.5371 L 642.3333 772.5371 C 629.4467 772.5372 619.0001 782.2376 619 794.2037 L 619 815.8704 C 619.0001 827.8365 629.4467 837.537 642.3333 837.5371 L 805.6667 837.5371 Z" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+      </g>
+      <g id="Line_279_shadow" filter="url(#Shadow)">
+        <line x1="289.97353" y1="609.925" x2="289.97353" y2="654.37415" marker-end="url(#FilledArrow_Marker)" marker-start="url(#Ball_Marker)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_281_shadow" filter="url(#Shadow)">
+        <line x1="412" y1="804.5" x2="589.3001" y2="804.96" marker-end="url(#FilledArrow_Marker)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8.0,8.0" stroke-width="2"/>
+      </g>
+      <g id="Graphic_282_shadow" filter="url(#Shadow)">
+        <path d="M 491.8355 589 C 495.23416 588.99994 497.9893 583.03044 497.98934 575.6667 L 497.98934 562.3333 C 497.9893 554.96956 495.23416 549.00006 491.8355 549 L 424.1432 549 C 420.7445 549.00006 417.98937 554.96956 417.98934 562.33333 L 417.98934 575.6667 C 417.98937 583.03044 420.7445 588.99994 424.1432 589 L 491.8355 589 Z" fill="#30bd5c"/>
+        <path d="M 491.8355 589 C 495.23416 588.99994 497.9893 583.03044 497.98934 575.6667 L 497.98934 562.3333 C 497.9893 554.96956 495.23416 549.00006 491.8355 549 L 424.1432 549 C 420.7445 549.00006 417.98937 554.96956 417.98934 562.33333 L 417.98934 575.6667 C 417.98937 583.03044 420.7445 588.99994 424.1432 589 L 491.8355 589 Z" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+      </g>
+      <g id="Graphic_283_shadow" filter="url(#Shadow)">
+        <path d="M 828.0895 589 C 831.4881 588.99994 834.2433 583.03044 834.2433 575.6667 L 834.2433 562.3333 C 834.2433 554.96956 831.4881 549.00006 828.0895 549 L 760.3972 549 C 756.9985 549.00006 754.24335 554.96956 754.2433 562.33333 L 754.2433 575.6667 C 754.24335 583.03044 756.9985 588.99994 760.3972 589 L 828.0895 589 Z" fill="#30bd5c"/>
+        <path d="M 828.0895 589 C 831.4881 588.99994 834.2433 583.03044 834.2433 575.6667 L 834.2433 562.3333 C 834.2433 554.96956 831.4881 549.00006 828.0895 549 L 760.3972 549 C 756.9985 549.00006 754.24335 554.96956 754.2433 562.33333 L 754.2433 575.6667 C 754.24335 583.03044 756.9985 588.99994 760.3972 589 L 828.0895 589 Z" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+      </g>
+      <g id="Graphic_284_shadow" filter="url(#Shadow)">
+        <path d="M 661.3922 589 C 664.79085 588.99994 667.546 583.03044 667.546 575.6667 L 667.546 562.3333 C 667.546 554.96956 664.79085 549.00006 661.3922 549 L 593.6999 549 C 590.3012 549.00006 587.54605 554.96956 587.546 562.33333 L 587.546 575.6667 C 587.54605 583.03044 590.3012 588.99994 593.6999 589 L 661.3922 589 Z" fill="#30bd5c"/>
+        <path d="M 661.3922 589 C 664.79085 588.99994 667.546 583.03044 667.546 575.6667 L 667.546 562.3333 C 667.546 554.96956 664.79085 549.00006 661.3922 549 L 593.6999 549 C 590.3012 549.00006 587.54605 554.96956 587.546 562.33333 L 587.546 575.6667 C 587.54605 583.03044 590.3012 588.99994 593.6999 589 L 661.3922 589 Z" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+      </g>
+      <g id="Line_288_shadow" filter="url(#Shadow)">
+        <line x1="457.98934" y1="609.925" x2="457.98934" y2="654.37415" marker-end="url(#FilledArrow_Marker)" marker-start="url(#Ball_Marker)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_289_shadow" filter="url(#Shadow)">
+        <line x1="794.5577" y1="609.9244" x2="794.9062" y2="655.3009" marker-end="url(#FilledArrow_Marker)" marker-start="url(#Ball_Marker)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_290_shadow" filter="url(#Shadow)">
+        <line x1="627.046" y1="609.8" x2="627.046" y2="654.37415" marker-end="url(#FilledArrow_Marker)" marker-start="url(#Ball_Marker)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_293_shadow" filter="url(#Shadow)">
+        <line x1="94.58204" y1="685" x2="953.718" y2="685" marker-end="url(#FilledArrow_Marker)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_301_shadow" filter="url(#Shadow)">
+        <line x1="307" y1="684.07415" x2="307" y2="742.175" marker-end="url(#FilledArrow_Marker_2)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_304_shadow" filter="url(#Shadow)">
+        <line x1="724" y1="772.4121" x2="724" y2="713.77415" marker-end="url(#FilledArrow_Marker_2)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Graphic_305">
+        <rect x="308" y="686" width="417" height="119.5" fill="#ffc0c0"/>
+        <rect x="308" y="686" width="417" height="119.5" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_274">
+        <desc>Work scheduled or in-progress</desc>
+        <path d="M 323.8197 589 C 327.21835 588.99994 329.9735 583.03044 329.97353 575.6667 L 329.97353 562.3333 C 329.9735 554.96956 327.21835 549.00006 323.8197 549 L 256.12738 549 C 252.72872 549.00006 249.97356 554.96956 249.97353 562.33333 L 249.97353 575.6667 C 249.97356 583.03044 252.72872 588.99994 256.12738 589 L 323.8197 589 Z" fill="#30bd5c"/>
+        <path d="M 323.8197 589 C 327.21835 588.99994 329.9735 583.03044 329.97353 575.6667 L 329.97353 562.3333 C 329.9735 554.96956 327.21835 549.00006 323.8197 549 L 256.12738 549 C 252.72872 549.00006 249.97356 554.96956 249.97353 562.33333 L 249.97353 575.6667 C 249.97356 583.03044 252.72872 588.99994 256.12738 589 L 323.8197 589 Z" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+        <text transform="translate(253.97353 555.5)" fill="white">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="white" x="14.9295" y="22">SYN</tspan>
+        </text>
+      </g>
+      <g id="Graphic_275">
+        <desc>Completed work</desc>
+        <path d="M 388.66667 837 C 401.55327 836.9999 411.9999 827.2995 412 815.3333 L 412 793.6667 C 411.9999 781.7005 401.55327 772.0001 388.66667 772 L 225.33333 772 C 212.44673 772.0001 202.0001 781.7005 202 793.6667 L 202 815.3333 C 202.0001 827.2995 212.44673 836.9999 225.33333 837 L 388.66667 837 Z" fill="#0085cc"/>
+        <path d="M 388.66667 837 C 401.55327 836.9999 411.9999 827.2995 412 815.3333 L 412 793.6667 C 411.9999 781.7005 401.55327 772.0001 388.66667 772 L 225.33333 772 C 212.44673 772.0001 202.0001 781.7005 202 793.6667 L 202 815.3333 C 202.0001 827.2995 212.44673 836.9999 225.33333 837 L 388.66667 837 Z" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+        <text transform="translate(206 775.5)" fill="white">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="white" x="4.6435" y="25">Send </tspan>
+          <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="white" y="25">conn_table</tspan>
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="white" x="36.782" y="53">write request</tspan>
+        </text>
+      </g>
+      <g id="Graphic_277">
+        <desc>Completed work</desc>
+        <path d="M 805.6667 837.5371 C 818.5533 837.537 828.9999 827.8365 829 815.8704 L 829 794.2037 C 828.9999 782.2376 818.5533 772.5372 805.6667 772.5371 L 642.3333 772.5371 C 629.4467 772.5372 619.0001 782.2376 619 794.2037 L 619 815.8704 C 619.0001 827.8365 629.4467 837.537 642.3333 837.5371 L 805.6667 837.5371 Z" fill="#0085cc"/>
+        <path d="M 805.6667 837.5371 C 818.5533 837.537 828.9999 827.8365 829 815.8704 L 829 794.2037 C 828.9999 782.2376 818.5533 772.5372 805.6667 772.5371 L 642.3333 772.5371 C 629.4467 772.5372 619.0001 782.2376 619 794.2037 L 619 815.8704 C 619.0001 827.8365 629.4467 837.537 642.3333 837.5371 L 805.6667 837.5371 Z" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+        <text transform="translate(623 776.0371)" fill="white">
+          <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="white" x="31.5" y="25">conn_table</tspan>
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="white" x="23.7195" y="53">write completes</tspan>
+        </text>
+      </g>
+      <g id="Line_279">
+        <desc>Sequence dependency notation/arrow</desc>
+        <line x1="289.97353" y1="609.925" x2="289.97353" y2="654.37415" marker-end="url(#FilledArrow_Marker)" marker-start="url(#Ball_Marker)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_281">
+        <desc>Sequence dependency notation/arrow</desc>
+        <line x1="412" y1="804.5" x2="589.3001" y2="804.96" marker-end="url(#FilledArrow_Marker)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8.0,8.0" stroke-width="2"/>
+      </g>
+      <g id="Graphic_282">
+        <desc>Work scheduled or in-progress</desc>
+        <path d="M 491.8355 589 C 495.23416 588.99994 497.9893 583.03044 497.98934 575.6667 L 497.98934 562.3333 C 497.9893 554.96956 495.23416 549.00006 491.8355 549 L 424.1432 549 C 420.7445 549.00006 417.98937 554.96956 417.98934 562.33333 L 417.98934 575.6667 C 417.98937 583.03044 420.7445 588.99994 424.1432 589 L 491.8355 589 Z" fill="#30bd5c"/>
+        <path d="M 491.8355 589 C 495.23416 588.99994 497.9893 583.03044 497.98934 575.6667 L 497.98934 562.3333 C 497.9893 554.96956 495.23416 549.00006 491.8355 549 L 424.1432 549 C 420.7445 549.00006 417.98937 554.96956 417.98934 562.33333 L 417.98934 575.6667 C 417.98937 583.03044 420.7445 588.99994 424.1432 589 L 491.8355 589 Z" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+        <text transform="translate(421.98934 555.5)" fill="white">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="white" x="15.034" y="22">data</tspan>
+        </text>
+      </g>
+      <g id="Graphic_283">
+        <desc>Work scheduled or in-progress</desc>
+        <path d="M 828.0895 589 C 831.4881 588.99994 834.2433 583.03044 834.2433 575.6667 L 834.2433 562.3333 C 834.2433 554.96956 831.4881 549.00006 828.0895 549 L 760.3972 549 C 756.9985 549.00006 754.24335 554.96956 754.2433 562.33333 L 754.2433 575.6667 C 754.24335 583.03044 756.9985 588.99994 760.3972 589 L 828.0895 589 Z" fill="#30bd5c"/>
+        <path d="M 828.0895 589 C 831.4881 588.99994 834.2433 583.03044 834.2433 575.6667 L 834.2433 562.3333 C 834.2433 554.96956 831.4881 549.00006 828.0895 549 L 760.3972 549 C 756.9985 549.00006 754.24335 554.96956 754.2433 562.33333 L 754.2433 575.6667 C 754.24335 583.03044 756.9985 588.99994 760.3972 589 L 828.0895 589 Z" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+        <text transform="translate(758.2433 555.5)" fill="white">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="white" x="15.034" y="22">data</tspan>
+        </text>
+      </g>
+      <g id="Graphic_284">
+        <desc>Work scheduled or in-progress</desc>
+        <path d="M 661.3922 589 C 664.79085 588.99994 667.546 583.03044 667.546 575.6667 L 667.546 562.3333 C 667.546 554.96956 664.79085 549.00006 661.3922 549 L 593.6999 549 C 590.3012 549.00006 587.54605 554.96956 587.546 562.33333 L 587.546 575.6667 C 587.54605 583.03044 590.3012 588.99994 593.6999 589 L 661.3922 589 Z" fill="#30bd5c"/>
+        <path d="M 661.3922 589 C 664.79085 588.99994 667.546 583.03044 667.546 575.6667 L 667.546 562.3333 C 667.546 554.96956 664.79085 549.00006 661.3922 549 L 593.6999 549 C 590.3012 549.00006 587.54605 554.96956 587.546 562.33333 L 587.546 575.6667 C 587.54605 583.03044 590.3012 588.99994 593.6999 589 L 661.3922 589 Z" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+        <text transform="translate(591.546 555.5)" fill="white">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="white" x="15.034" y="22">data</tspan>
+        </text>
+      </g>
+      <g id="Line_288">
+        <desc>Sequence dependency notation/arrow</desc>
+        <line x1="457.98934" y1="609.925" x2="457.98934" y2="654.37415" marker-end="url(#FilledArrow_Marker)" marker-start="url(#Ball_Marker)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_289">
+        <desc>Sequence dependency notation/arrow</desc>
+        <line x1="794.5577" y1="609.9244" x2="794.9062" y2="655.3009" marker-end="url(#FilledArrow_Marker)" marker-start="url(#Ball_Marker)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_290">
+        <desc>Sequence dependency notation/arrow</desc>
+        <line x1="627.046" y1="609.8" x2="627.046" y2="654.37415" marker-end="url(#FilledArrow_Marker)" marker-start="url(#Ball_Marker)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_293">
+        <desc>Sequence dependency notation/arrow</desc>
+        <line x1="94.58204" y1="685" x2="953.718" y2="685" marker-end="url(#FilledArrow_Marker)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Graphic_294">
+        <rect x="109.76072" y="666.5" width="58" height="37" fill="white"/>
+        <text transform="translate(114.76072 671.5)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".042" y="22">Time</tspan>
+        </text>
+      </g>
+      <g id="Line_301">
+        <desc>Sequence dependency notation/arrow</desc>
+        <line x1="307" y1="684.07415" x2="307" y2="742.175" marker-end="url(#FilledArrow_Marker_2)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_304">
+        <desc>Sequence dependency notation/arrow</desc>
+        <line x1="724" y1="772.4121" x2="724" y2="713.77415" marker-end="url(#FilledArrow_Marker_2)" stroke="#414141" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+    </g>
+  </g>
+</svg>
