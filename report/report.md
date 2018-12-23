@@ -67,7 +67,7 @@ To our knowledge, SDN-based load balancing with an adjustable distribution has n
 
 # Implementation
 
-## Guiding principles 
+## Guiding principles
 
 During the implementation, we dedicated non-negligible effort to keeping the
 high-level structure clean: the different components are in clearly separated, well
@@ -82,7 +82,7 @@ inheritance), but also for the P4 code, to the extent possible by the current
 "flat" file structure needed by the P4 compiler.\footnote{
 Looking back, the author would today write the controller code with much less
 inheritance and much more explicit function composition: somewhat in the
-direction of \ref{inheritance}. Nevertheless, even this not entirely optimal
+spirit of \ref{inheritance}. Nevertheless, even this not entirely optimal
 approach was good enough to save a lot of time in the later stages of
 development. Anything that keeps things decoupled pays off eventually.
 }
