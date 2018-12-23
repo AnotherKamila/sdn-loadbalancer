@@ -286,17 +286,21 @@ To be able to keep both old and current data in the same P4 table, we have
 created a universal "versioned table" abstraction:
 
 * the P4 code adds an extra `meta.version` key (exact match)
-* the P4 code reads a versions register 
-* the controller code writes to the register to tell the P4 switch which version
-  is correct
-* the controller uses our `VersionedP4Table` abstraction, which looks like a
+* the P4 code reads a versions register and stores the value in `meta.version`
+* the controller writes to the register to tell the P4 switch which version
+  should be currently active
+* the controller may use our `VersionedP4Table` abstraction, which looks like a
   normal P4 table, but has an extra `commit()` method and handles versions (i.e.
   adds the extra key and writes to the register when needed)
 
 Note that in addition to enabling us to store old data, this also enables
-transactions (even across table, if multiple tables use the same version
-register): the controller can make changes in a "scratch" version and flip them
+transactions (even across tables, if multiple tables use the same version
+register): the controller can make changes in a "scratch" version and commit
 atomically by a single register write.
+
+#### Determining which table version goes with a packet
+
+
 
 # Evaluation
 
