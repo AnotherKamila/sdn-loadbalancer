@@ -535,22 +535,22 @@ Listing~\ref{lst:pytest} shows a sample tests run.
 \begin{lstlisting}[basicstyle=\ttfamily\small,caption=A sample test
                    session,captionpos=b,label=lst:pytest]
 vagrant@p4:/project$ pytest                                          
-=========================== test session starts ==========================
+=========================== test session starts ===========================
 platform linux2 -- Python 2.7.12, pytest-4.0.1, py-1.7.0, pluggy-0.8.0
 rootdir: /project, inifile:
 plugins: twisted-1.8, timeout-1.3.3
 collected 23 items / 2 skipped
 
-test/l2_lazy/blackbox_test.py ..                                    [  8%]
-test/l3_router_lazy/blackbox_test.py ..                             [ 17%]
-test/l4_loadbalancer/keep_connections_test.py ...                   [ 30%]
-test/l4_loadbalancer/versioned_tables_test.py .....s                [ 56%]
-test/l4_loadbalancer-unversioned/connection_breaking_test.py .      [ 60%]
-test/l4_loadbalancer-unversioned/l3_still_works_test.py ..          [ 69%]
-test/l4_loadbalancer-unversioned/loadbalancing_test.py ...          [ 82%]
-test/l4_loadbalancer-unversioned/twisted_loadbalancing_test.py ...s [100%]
+test/l2_lazy/blackbox_test.py ..                                     [  8%]
+test/l3_router_lazy/blackbox_test.py ..                              [ 17%]
+test/l4_loadbalancer/keep_connections_test.py ...                    [ 30%]
+test/l4_loadbalancer/versioned_tables_test.py .....s                 [ 56%]
+test/l4_loadbalancer-unversioned/connection_breaking_test.py .       [ 60%]
+test/l4_loadbalancer-unversioned/l3_still_works_test.py ..           [ 69%]
+test/l4_loadbalancer-unversioned/loadbalancing_test.py ...           [ 82%]
+test/l4_loadbalancer-unversioned/twisted_loadbalancing_test.py ...s  [100%]
 
-================== 21 passed, 4 skipped in 315.61 seconds ================
+================== 21 passed, 4 skipped in 315.61 seconds =================
 \end{lstlisting}
 
 \subsection{Live system simulation}
