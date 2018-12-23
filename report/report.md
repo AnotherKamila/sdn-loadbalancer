@@ -218,16 +218,24 @@ the VIPs table did not match.
 
 ## Changing the distribution
 
-A simple way to change the distribution of requests with minimal code changes is to add an entry for a server multiple times (with different hashes):
+A simple way to change the distribution of requests with minimal code changes is
+to add an entry for a server multiple times (with different hashes):
 
 ![Figure 2: Multiple buckets per server](./figures/buckets.svg)
 
-This allows to change the ratios of requests that land in different servers, at the cost of increased memory usage: the table size will now be $\sum \mathrm{weights}$.
+This allows to change the ratios of requests that land in different servers, at
+the cost of increased memory usage: the table size will now be $\sum
+\mathrm{weights}$.
+This is what we implemented in our project.
 
 Memory usage could be improved by using something other than an exact match:
 
-* The P4 standard specifies an LPM match kind, which could be leveraged to decrease the table size to $\ln \sum \textrm{weights}$ by splitting the bucket sizes to powers of two and adding one entry per power of two, as shown in Figure 3.
-* the V1 model offers a range match kind: this would keep the table size independent of the weights.
+* The P4 standard specifies an LPM match kind, which could be leveraged to
+  decrease the table size to $\ln \sum \textrm{weights}$ by splitting the bucket
+  sizes to powers of two and adding one entry per power of two, as shown in
+  Figure 3.
+* the V1 model offers a range match kind: this would keep the table size
+  independent of the weights.
 
 ![Figure 3: Decreasing table size by using LPM instead of exact match](./figures/prefix-tree.svg)
 
@@ -235,7 +243,12 @@ We did not implement this in the project, but it would be a trivial change.
 
 ## Per-connection consistency
 
-If we only implement what has been described so far, we will get a functional load balancer with weights, but we cannot change the weights dynamically without losing per-connection consistency. When the pool distribution changes, some buckets will be assigned to different servers and therefore connections in those buckets will be broken (see Figure 4).
+If we implement what has been described so far, we will get a functional load
+balancer with weights, but we cannot change the weights (or the servers in
+pools) dynamically without losing per-connection consistency.
+When the pool distribution changes, some buckets will be assigned to different
+servers and therefore connections in those buckets will be broken (see Figure
+4).
 
 ![Figure 4: Changing the distribution will break connections which hashed into the third bucket.](./figures/hash-problem.svg)
 
