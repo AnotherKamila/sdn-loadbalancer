@@ -106,7 +106,7 @@ It would be very useful to take into account some server metrics, such as server
 load or mean request latency, when making load balancing decisions.
 
 Therefore, this project proposes a load balancer based on software-defined
-networking (SDN), able to perform entirely in the data plane (i.e. at line
+networking (SDN), able to perform entirely in the data plane (i.e.~at line
 rate), which can additionally forward the requests to the application servers
 with an arbitrary, dynamically adjustable distribution.
 
@@ -129,8 +129,8 @@ L4 load balancing in general works as follows:
     it appears that the response comes from the load balancer.
 \end{enumerate}
 
-The challenge when implementing an SDN-based load balancer is
-\textbf{per-connection consistency}, i.e. making sure that all packets of a
+The challenge when implementing a P4-based load balancer is
+\textbf{per-connection consistency}, i.e.~making sure that all packets of a
 given connection are forwarded to the same application server.
 Unlike in software, a hardware-based load balancer cannot afford to keep much
 state (because that would reduce performance), and therefore it is not trivial
@@ -180,12 +180,11 @@ concerns.
 \subsection{L3 and below: a simple router}
 A load balancer's function is ultimately to rewrite the destination IP and port
 and then send the traffic to that server.
-Therefore, up to L3 it performs standard routing: it knows how to reach
-different hosts.
-For simplicity, for this project we implemented simplified routing which has its
+Therefore, up to L3 it performs standard routing.
+For this project we implemented simplified routing which has its
 ARP and MAC tables pre-filled by the controller instead of running the ARP
 protocol and L2 learning.
-The different components of a router are the following:
+The following describes our routing implementation.
 
 \subsubsection{L3: routing}
 The packet's destination IP address is matched in the router's \emph{routing
@@ -224,7 +223,7 @@ Note: Interface conceptually belongs there, but the IP address should in fact be
 unique.
 Our code leaves out the interface for simplicity.
 
-If there is no match, i.e. when we don’t know the MAC address for the IP
+If there is no match, i.e.~when we don’t know the MAC address for the IP
 address, the control plane would normally send an \emph{ARP request} (and drop
 the packet).
 In our case, we opted to simplify by pre-filling the ARP table from the (known)
@@ -410,7 +409,7 @@ created a universal ``versioned table'' abstraction:
     should be currently active
 \item the controller may use our \texttt{VersionedP4Table} abstraction, which
     looks like a normal P4 table, but has an extra \texttt{commit()} method and
-    handles versions (i.e.  adds the extra key and writes to the register when
+    handles versions (i.e.~adds the extra key and writes to the register when
     needed)
 \end{itemize}
 
@@ -575,11 +574,10 @@ A function usable in production is a control theory question, and is very likely
 application-specific, so we did not explore this subproblem.
 }
 To see the effect, the load balancer was initially set to balance uniformly
-(i.e. with all weights set to 1), and later it was switched to take the server
+(i.e.~with all weights set to 1), and later it was switched to take the server
 load into account and re-distribute the requests accordingly.
 A sample run of the experiment is on Figure~\ref{fig:demo1-wide}.
 
-TODO
 %![Figure whatever2: Loads and weights over time](./figures/demo1-wide.png)
 \begin{figure}[h]
 \centering
