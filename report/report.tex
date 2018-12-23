@@ -366,14 +366,12 @@ The obvious fix is to remember the server for a connection instead of
 re-selecting it for every packet.
 The flow would then be as follows:
 
-TODO
-%%% Which one is connections.svg?
-%\begin{figure}[h]
-%\centering
-%\includegraphics[width=.5\textwidth]{figures/connections.pdf}
-%\caption{Connections table}
-%\label{fig:connections}
-%\end{figure}
+\begin{figure}[h]
+\centering
+\includegraphics[width=.5\textwidth]{figures/connections.pdf}
+\caption{Connections table}
+\label{fig:connections}
+\end{figure}
 
 We need to use a table (with exact match on the 5-tuple), not SRAM, because we
 need an exact match to not break anything.
