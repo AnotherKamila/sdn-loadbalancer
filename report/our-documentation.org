@@ -1,8 +1,0 @@
-* Who did what
-|                                  |        |
-| Header and Parser Bootstrap      | Nico   |
-| Write the test framework         | Kamila |
-| IPv6 address egress learning     | Kamila |
-| IPv4 address ingress learning    | Sarah  |
-| Simple stateless 1:1 NAT64 table | Sarah  |
-|                                  |        |
