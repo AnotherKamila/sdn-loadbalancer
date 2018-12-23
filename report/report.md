@@ -67,15 +67,122 @@ To our knowledge, SDN-based load balancing with an adjustable distribution has n
 
 # Implementation
 
-## Up to L3: A simple router
+## Guiding principles 
 
-## Simple L4 load balancer
+During the implementation, we dedicated non-negligible effort to keeping the
+high-level structure clean: the different components are in clearly separated, well
+decoupled modules.
+This is true not only, but especially for code dealing with different network
+layers: the L2 switching, "L2.5" ARP, and L3 routing are completely separate and
+each layer can be freely exchanged with another implementation without modifying
+the other layers (as it should be).
+This is the case not only for the controller code (which uses various
+modularity-friendly features of Python such as modules, classes and
+inheritance), but also for the P4 code, to the extent possible by the current
+"flat" file structure needed by the P4 compiler.\footnote{
+Looking back, the author would today write the controller code with much less
+inheritance and much more explicit function composition: somewhat in the
+direction of \ref{inheritance}. Nevertheless, even this not entirely optimal
+approach was good enough to save a lot of time in the later stages of
+development. Anything that keeps things decoupled pays off eventually.
+}
+Thanks to this, the individual components can be be thought about, implemented,
+debugged, and tested separately.
+This allowed us to progress quickly when unexpected challenges arose, as
+changing existing code was relatively easy due to the clean separation.
+
+## L3 and below: A simple router
+
+A load balancer's function is ultimately to rewrite the destination IP and port
+and then send the traffic to that host.
+Therefore, up to L3 it performs standard routing: it knows how to reach
+different hosts.
+For simplicity, for this project we implemented a simplifed router which has its
+ARP and MAC tables pre-filled by the controller instead of running the ARP
+protocol and L2 learning. The different components of a router are the following:
+
+### L3: routing
+
+The packet's destination IP address is matched in the router's _routing table_,
+using a longest-prefix match (LPM).
+The packet may either be addressed to a host the router is directly connected to
+(on some interface), or it may need to be sent further, through a gateway
+(through some interface).
+
+Therefore, the routing table maps a prefix to either of:
+* a next hop through a gateway and an interface, or
+* a direct connection through an interface.
+
+```
+routing_table : Prefix -> NextHop (GatewayIP, Interface) | Direct Interface
+```
+
+If there is no match (no route to host), we drop the packet.
+
+Note that the next hop’s IP address is in the router’s memory only: it does not
+appear in the packet at any time.
+
+### "L2.5": ARP
+
+We now know the IP address and interface of the next hop.
+(Note that this is a host that is connected to us directly – it is sitting on
+the same wire.)
+We need to translate this into an L2 MAC address in order to pass it to L2.
+The mapping is stored in the _ARP table_.
+
+```
+arp_table : (IPv4Address, Interface) -> MACAddress
+```
+
+Note: Interface conceptually belongs there, but the IP address should in fact be
+unique.
+Our code leaves out the interface for simplicity.
+
+If there is no match, i.e. when we don’t know the MAC address for the IP, the
+control plane would normally send an _ARP request_ (and drop the packet).
+In our case, we opted to simplify by pre-filling the ARP table from the (known)
+topology instead.
+
+IPv6 uses NDP instead of ARP.
+While the protocol is different, the data-plane table is conceptually the same.
+
+### L2: switching
+
+Here we get a packet with some destination MAC address, and we need to decide on
+which port we should put it.
+We use a MAC table to do it:
+
+```
+mac_table : MACAddress -> Port
+```
+
+Real switches are a bit more complicated than that: for example, redundant links
+mean that a MAC address may be on more than one port.
+We do not support that.
+
+The MAC table is normally filled at runtime by observing source MACs on incoming
+packets.
+In our case, we pre-fill it from the known topology for simplicity.
+
+### The control flow: Putting it together
+
+The router applies the tables described above as follows:
+
+1. Apply routing. Find the next hop (either gateway or direct).
+1. Apply ARP translation to the “next hop” host. Fill out the destination MAC address in the packet.
+3. Apply the MAC table to find the right port for this destination MAC address. Send it out.
+
+## L4: Simple load balancer
 
 ## Dynamically adjusting weights
 
 # Evaluation
 
+TODO methods + results
+
 # Conclusion
+
+TODO
 
 # References
 
@@ -84,3 +191,18 @@ TODO bibtexify
 maglev: D. E. Eisenbud, et al. 2016. Maglev: A Fast and Reliable Software Network Load Balancer. In NSDI.
 silkroad: SilkRoad: Making Stateful Layer-4 Load Balancing Fast and Cheap Using Switching ASICs
 whyisthereatypointhispaperstitle: R. Govindan, et al. Evolve or Die: High-Availability Design Principles Drawn from Googles Network Infrastructure. In ACM SIGCOMM 2016.
+inheritance: https://www.youtube.com/watch?v=3MNVP9-hglc
+
+# Group organisation
+
+TODO is this good?
+
+The original group split after about two weeks. Most of this project was done by Kamila Součková. Others' contributions are:
+
+## Nico Schottelius
+
+Wrote the packet parsers (Ethernet, IPv4, IPv6, TCP).
+
+## Sarah Plocher
+
+Wrote the first version of the L2 switch. None of the code is present now.
