@@ -41,6 +41,8 @@ sudo make install
 sudo ldconfig
 ```
 
+(If things look a little bit weird and a lot of connections are getting lost, it's probably because the switch is in debug mode. It kind of looks like it works, but not really.)
+
 ### Python
 
 The controller needs to be able to use raw sockets (to receive the cloned packets from the controller). To run it as non-root, the Python executable needs to get the `net_raw` capability. Set it using:

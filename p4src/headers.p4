@@ -113,7 +113,7 @@ struct bloom_filter_meta_t {
 struct metadata {
     bit<16> l4_payload_length;
 
-    interface_t out_interface; // in SDN, an interface is a software-only concept (TODO really?)
+    interface_t out_interface; // in SDN, an interface is a software-only concept
 
     ipv4_addr_t ipv4_next_hop; // at most one will be present,
     ipv6_addr_t ipv6_next_hop; // depending on what we're sending out

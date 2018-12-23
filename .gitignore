@@ -10,3 +10,9 @@ readyfile
 
 set-switch.sh
 demo/data.tsv
+
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc

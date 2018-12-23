@@ -9,7 +9,6 @@ while [ "$CURDIR" != "/" ]; do
         DOTENV="$CURDIR/.env"
         break
     fi
-    echo "$CURDIR"
     CURDIR="$(readlink -m ..)"
 done
 
