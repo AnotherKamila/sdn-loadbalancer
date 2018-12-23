@@ -13,9 +13,8 @@ This is critical to performance, especially for large services, because with
 load balancing what appears to be a single endpoint can process more requests at
 the same time.
 However, the load balancer quickly becomes a bottleneck: a high-end software
-load balancer can forward up to 12 million packets per second (12 Mpps), while
-the underlying network throughput can easily reach multiple billion packets per
-second (Gpps).\ref{maglev}
+load balancer can forward a few Mpps, while the underlying network throughput
+can easily reach multiple Gpps.\cite{maglev}
 
 Furthermore, load balancers typically select servers from the pool
 uniformly, which can pose problems in multiple scenarios.
@@ -57,9 +56,9 @@ keep much state (because that would reduce performance), and therefore it is not
 trivial to ensure that all packets of the same connection will be forwarded to
 the same server when the pool changes.
 Pool changes are quite frequent, as especially in large data centres servers come
-offline or online multiple times per second.\ref{googleinfra}
+offline or online multiple times per second.\cite{googleinfra}
 
-SDN-based load balancing has been explored in \ref{silkroad}.
+SDN-based load balancing has been explored in \cite{silkroad}.
 The paper focused on performance, scalability, and the ability to handle
 frequent changes to the DIP pools.
 The approach in this paper is highly optimised and rather clever.
@@ -88,7 +87,7 @@ inheritance), and for the P4 code, to the extent possible by the current
 "flat" file structure needed by the P4 compiler.\footnote{
 Looking back, the author would today write the controller code with much less
 inheritance and much more explicit function composition: somewhat in the
-spirit of \ref{inheritance}.
+spirit of \cite{inheritance}.
 Nevertheless, even this not entirely optimal approach was good enough to save a
 lot of time in the later stages of development.
 Anything that keeps things decoupled pays off eventually.
@@ -219,9 +218,26 @@ the VIPs table did not match.
 
 ## Changing the distribution
 
-TODO
+A simple way to change the distribution of requests with minimal code changes is to add an entry for a server multiple times (with different hashes):
+
+![Figure 2: Multiple buckets per server](./figures/buckets.svg)
+
+This allows to change the ratios of requests that land in different servers, at the cost of increased memory usage: the table size will now be $\sum \mathrm{weights}$.
+
+Memory usage could be improved by using something other than an exact match:
+
+* The P4 standard specifies an LPM match kind, which could be leveraged to decrease the table size to $\ln \sum \textrm{weights}$ by splitting the bucket sizes to powers of two and adding one entry per power of two, as shown in Figure 3.
+* the V1 model offers a range match kind: this would keep the table size independent of the weights.
+
+![Figure 3: Decreasing table size by using LPM instead of exact match](./figures/prefix-tree.svg)
+
+We did not implement this in the project, but it would be a trivial change.
 
 ## Per-connection consistency
+
+If we only implement what has been described so far, we will get a functional load balancer with weights, but we cannot change the weights dynamically without losing per-connection consistency. When the pool distribution changes, some buckets will be assigned to different servers and therefore connections in those buckets will be broken (see Figure 4).
+
+![Figure 4: Changing the distribution will break connections which hashed into the third bucket.](./figures/hash-problem.svg)
 
 # Evaluation
 

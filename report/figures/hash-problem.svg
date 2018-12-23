@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="163.52597 365.30952 686.4477 158.69048" width="686.4477" height="158.69048">
+  <defs>
+    <font-face font-family="Input Sans" font-size="22" panose-1="2 0 5 6 2 0 0 9 0 4" units-per-em="1000" underline-position="0" underline-thickness="64.404955" slope="0" x-height="545.45455" cap-height="727.2727" ascent="927.2766" descent="-272.72034" font-weight="400">
+      <font-face-src>
+        <font-face-name name="InputSans-Regular"/>
+      </font-face-src>
+    </font-face>
+    <font-face font-family="Lato" font-size="22" panose-1="2 15 5 2 2 2 4 3 2 3" units-per-em="1000" underline-position="-233" underline-thickness="44.5" slope="0" x-height="506.5" cap-height="716.5" ascent="986.9995" descent="-212.99744" font-weight="400">
+      <font-face-src>
+        <font-face-name name="Lato-Regular"/>
+      </font-face-src>
+    </font-face>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -3 7 6" markerWidth="7" markerHeight="6" color="black">
+      <g>
+        <path d="M 4.8 0 L 0 -1.8 L 0 1.8 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.9.4 
+    <dc:date>2018-12-19 17:34:41 +0000</dc:date>
+  </metadata>
+  <g id="Hash_problem" stroke="none" stroke-dasharray="none" stroke-opacity="1" fill="none" fill-opacity="1">
+    <title>Hash problem</title>
+    <g id="Hash_problem: Layer 1">
+      <title>Layer 1</title>
+      <g id="Graphic_11">
+        <rect x="225.60937" y="457.7143" width="58.64006" height="30" fill="#8080ff"/>
+      </g>
+      <g id="Graphic_10">
+        <rect x="286.69277" y="457.7143" width="58.64006" height="30" fill="#ff80ff"/>
+      </g>
+      <g id="Graphic_9">
+        <rect x="347.77616" y="457.7143" width="58.64006" height="30" fill="#ff80ff"/>
+      </g>
+      <g id="Graphic_8">
+        <rect x="408.85956" y="457.7143" width="58.64006" height="30" fill="#ff80ff"/>
+      </g>
+      <g id="Graphic_7">
+        <rect x="164.52597" y="457.7143" width="58.64006" height="30" fill="#8080ff"/>
+      </g>
+      <g id="Graphic_12">
+        <text transform="translate(398 403.5)" fill="black">
+          <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="black" x="0" y="25">hash(five_tuple)</tspan>
+        </text>
+      </g>
+      <g id="Graphic_18">
+        <text transform="translate(281.5128 365.30952)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="0" y="22">before:</tspan>
+        </text>
+      </g>
+      <g id="Line_22">
+        <path d="M 393 419 L 316.0128 419 L 316.0128 444.8143" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Graphic_25">
+        <rect x="164.52597" y="493" width="119.72346" height="30" stroke="#7f80ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <text transform="translate(169.52597 494.5)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="1.4402286" y="22">blue server</tspan>
+        </text>
+      </g>
+      <g id="Graphic_26">
+        <rect x="286.69277" y="493" width="180.80685" height="30" stroke="#ff7fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <text transform="translate(291.69277 494.5)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="32.146927" y="22">pink server</tspan>
+        </text>
+      </g>
+      <g id="Graphic_32">
+        <text transform="translate(671.9868 365.30952)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="0" y="22">after:</tspan>
+        </text>
+      </g>
+      <g id="Graphic_48">
+        <rect x="607.0834" y="457.7143" width="58.64006" height="30" fill="#8080ff"/>
+      </g>
+      <g id="Graphic_47">
+        <rect x="668.1668" y="457.7143" width="58.64006" height="30" fill="#8080ff"/>
+      </g>
+      <g id="Graphic_46">
+        <rect x="729.2502" y="457.7143" width="58.64006" height="30" fill="#ff80ff"/>
+      </g>
+      <g id="Graphic_45">
+        <rect x="790.3336" y="457.7143" width="58.64006" height="30" fill="#ff80ff"/>
+      </g>
+      <g id="Graphic_44">
+        <rect x="546" y="457.7143" width="58.64006" height="30" fill="#8080ff"/>
+      </g>
+      <g id="Graphic_43">
+        <rect x="546" y="493" width="180.80685" height="30" stroke="#7f80ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <text transform="translate(551 494.5)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="31.981927" y="22">blue server</tspan>
+        </text>
+      </g>
+      <g id="Graphic_42">
+        <rect x="728.97365" y="493" width="120" height="30" stroke="#ff7fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <text transform="translate(733.97365 494.5)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="1.7435" y="22">pink server</tspan>
+        </text>
+      </g>
+      <g id="Line_50">
+        <path d="M 618 419 L 697.4868 419 L 697.4868 444.8143" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+    </g>
+  </g>
+</svg>
