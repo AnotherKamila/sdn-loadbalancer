@@ -16,3 +16,4 @@ demo/data.tsv
 *.blg
 *.out
 *.toc
+*.log
