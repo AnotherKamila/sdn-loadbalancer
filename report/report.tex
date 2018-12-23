@@ -49,7 +49,7 @@
     \sf Author:\\[5pt]
     \sf Kamila Sou\v{c}kov\'{a} \\ [5pt]
     %
-    \sf  Advisor:  (name of the assistant) \vspace*{5mm}\\
+    \sf  Advisor:  Alexander Dietm\"{u}ller \vspace*{5mm}\\
     %
     \sf  Supervisor:  Prof. Dr. Laurent Vanbever \vspace*{20.0mm}\\
     %
@@ -521,12 +521,12 @@ To make sure that our load balancer works correctly, we created a ``mini test
 framework'' for our P4 switch using \texttt{pytest}\cite{pytest}.
 This mini-framework enables us to write full integration tests: it uses
 \texttt{p4run} to create a Mininet network and start the P4 switch, and it
-allows to perform end-to-end tests by telling the Mininet hosts to run anything
+can perform end-to-end tests by telling the Mininet hosts to run anything
 from \texttt{ping} and \texttt{netcat} to custom servers and clients controlled
 via RPC.
 
 Thanks to using the Twisted framework, which makes it trivial to combine
-multiple network-connected event loops, we were able to write very specific
+multiple event loops, we were able to write very specific
 tests which show where exactly we have a problem.
 Though the initial time investment into creating the mini test framework and
 rewriting everything into Twisted was substantial, it clearly paid off during
@@ -565,8 +565,8 @@ We started up four of the servers, each set to simulate a system with a
 different number of CPUs (and therefore a different ability to handle the load).
 
 We then programmed the load balancer to read this simulated value and set the
-requests distribution to $1/\mathrm{load}$ for each server.\footnote{%
-In the real world, $1/\mathrm{load}$ does not work very well, because that way
+requests distribution to $\mathrm{load}^{-1}$ for each server.\footnote{%
+In the real world, $\mathrm{load}^{-1}$ does not work very well, because that way
 the system is a feedback loop with a delay, which means that oscillations will
 occur.
 Nevertheless, this allows us to see that the load balancer works.
@@ -576,8 +576,9 @@ application-specific, so we did not explore this subproblem.
 To see the effect, the load balancer was initially set to balance uniformly
 (i.e. with all weights set to 1), and later it was switched to take the server
 load into account and re-distribute the requests accordingly.
-A sample run of the experiment is on Figure~\ref{fig:demo1-wide}.
+A sample run of the experiment is on Figure~\ref{fig:demo}.
 
+TODO
 %![Figure whatever2: Loads and weights over time](./figures/demo1-wide.png)
 
 \section{Conclusion}
