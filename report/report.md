@@ -243,6 +243,8 @@ We did not implement this in the project, but it would be a trivial change.
 
 ## Per-connection consistency
 
+### The problem
+
 If we implement what has been described so far, we will get a functional load
 balancer with weights, but we cannot change the weights (or the servers in
 pools) at runtime without losing per-connection consistency.
@@ -251,6 +253,49 @@ servers and therefore connections in those buckets will be broken (see Figure
 4).
 
 ![Figure 4: Changing the distribution will break connections which hashed into the third bucket.](./figures/hash-problem.svg)
+
+### Fix #1: Saving server assignment in a connections table
+
+The obvious fix is to remember the server for a connection instead of
+re-selecting it for every packet.
+The flow would then be as follows:
+
+![Figure 5: Connections table](./figures/connections.svg)
+
+We need to use a table (with exact match on the 5-tuple), not SRAM, because we
+need an exact match to not break anything.
+
+The problem with this approach is that we cannot write to the table instantly
+(as table writes are done by the control plane).
+Therefore, although this approach allows us to remember connections after some
+time, there is a "dangerous window" between the first packet of the connection
+and the completion of the table write: see Figure 6.
+
+![Figure 6: "Dangerous window" where we could still choose the wrong server](./figures/timeline.svg)
+
+### Fix #2: Closing the "dangerous window"
+
+The dangerous window is dangerous because we have discarded the old data.
+Therefore, we can get around the problem by not discarding it until all pending
+connection writes using it have been written into the connections table.
+
+#### Versioned tables
+
+To be able to keep both old and current data in the same P4 table, we have
+created a universal "versioned table" abstraction:
+
+* the P4 code adds an extra `meta.version` key (exact match)
+* the P4 code reads a versions register 
+* the controller code writes to the register to tell the P4 switch which version
+  is correct
+* the controller uses our `VersionedP4Table` abstraction, which looks like a
+  normal P4 table, but has an extra `commit()` method and handles versions (i.e.
+  adds the extra key and writes to the register when needed)
+
+Note that in addition to enabling us to store old data, this also enables
+transactions (even across table, if multiple tables use the same version
+register): the controller can make changes in a "scratch" version and flip them
+atomically by a single register write.
 
 # Evaluation
 
