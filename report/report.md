@@ -178,16 +178,30 @@ As already hinted, a simple load balancer handles incoming packets as follows:
 
 ![Figure 1: Flow diagram of the simple load balancer](./figures/simple-packet.svg)
 
-1. Match the packet's destination IP address and port against the _VIPs table_. If it matches, this is a packet we should load balance. If it does not, we skip the following steps. This table's match action sets not only the pool ID, but also the pool size.
-2. Compute a hash of the fivetuple, modulo pool size. The fivetuple identifies a connection, therefore the hash will be the same for all packets of the same connection.
-3. Match the pool ID and the hash to the _DIPs table_: select a specific server. If the hash is sufficiently uniform, the server will be selected uniformly at random.
-4. Rewrite the packet's destination IP and port to the selected server's IP and port.
-5. Pass to L3 for routing to the server. Note that now the packet's destination is that server, so L3 can handle it without awareness of our rewriting.
+1. Match the packet's destination IP address and port against the _VIPs table_.
+   If it matches, this is a packet we should load balance. If it does not, we
+   skip the following steps. This table's match action sets not only the pool
+   ID, but also the pool size.
+2. Compute a hash of the fivetuple, modulo pool size. The fivetuple identifies a
+   connection, therefore the hash will be the same for all packets of the same
+   connection.
+3. Match the pool ID and the hash to the _DIPs table_: select a specific server.
+   If the hash is sufficiently uniform, the server will be selected uniformly at
+   random.
+4. Rewrite the packet's destination IP and port to the selected server's IP and
+   port.
+5. Pass to L3 for routing to the server. Note that now the packet's destination
+   is that server, so L3 can handle it without awareness of our rewriting.
 
-Care must be taken to also rewrite packets on the return path, so that they appear to come from the load balancer. In our case, we add two more tables to handle this, and we apply these only if the VIPs table did not match.
+Care must be taken to also rewrite packets on the return path, so that they
+appear to come from the load balancer.
+In our case, we add two more tables to handle this, and we apply these only if
+the VIPs table did not match.
 
-1. Match the packet's source address and port against the _DIPs inverse table_. This table's match action sets the pool ID.
-2. Match the pool ID against the _VIPs inverse table_. This table's match action rewrites the source address and port to the appropriate VIP.
+1. Match the packet's source address and port against the _DIPs inverse table_.
+   This table's match action sets the pool ID.
+2. Match the pool ID against the _VIPs inverse table_. This table's match action
+   rewrites the source address and port to the appropriate VIP.
 
 ## Changing the distribution
 
