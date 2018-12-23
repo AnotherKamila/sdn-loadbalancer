@@ -1,18 +1,21 @@
 # Abstract
 
+TODO
+
 # Introduction
 
 L4 load-balancers enable horizontal scaling of traffic for a service across
 multiple application servers.
-They do so by mapping a _virtual IP_ (VIP) to a pool of _direct IPs_ (DIPs), or
-the actual application servers: when a request arrives to the VIP, the load
+They operate by mapping a _virtual IP_ (VIP) to a pool of _direct IPs_ (DIPs),
+or the actual application servers: when a request arrives to the VIP, the load
 balancer forwards it to one of the multiple servers in the DIP pool.
 This is critical to performance, especially for large services, because with
 load balancing what appears to be a single endpoint can process more requests at
 the same time.
 However, the load balancer quickly becomes a bottleneck: a high-end software
-load balancer can forward up to 12 Mpps, while the underlying network throughput
-can easily reach multiple Gpps.\ref{maglev}
+load balancer can forward up to 12 million packets per second (12 Mpps), while
+the underlying network throughput can easily reach multiple billion packets per
+second (Gpps).\ref{maglev}
 
 Furthermore, load balancers typically select servers from the pool
 uniformly, which can pose problems in multiple scenarios.
@@ -23,10 +26,11 @@ to uniformly distributed load. It would be very useful to take into account some
 server metrics, such as server load or mean request latency, when making load
 balancing decisions.
 
-Therefore, this project proposes an SDN-based load balancer able to load-balance
-entirely in the data plane (i.e. at line rate), which can additionally forward
-the requests to the application servers with an arbitrary, dynamically adjustable
-distribution.
+Therefore, this project proposes a load balancer based on software-defined
++networking (SDN), able to perform entirely in the data plane (i.e. at
++line rate), which can additionally forward the requests to the application
++servers with an arbitrary, dynamically adjustable distribution.
+
 The distribution can then be derived at real-time from application server
 metrics such as server load or request latency.
 
@@ -34,15 +38,16 @@ metrics such as server load or request latency.
 
 L4 load balancing in general works as follows:
 
-1. Match the packet's destination IP and destination port against the load
-   balancer's Virtual IPs and map to a server pool.
-2. Select a DIP from the pool. This can be done e.g. in a round-robin fashion,
-   or by hashing the fivetuple. The usual approaches result in a uniform
-   distribution of requests to servers.
+1. Match an incoming packet's destination IP address and destination port
+   against the load balancer's Virtual IPs and map to a server pool.
+2. Select a DIP from the pool.
+   This can be done e.g. in a round-robin fashion, or by hashing the five-tuple.
+   This normally results in a uniform distribution of requests to servers.
 3. Re-write the destination IP and port.
 4. Forward the packet to the selected server.
-5. Make sure to handle the return path correctly: rewrite the source IP and port
-   back to the Virtual IP on replies for this request.
+5. Handle the return path correctly: rewrite the source IP address and source
+   port back to the Virtual IP on replies for this request, so that it appears
+   that the response comes from the load balancer.
 
 The challenge when implementing an SDN-based load balancer is **per-connection
 consistency**, i.e. making sure that all packets of a given connection are
@@ -54,42 +59,45 @@ the same server when the pool changes.
 Pool changes are quite frequent, as especially in large data centres servers come
 offline or online multiple times per second.\ref{googleinfra}
 
-SDN-based load balancing has been explored in \ref{silkroad}. The paper focused
-on performance, scalability, and the ability to handle frequent changes to the
-DIP pools.
+SDN-based load balancing has been explored in \ref{silkroad}.
+The paper focused on performance, scalability, and the ability to handle
+frequent changes to the DIP pools.
 The approach in this paper is highly optimised and rather clever.
 While their way of ensuring per-connection consistency has a better memory
 footprint than ours, we found it valuable to create a simpler approach.
 We enjoyed seeing how SDN enables solving the same problem in very different
-ways, with different tradeoffs.
+ways, with different trade-offs.
 
-To our knowledge, SDN-based load balancing with an adjustable distribution has not been explored before.
+To our knowledge, SDN-based load balancing with an adjustable distribution has
+not been explored before.
 
 # Implementation
 
 ## Guiding principles
 
-During the implementation, we dedicated non-negligible effort to keeping the
-high-level structure clean: the different components are in clearly separated, well
-decoupled modules.
+During the implementation, we dedicated substantial effort to keeping the
+high-level structure clean: the different components are in clearly separated,
+well decoupled modules.
 This is true not only, but especially for code dealing with different network
 layers: the L2 switching, "L2.5" ARP, and L3 routing are completely separate and
 each layer can be freely exchanged with another implementation without modifying
 the other layers (as it should be).
-This is the case not only for the controller code (which uses various
+We use this approach both for the controller code (which uses various
 modularity-friendly features of Python such as modules, classes and
-inheritance), but also for the P4 code, to the extent possible by the current
+inheritance), and for the P4 code, to the extent possible by the current
 "flat" file structure needed by the P4 compiler.\footnote{
 Looking back, the author would today write the controller code with much less
 inheritance and much more explicit function composition: somewhat in the
-spirit of \ref{inheritance}. Nevertheless, even this not entirely optimal
-approach was good enough to save a lot of time in the later stages of
-development. Anything that keeps things decoupled pays off eventually.
+spirit of \ref{inheritance}.
+Nevertheless, even this not entirely optimal approach was good enough to save a
+lot of time in the later stages of development.
+Anything that keeps things decoupled pays off eventually.
 }
-Thanks to this, the individual components can be be thought about, implemented,
-debugged, and tested separately.
+Thanks to this disciplined way of working, the individual components can be
+thought about, implemented, debugged, and tested separately.
 This allowed us to progress quickly when unexpected challenges arose, as
-changing existing code was relatively easy due to the clean separation.
+changing existing code was comparatively easy due to the clean separation of
+concerns.
 
 ## L3 and below: A simple router
 
@@ -97,9 +105,10 @@ A load balancer's function is ultimately to rewrite the destination IP and port
 and then send the traffic to that host.
 Therefore, up to L3 it performs standard routing: it knows how to reach
 different hosts.
-For simplicity, for this project we implemented a simplifed router which has its
+For simplicity, for this project we implemented a simplified router which has its
 ARP and MAC tables pre-filled by the controller instead of running the ARP
-protocol and L2 learning. The different components of a router are the following:
+protocol and L2 learning.
+The different components of a router are the following:
 
 ### L3: routing
 
@@ -119,7 +128,7 @@ routing_table : Prefix -> NextHop (GatewayIP, Interface) | Direct Interface
 
 If there is no match (no route to host), we drop the packet.
 
-Note that the next hop’s IP address is in the router’s memory only: it does not
+Note that the next hop's IP address is in the router's memory only: it does not
 appear in the packet at any time.
 
 ### "L2.5": ARP
@@ -168,9 +177,12 @@ In our case, we pre-fill it from the known topology for simplicity.
 
 The router applies the tables described above as follows:
 
-1. Apply routing. Find the next hop (either gateway or direct).
-1. Apply ARP translation to the “next hop” host. Fill out the destination MAC address in the packet.
-3. Apply the MAC table to find the right port for this destination MAC address. Send it out.
+1. Apply routing.
+   Find the next hop (either gateway or direct).
+1. Apply ARP translation to the "next hop" host.
+   Fill out the destination MAC address in the packet.
+3. Apply the MAC table to find the right port for this destination MAC address.
+   Send it out.
 
 ## L4: Simple load balancer
 
@@ -179,19 +191,20 @@ As already hinted, a simple load balancer handles incoming packets as follows:
 ![Figure 1: Flow diagram of the simple load balancer](./figures/simple-packet.svg)
 
 1. Match the packet's destination IP address and port against the _VIPs table_.
-   If it matches, this is a packet we should load balance. If it does not, we
-   skip the following steps. This table's match action sets not only the pool
-   ID, but also the pool size.
-2. Compute a hash of the fivetuple, modulo pool size. The fivetuple identifies a
-   connection, therefore the hash will be the same for all packets of the same
-   connection.
+   If it matches, this is a packet we should load balance.
+   If it does not, we skip the following steps.
+   This table's match action sets not only the pool ID, but also the pool size.
+2. Compute a hash of the five-tuple, modulo pool size.
+   The five-tuple identifies a connection, therefore the hash will be the same
+   for all packets of the same connection.
 3. Match the pool ID and the hash to the _DIPs table_: select a specific server.
    If the hash is sufficiently uniform, the server will be selected uniformly at
    random.
 4. Rewrite the packet's destination IP and port to the selected server's IP and
    port.
-5. Pass to L3 for routing to the server. Note that now the packet's destination
-   is that server, so L3 can handle it without awareness of our rewriting.
+5. Pass to L3 for routing to the server.
+   Note that now the packet's destination is that server, so L3 can handle it
+   without awareness of our rewriting.
 
 Care must be taken to also rewrite packets on the return path, so that they
 appear to come from the load balancer.
@@ -200,10 +213,13 @@ the VIPs table did not match.
 
 1. Match the packet's source address and port against the _DIPs inverse table_.
    This table's match action sets the pool ID.
-2. Match the pool ID against the _VIPs inverse table_. This table's match action
-   rewrites the source address and port to the appropriate VIP.
+2. Match the pool ID against the _VIPs inverse table_.
+   This table's match action rewrites the source address and port to the
+   appropriate VIP.
 
 ## Changing the distribution
+
+TODO
 
 ## Per-connection consistency
 
@@ -223,7 +239,9 @@ TODO there's stuff in refs.bib
 
 TODO is this good?
 
-The original group split after about two weeks. Most of this project was done by Kamila Součková. Others' contributions are:
+The original group split after about two weeks.
+Most of this project was done by Kamila Součková.
+Others' contributions are:
 
 ## Nico Schottelius
 
@@ -231,4 +249,5 @@ Wrote the packet parsers (Ethernet, IPv4, IPv6, TCP).
 
 ## Sarah Plocher
 
-Wrote the first version of the L2 switch. None of the code is present now.
+Wrote the first version of the L2 switch.
+None of the code is present now.
