@@ -245,7 +245,7 @@ We did not implement this in the project, but it would be a trivial change.
 
 If we implement what has been described so far, we will get a functional load
 balancer with weights, but we cannot change the weights (or the servers in
-pools) dynamically without losing per-connection consistency.
+pools) at runtime without losing per-connection consistency.
 When the pool distribution changes, some buckets will be assigned to different
 servers and therefore connections in those buckets will be broken (see Figure
 4).
