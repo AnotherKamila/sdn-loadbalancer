@@ -15,7 +15,7 @@ In approximate order of interestingness:
 * `test`: Integration tests for the various components
 * `demo`: runs the controller and a few servers + clients, showcases the load balancing
 * `presentation`: slides + assets for the presentation
-* `doc`: the report
+* `report`: the report
 * `myutils`: random Python utility functions, plus a stand-alone server & client
 
 See the README files inside the directories for information about the specific parts.
