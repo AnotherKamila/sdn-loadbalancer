@@ -18,14 +18,14 @@ Furthermore, load balancers typically select servers from the pool
 uniformly, which can pose problems in multiple scenarios.
 If the servers are heterogeneous, whether it is because of a different hardware
 configuration, or because they run multiple different applications (as is often
-the case in datacenters), uniformly distributed requests often do not correspond
+the case in data centres), uniformly distributed requests often do not correspond
 to uniformly distributed load. It would be very useful to take into account some
 server metrics, such as server load or mean request latency, when making load
 balancing decisions.
 
 Therefore, this project proposes an SDN-based load balancer able to load-balance
-entirely in the data plane (i.e. at line rates**, which can additionally forward
-the requests to the application servers with an arbitrary dynamically adjustable
+entirely in the data plane (i.e. at line rate), which can additionally forward
+the requests to the application servers with an arbitrary, dynamically adjustable
 distribution.
 The distribution can then be derived at real-time from application server
 metrics such as server load or request latency.
@@ -51,7 +51,7 @@ Unlike in software, a hardware-based load balancer cannot afford to
 keep much state (because that would reduce performance), and therefore it is not
 trivial to ensure that all packets of the same connection will be forwarded to
 the same server when the pool changes.
-Pool changes are quite frequent, as especially in large datacenters servers come
+Pool changes are quite frequent, as especially in large data centres servers come
 offline or online multiple times per second.\ref{whyisthereatypointhispaperstitle}
 
 SDN-based load balancing has been explored in \ref{silkroad}. The paper focused
