@@ -300,11 +300,150 @@ atomically by a single register write.
 
 #### Determining which table version goes with a packet
 
+When a packet arrives (and it does not match the connections table), we need to
+find out whether we should use the current pools version or some old version
+(and which).
+Abstractly, we want to associate the five-tuple with a version.
+We do not have the usual data structures used for storing key-value pairs in P4,
+so we needed some creativity to solve this sub-problem.
+The key idea is that we do not need a lot of versions at the same time: the
+"dangerous window" is rather short (<<500ms), so a very small number of version
+is always enough.
+We chose to support four versions in our implementation (including the "scratch"
+one, so three versions are usable at any time: the current one and two old ones.)
 
+Now, instead of storing key-value pairs, we can query the other way around: "for
+each version: did we use this version to select the server for this connection?"
+These are set membership queries (for each version, we have the set of the
+connection five-tuples using that version), and therefore they can be
+implemented using Bloom filters.
+
+Therefore:
+
+* the P4 switch needs four Bloom filters with connection five-tuples
+* for an incoming packet:
+   * by default, set version to the value in the versions register
+   * for $i$ in $\{0,1,2,3\}$:
+       * if the five-tuple is in Bloom filter $i$: set version to $i$
+
+After the Bloom filters, the version is set correctly.\footnote{
+With a very high probability, as Bloom filters are probabilistic.}
+Therefore, we can match against our VIP and DIP tables (which contain the
+versioned data) and the server will be selected correctly.
+
+To handle pool table versioning correctly, the controller needs to keep track of
+outstanding connections table writes and wait for their completion before
+overwriting an old version.
+Therefore, the table writes must be done asynchronously. We used the Twisted
+Python framework\cite{twisted} for writing event-driven code, and we created an
+asynchronous abstraction over P4 tables (which also enables easy introspection).
+We also had to re-write the rest of the controller to be asynchronous, which was
+not trivial, but it paid off, as described below.
+
+##### Bloom filters implementation hurdles
+
+We encountered several entertaining problems when implementing the Bloom filters:
+
+1. P4 does not have multi-dimensional arrays (even though constant-size arrays
+   could be unrolled at compile time, so it could have them).
+2. Not having multi-dimensional arrays, which are just syntactic sugar for
+   offset calculations, we chose to create a single register array and calculate
+   the offsets ourselves.
+   However, as we later discovered, even though an API to clear a register array
+   partially exists, it is in fact not fully implemented: an exception is thrown
+   from deep inside the `runtime_API` Python code when a pair of indices is
+   passed.
+   We tried clearing the register array cell by cell, but unsurprisingly this
+   was very slow: it took about 8 seconds to clear the 8000 cells that we use
+   for the Bloom filter.
+3. Being unable to do this nicely due to the above, we settled on using the C
+   preprocessor to generate four Bloom filter register arrays and four pairs of
+   functions identical except for a few occurrences of the numbers 0-3.
+   This worked, but not before encountering three different compiler bugs: one
+   related to nested structs, and two cryptic enough to discourage any further
+   investigation.
+4. The Python control-plane API communicates with the switch in a blocking and
+   thread-unsafe manner. Therefore, we had to run it in a separate thread to avoid
+   blocking the main event loop, and synchronise the calls to avoid race conditions.
+
+## Putting it all together
+
+With the connections table, versioned pool tables, and version-checking Bloom
+filters, the load balancer can preserve per-connection consistency. The final
+flow is depicted on Figure whatever-the-number-is-here-TODO-use-refs.
+
+![Figure whatever-the-number-is-here-TODO-use-refs: Life of a packet.](./figures/life-of-a-packet.svg)
+
+^^ TODO maybe that wants to be that new figure instead
 
 # Evaluation
 
-TODO methods + results
+## Integration tests
+
+To make sure that our load balancer works correctly, we created a "mini test
+framework" for our P4 switch using `pytest`\cite{pytest}.
+This mini-framework enables us to write full integration tests: it uses `p4run`
+to create a Mininet network and start the P4 switch, and it allows to perform
+end-to-end tests by telling the Mininet hosts to run anything from `ping` and
+`netcat` to custom servers and clients controlled via RPC.
+
+Thanks to using the Twisted framework, which makes it trivial to combine
+multiple network-connected event loops, we were able to write very specific
+tests which show where exactly we have a problem.
+Though the initial time investment into creating the mini test framework and
+rewriting everything into Twisted was substantial, it clearly paid off during
+late-stage refactoring.
+
+The tests check everything from L2 to not breaking connections, and therefore we
+can be sure that the load balancer does what it should.
+Figure whatever shows a sample tests run.
+
+```
+vagrant@p4:/project$ pytest                                          
+============================= test session starts ==============================
+platform linux2 -- Python 2.7.12, pytest-4.0.1, py-1.7.0, pluggy-0.8.0          
+rootdir: /project, inifile:                                                     
+plugins: twisted-1.8, timeout-1.3.3                                             
+collected 23 items / 2 skipped                                                  
+                                                                                
+test/l2_lazy/blackbox_test.py ..                                         [  8%] 
+test/l3_router_lazy/blackbox_test.py ..                                  [ 17%] 
+test/l4_loadbalancer/keep_connections_test.py ...                        [ 30%] 
+test/l4_loadbalancer/versioned_tables_test.py .....s                     [ 56%] 
+test/l4_loadbalancer-unversioned/connection_breaking_test.py .           [ 60%] 
+test/l4_loadbalancer-unversioned/l3_still_works_test.py ..               [ 69%] 
+test/l4_loadbalancer-unversioned/loadbalancing_test.py ...               [ 82%] 
+test/l4_loadbalancer-unversioned/twisted_loadbalancing_test.py ...s      [100%] 
+                                                                                
+==================== 21 passed, 4 skipped in 315.61 seconds ====================
+```
+
+^^ Figure whatever: A sample test session.
+
+## Live system simulation
+
+To visualise our load balancer's impact, we wrote a server which simulates
+load (by reporting a load proportional to the number of concurrent connections).
+We also created a client for generating load.
+
+We started up four of the servers, each set to simulate a system with a
+different number of CPUs (and therefore a different ability to handle the load).
+
+We then programmed the load balancer to read this simulated value and set the
+requests distribution to $1/\mathrm{load}$ for each server.\footnote{
+In the real world, $1/\mathrm{load}$ does not work very well, because that way
+the system is a feedback loop with a delay, which means that oscillations will
+occur.
+Nevertheless, this allows us to see that the load balancer works.
+A function usable in production is a control theory question, and is very likely
+application-specific, so we did not explore this subproblem.
+}
+To see the effect, the load balancer was initially set to balance uniformly
+(i.e. with all weights set to 1), and later it was switched to take the server
+load into account and re-distribute the requests accordingly. A sample run of
+the experiment is on Figure whatever2.
+
+![Figure whatever2: Loads and weights over time](./figures/demo1-wide.png)
 
 # Conclusion
 
@@ -315,8 +454,6 @@ TODO
 TODO there's stuff in refs.bib
 
 # Group organisation
-
-TODO is this good?
 
 The original group split after about two weeks.
 Most of this project was done by Kamila Součková.
