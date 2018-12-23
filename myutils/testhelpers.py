@@ -22,7 +22,7 @@ def run_cmd(cmd, host=None, background=False):
             preexec_fn=os.setsid,
         )
 
-# what the fuckity fuck why is this so difficult
+# why is this so difficult
 def kill_with_children(process):
     return run_cmd([
         'sudo', 'kill', '-SIGTERM', '--', '-{}'.format(os.getpgid(process.pid))

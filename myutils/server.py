@@ -7,7 +7,7 @@ from twisted.spread            import pb
 import attr
 import sys
 
-from myutils import remote_all_the_things, raise_all_exceptions_on_client
+from myutils import raise_all_exceptions_on_client
 
 LOAD_AVERAGE_WINDOW    = 30   # seconds
 LOAD_SAMPLING_INTERVAL = 0.2  # seconds

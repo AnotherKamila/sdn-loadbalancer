@@ -52,9 +52,8 @@ class BaseController(object):
         obj = cls(sw_name, *args, **kwargs)
         yield obj._before_init()
 
-        # This is horrible and I probably shouldn't be doing it.
-        # FIXME actually, this is really terrible and I _really_ shouldn't be
-        # doing it, because it breaks expectations.
+        # TODO this actually wasn't a great idea and I shouldn't be
+        # doing it, because it breaks expectations. But it works :D
         for mcls in reversed(cls.__mro__):
             if 'init' in mcls.__dict__:
                 yield defer.maybeDeferred(mcls.init, obj)

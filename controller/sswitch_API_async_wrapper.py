@@ -23,7 +23,7 @@ from twisted.python            import threadable
 # it works as long as I don't call things implemented in different classes in
 # the hierarchy at the same time, which I don't, but ugh :D
 # If I had more time, this would actually live in one background thread and
-# have a queue for crap.
+# have a queue.
 
 asyncified = {
     'RuntimeAPI': [
@@ -54,7 +54,7 @@ class SimpleSwitchAPIAsyncWrapper(object):
     All non-dunder methods are deferred to a thread and return a Deferred.
 
     Note that the underlying thing is NOT thread-safe, so things actually
-    won't happen in parallel even if you try. Everything is terrible.
+    won't happen in parallel even if you try.
     """
 
     def __init__(self, *args, **kwargs):

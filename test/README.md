@@ -66,6 +66,6 @@ I wanted to make pytest run p4run, so that running the tests really is one comma
 
 I use the `exec_scripts` config option in `p4app.json` to create a file. Then I wait for that file to appear within the test, and only proceed once it's there.
 
-The scripts are called when mininet is ready, so the file does not appear too early. This is the only reliable way I found to detect that it's ready. Everything is terrible. But it works. Just don't forget to put the thing into `p4app.json`.
+The scripts are called when mininet is ready, so the file does not appear too early. This is the only reliable way I found to detect that it's ready. It's not pretty, but it works. Just don't forget to put the thing into `p4app.json`.
 
-The horribleness is implemented in `./conftest.py`.
+The fixture is implemented in `./conftest.py`.

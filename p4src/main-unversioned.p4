@@ -92,12 +92,6 @@ control MyIngress(inout headers hdr,
 
     ///////////////// ON THE WAY BACK: We need to undo the NATting //////////
 
-    // Note: All of this is terribly wrong! This should be per connection --
-    // because what if someone connects to the same thing directly. FIXME!!!
-    // TODO I should either track whether the connection is NATted
-    // (so a set membership/bloom filter) OR drop direct connections to backends.
-    // Ask the TA!
-
     // We can fill this statically at the beginning because we are assuming a
     // static pool. Therefore, we don't have the "it takes time to write to a
     // table" problem. In reality, we'd have to deal with that!

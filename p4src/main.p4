@@ -183,10 +183,10 @@ control MyIngress(inout headers hdr,
     ///////////////// ON THE WAY BACK: We need to undo the NATting //////////
 
     // Note: This is ahem a bit awkward! This should be per connection --
-    // because what if someone connects to the same thing directly. FIXME!!!
+    // because what if someone connects to the same thing directly.
+    // This way direct connections don't work.
     // TODO I should either track whether the connection is NATted
     // (so a set membership/bloom filter) OR drop direct connections to backends.
-    // Ask the TA!
 
     // We could do this in one table, but that would require a lot more space,
     // so instead I'll "normalise the tables" and split it into two, joinable

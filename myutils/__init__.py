@@ -38,13 +38,6 @@ def deferred_print_entry_exit(f):
         defer.returnValue(res)
     return decorated
 
-def remote_all_the_things(cls):
-    """THIS IS A TERRIBLE IDEA DO NOT USE IN PRODUCTION EVER"""
-    for name, attr in cls.__dict__.items():
-        if not callable(attr): continue
-        setattr(cls, 'remote_'+name, attr)
-    return cls
-
 
 class UnexpectedServerError(pb.Error):
     pass
