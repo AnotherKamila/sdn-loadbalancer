@@ -425,7 +425,7 @@ Abstractly, we want to associate the five-tuple with a version.
 We do not have the usual data structures used for storing key-value pairs in P4,
 so we needed some creativity to solve this sub-problem.
 The key idea is that we do not need a lot of versions at the same time: the
-``dangerous window'' is rather short ($<<500ms$), so a very small number of
+``dangerous window'' is rather short ($\ll 500\,\mathrm{ms}$), so a very small number of
 version is always enough.
 We chose to support four versions in our implementation (including the
 ``scratch'' one, so three versions are usable at any time: the current one and
@@ -532,8 +532,10 @@ The tests check everything from L2 to not breaking connections, and therefore we
 can be sure that the load balancer does what it should.
 Listing~\ref{lst:pytest} shows a sample tests run.
 
-\begin{lstlisting}[basicstyle=\ttfamily\small,caption=A sample test
-                   session,captionpos=b,label=lst:pytest]
+\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=false,
+                   xleftmargin=-.3cm,linewidth=\paperwidth,
+                   caption=A sample test session,captionpos=b,
+                   label=lst:pytest]
 vagrant@p4:/project$ pytest                                          
 =========================== test session starts ===========================
 platform linux2 -- Python 2.7.12, pytest-4.0.1, py-1.7.0, pluggy-0.8.0
