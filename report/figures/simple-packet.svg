@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="134 682 851.9841 209" width="851.9841" height="209">
+  <defs>
+    <font-face font-family="Lato" font-size="22" panose-1="2 15 5 2 2 2 4 3 2 3" units-per-em="1000" underline-position="-233" underline-thickness="44.5" slope="0" x-height="506.5" cap-height="716.5" ascent="986.9995" descent="-212.99744" font-weight="400">
+      <font-face-src>
+        <font-face-name name="Lato-Regular"/>
+      </font-face-src>
+    </font-face>
+    <font-face font-family="Input Sans" font-size="22" panose-1="2 0 5 6 2 0 0 9 0 4" units-per-em="1000" underline-position="0" underline-thickness="64.404955" slope="0" x-height="545.45455" cap-height="727.2727" ascent="927.2766" descent="-272.72034" font-weight="400">
+      <font-face-src>
+        <font-face-name name="InputSans-Regular"/>
+      </font-face-src>
+    </font-face>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -3 7 6" markerWidth="7" markerHeight="6" color="black">
+      <g>
+        <path d="M 4.8 0 L 0 -1.8 L 0 1.8 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.9.4 
+    <dc:date>2018-12-19 18:17:28 +0000</dc:date>
+  </metadata>
+  <g id="Life_of_a_packet_-_simple" stroke="none" stroke-dasharray="none" stroke-opacity="1" fill="none" fill-opacity="1">
+    <title>Life of a packet - simple</title>
+    <g id="Life_of_a_packet_-_simple: Layer 1">
+      <title>Layer 1</title>
+      <g id="Graphic_47">
+        <rect x="677" y="683" width="135" height="110" fill="#8080ff"/>
+        <rect x="677" y="683" width="135" height="110" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <text transform="translate(682 711)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="25.2045" y="22">Rewrite </tspan>
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="8.3085" y="49">destination</tspan>
+        </text>
+      </g>
+      <g id="Graphic_75">
+        <rect x="357" y="683" width="273" height="110" fill="#ff8080"/>
+        <rect x="357" y="683" width="273" height="110" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <text transform="translate(362 695.5)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="23.623" y="22">Match pool and server </tspan>
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="18.9865" y="49">using the pool data and </tspan>
+          <tspan font-family="Input Sans" font-size="22" font-weight="400" fill="black" x="24" y="79">hash(five_tuple)</tspan>
+        </text>
+      </g>
+      <g id="Line_201">
+        <line x1="813" y1="738" x2="972.0841" y2="738" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_208">
+        <line x1="631" y1="738" x2="663.1" y2="738" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Graphic_279">
+        <rect x="843.775" y="719.5" width="109" height="37" fill="white"/>
+        <text transform="translate(848.775 724.5)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".264" y="22">Pass to L3</tspan>
+        </text>
+      </g>
+      <g id="Graphic_289">
+        <rect x="357" y="825" width="273" height="65" fill="#ff80ff"/>
+        <rect x="357" y="825" width="273" height="65" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <text transform="translate(362 844)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x="86.334" y="22">Pool data  </tspan>
+        </text>
+      </g>
+      <g id="Line_294">
+        <line x1="135" y1="738" x2="344.1" y2="738" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Graphic_297">
+        <rect x="159.18715" y="719.5" width="167" height="37" fill="white"/>
+        <text transform="translate(164.18715 724.5)" fill="black">
+          <tspan font-family="Lato" font-size="22" font-weight="400" fill="black" x=".0975" y="22">incoming packet</tspan>
+        </text>
+      </g>
+      <g id="Line_299">
+        <line x1="493.5" y1="824" x2="493.5" y2="805.9" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+    </g>
+  </g>
+</svg>

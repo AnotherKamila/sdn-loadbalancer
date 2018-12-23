@@ -52,7 +52,7 @@ keep much state (because that would reduce performance), and therefore it is not
 trivial to ensure that all packets of the same connection will be forwarded to
 the same server when the pool changes.
 Pool changes are quite frequent, as especially in large data centres servers come
-offline or online multiple times per second.\ref{whyisthereatypointhispaperstitle}
+offline or online multiple times per second.\ref{googleinfra}
 
 SDN-based load balancing has been explored in \ref{silkroad}. The paper focused
 on performance, scalability, and the ability to handle frequent changes to the
@@ -217,12 +217,7 @@ TODO
 
 # References
 
-TODO bibtexify
-
-maglev: D. E. Eisenbud, et al. 2016. Maglev: A Fast and Reliable Software Network Load Balancer. In NSDI.
-silkroad: SilkRoad: Making Stateful Layer-4 Load Balancing Fast and Cheap Using Switching ASICs
-whyisthereatypointhispaperstitle: R. Govindan, et al. Evolve or Die: High-Availability Design Principles Drawn from Googles Network Infrastructure. In ACM SIGCOMM 2016.
-inheritance: https://www.youtube.com/watch?v=3MNVP9-hglc
+TODO there's stuff in refs.bib
 
 # Group organisation
 
