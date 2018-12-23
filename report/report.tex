@@ -140,26 +140,27 @@ L4 load balancing in general works as follows:
 \end{enumerate}
 
 The challenge when implementing a P4-based load balancer is
-\textbf{per-connection consistency}, i.e.~making sure that all packets of a
+\textbf{per-connection consistency}: it is critical that all packets of a
 given connection are forwarded to the same application server.
 Unlike in software, a hardware-based load balancer cannot afford to keep much
 state (because that would reduce performance), and therefore it is not trivial
 to ensure that all packets of the same connection will be forwarded to the same
 server when the pool changes.
-Pool changes are quite frequent, as especially in large data centres servers
-come offline or online multiple times per second.\cite{googleinfra}
+Pool changes can be quite frequent.
+Especially in large data centres servers come offline or online multiple times
+per second.\cite{googleinfra}
 
-SDN-based load balancing has been explored in \cite{silkroad}.
-The paper focused on performance, scalability, and the ability to handle
+SDN-based load balancing has been previously explored in \cite{silkroad}.
+That paper focuses on performance, scalability, and the ability to handle
 frequent changes to the DIP pools.
-The approach in this paper is highly optimised and rather clever.
+The approach is highly optimised and rather clever.
 While their way of ensuring per-connection consistency has a smaller memory
 footprint than ours, we found it valuable to create a simpler approach.
-We enjoyed seeing how SDN enables solving the same problem in very different
+We enjoyed observing how SDN enables solving the same problem in very different
 ways, with different trade-offs.
 
 To our knowledge, SDN-based load balancing with an adjustable distribution has
-not been explored before.
+not been investigated before.
 
 \section{Implementation}
 \subsection{Guiding principles}
@@ -215,13 +216,13 @@ routing_table : Prefix -> NextHop (GatewayIP, Interface) | Direct Interface
 
 If there is no match (no route to host), we drop the packet.
 
-Note that the next hop's IP address exists only in the router's memory: it does
-not appear in the packet at any time.
+The next hop's IP address exists only in the router's memory.
+It does not appear in the packet at any time.
 
 \subsubsection{``L2.5'': ARP}
 We now know the IP address and interface of the next hop.
-(Note that this is a host that is connected to us directly---it is on the same
-wire segment.)
+(This is a host that is connected to us directly---it is on the same wire
+segment.)
 We need to translate this into an L2 MAC address in order to pass it to L2.
 This mapping is stored in the \emph{ARP table}.
 
@@ -233,9 +234,8 @@ Note: Interface conceptually belongs there, but the IP address should in fact be
 unique.
 Our code leaves out the interface for simplicity.
 
-If there is no match, i.e.~when we don’t know the MAC address for the IP
-address, the control plane would normally send an \emph{ARP request} (and drop
-the packet).
+When we don’t know the MAC address for the IP address, the control plane would
+normally send an \emph{ARP request} (and drop the packet).
 In our case, we opted to simplify by pre-filling the ARP table from the (known)
 topology instead.
 
@@ -421,10 +421,10 @@ created a universal ``versioned table'' abstraction:
     needed)
 \end{itemize}
 
-Note that in addition to enabling us to store old data, this also enables
-transactions (even across tables, if multiple tables use the same version
-register): the controller can make changes in a ``scratch'' version and commit
-atomically by a single register write.
+In addition to enabling us to store old data, this also enables transactions
+(even across tables, if multiple tables use the same version register): the
+controller can make changes in a ``scratch'' version and commit atomically by a
+single register write.
 
 \paragraph{Determining which table version goes with a packet}
 
