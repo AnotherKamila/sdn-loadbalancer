@@ -1,11 +1,16 @@
 import functools
 import itertools
+import os
 import time
 from twisted.internet import defer
 from twisted.spread import pb
 
 from myutils.testhelpers import run_cmd, kill_with_children
 from myutils.twisted_utils import sleep
+
+WITH_PIPENV = run_cmd(['which', 'pipenv']) == 0
+DOTENV_SCRIPT = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'dotenv.sh')
+PYTHON_CMD_PREFIX = ['pipenv', 'run'] if WITH_PIPENV else [DOTENV_SCRIPT]
 
 _processes = []
 def process(cmd, host=None, background=True):
@@ -21,10 +26,11 @@ def sock(*args):
     return '/tmp/p4crap-{}.socket'.format('-'.join(str(a) for a in args))
 
 def python_m(module, *args):
-    time.sleep(0.1) # pipenv run opens Pipfile in exclusive mode or something,
-                    # and then it throws up when I run more of them
-                    # using time.sleep because I *want* to block the reactor
-    return ['pipenv', 'run', 'python', '-m', module] + list(args)
+    if WITH_PIPENV:
+        time.sleep(0.1) # pipenv run opens Pipfile in exclusive mode or something,
+                        # and then it throws up when I run more of them
+                        # using time.sleep because I *want* to block the reactor
+    return PYTHON_CMD_PREFIX + ['python', '-m', module] + list(args)
 
 _sock_counter = itertools.count(1)
 @defer.inlineCallbacks

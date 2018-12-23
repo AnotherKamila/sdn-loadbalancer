@@ -10,8 +10,6 @@ If you want to run all the tests, run `pytest` in the `test/` directory; if you 
 
 Note: Do not run `p4run` manually -- the tests will do it for you.
 
-Some tests run a lot of connections, and the switch won't be able to cope with them if it has debugging enabled. Therefore, it is recommended to re-compile the switch without debugging.
-
 -----------------------------------------------------------------------
 
 Some tests are a bit flaky. If things crash or fail, try re-running the same thing. Also, if things are stuck without any progress for more than ~30 seconds, it's probably gotten stuck and it should be restarted.

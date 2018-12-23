@@ -65,6 +65,7 @@ def main():
     load_sampler = task.LoopingCall(conn_counter.sample_load)
     load_sampler.start(LOAD_SAMPLING_INTERVAL)
 
+    reactor.callWhenRunning(print, '[server] reactor running')
     reactor.run()
 
 if __name__ == '__main__':

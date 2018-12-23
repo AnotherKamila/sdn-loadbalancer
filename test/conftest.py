@@ -14,6 +14,7 @@ from controller.l4_loadbalancer import LoadBalancer
 from myutils.testhelpers import run_cmd, kill_with_children
 from myutils import all_results
 from myutils.twisted_utils import sleep
+from myutils.remote_utils import python_m
 
 from p4utils.utils.topology import Topology
 
@@ -170,11 +171,6 @@ def process(request):
         # cannot exit them with .terminate() if they're in mx :-(
         # p.terminate()
         assert kill_with_children(p) == 0
-
-def python_m(module, *args):
-    time.sleep(0.1) # pipenv run opens Pipfile in exclusive mode or something,
-                    # and then it throws up when I run more of them
-    return ['pipenv', 'run', 'python', '-m', module] + list(args)
 
 def sock(*args):
     return '/tmp/p4crap-{}.socket'.format('-'.join(str(a) for a in args))

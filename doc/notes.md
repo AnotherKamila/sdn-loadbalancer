@@ -19,11 +19,6 @@ Not really / not worth it:
 - [ ] I should either track whether the connection is NATted (so a set membership/bloom filter)
         OR drop direct connections to backends.
 
-## TODO ask on meeting:
-
-* report: when?
-* presentation: how long?
-
 ## Notes:
 
 * switch goes x_x / starts dropping packets at about 10kpps

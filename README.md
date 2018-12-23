@@ -8,12 +8,15 @@ I use the [Twisted](https://twistedmatrix.com/) framework for the controller and
 
 ## What's in here
 
+In approximate order of interestingness:
+
 * `p4src`: the code for the switches (data plane)
 * `controller`: the code for the network controller (control plane)
 * `test`: Integration tests for the various components
 * `demo`: runs the controller and a few servers + clients, showcases the load balancing
 * `presentation`: slides + assets for the presentation
 * `doc`: the report
+* `myutils`: random Python utility functions, plus a stand-alone server & client
 
 See the README files inside the directories for information about the specific parts.
 
@@ -23,7 +26,28 @@ See the README files inside the directories for information about the specific p
 
 The `demo/` directory and the various subdirectories under `/test` contain an example `p4app.json` and more documentation.
 
+Note that the switch won't be able to cope with a lot of connections if it has debugging enabled. Therefore, for the demo and most tests it is needed to re-compile the switch without debugging:
+
+```
+su - p4
+cd ~/p4-tools/
+git clone https://github.com/p4lang/behavioral-model.git bmv2-opt
+cd bmv2-opt
+git checkout 7e71a9bdd161afd63a162aaa96703bfa7ab1b3e1
+./autogen.sh
+./configure --disable-elogger --disable-logging-macros 'CFLAGS=-g -O2' 'CXXFLAGS=-g -O2'
+make -j 2
+sudo make install
+sudo ldconfig
+```
+
 ### Python
+
+The controller needs to be able to use raw sockets (to receive the cloned packets from the controller). To run it as non-root, the Python executable needs to get the `net_raw` capability. Set it using:
+
+```sh
+$ sudo setcap cap_net_raw=eip $(readlink -f $(which python))
+```
 
 #### Global install: No virtualenv
 
@@ -34,7 +58,12 @@ $ ./fix-pythonpath.sh
 $ . .env
 $ pytest  # for example
 ```
+
+Remember that the `.env` file must always be sourced, to get the right PYTHONPATH.
+
 #### Virtualenv install [more complicated => probably ignore this and install globally]
+
+TODO flag for pipenv to install with site packages
 
 ##### TL;DR
 

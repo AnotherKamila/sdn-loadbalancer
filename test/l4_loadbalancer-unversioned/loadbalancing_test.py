@@ -3,9 +3,11 @@ import time
 
 from myutils.testhelpers import netcat_from_to, run_cmd
 
+from myutils.remote_utils import PYTHON_CMD_PREFIX
+
 path    = os.path.dirname(os.path.realpath(__file__))
-srv_cmd = ['pipenv', 'run', os.path.join(path, 'server.py')]
-cli_cmd = ['pipenv', 'run', os.path.join(path, 'client.py')]
+srv_cmd = PYTHON_CMD_PREFIX+[os.path.join(path, 'server.py')]
+cli_cmd = PYTHON_CMD_PREFIX+[os.path.join(path, 'client.py')]
 
 def hostport(s):
     return s.split(':')
